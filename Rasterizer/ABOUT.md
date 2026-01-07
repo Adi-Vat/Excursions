@@ -6,3 +6,5 @@ Implements
 - Vertex shader using basic algorithm
 - Fragment shader with Z-Buffering
 - Basic Lighting
+
+![](Rasterizer_Video.gif)
