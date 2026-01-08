@@ -5,8 +5,53 @@ made in System Verilog, but that's not included here.
 
 As an example, I've written a Fibonacci sequence algorithm, and compiled it into byte code.
 Then I run the byte code in the emulator.  
+
 ![](Z8_Compiler_and_Emulator.gif)
+
+
+## Instruction Set
+- `NOP` No operation
+- `LDD` Load directly into register `<REG>` from `<MEMORY/REG>`
+- `LDD_I`
+- `LDR` Load into register `<REG>` data at memory location in `<MEMORY/REG>`
+- `STR` Store into `<MEMORY>` data from `<REG/VALUE>`
+- `STR_I`
+- `ADC` Add with carry acc and `<REG/VALUE>` store into acc
+- `ADC_I`
+- `SUB` Subtract acc and `<REG/VALUE>` store into acc
+- `SUB_I`
+- `INC` Increment `<REG>`
+- `DEC` Decrement `<REG>`
+- `ROL` Rotate left `<REG>`
+- `ROR` Rotate right `<REG>`
+- `SLL` Shift left logical `<REG>`
+- `SLA` Shift left arithmetic `<REG>`
+- `SRL` Shift right logical `<REG>`
+- `SRA` Shift right arithmetic `<REG>`
+- `PSH` Push `<REG>` to stack
+- `POP` Pop stack onto `<REG>`
+- `JMP` Jump to `<VAL>`
+- `CMP` Compare `<REG>` with acc
+- `CMP_I`
+- `JZ` Jump to `<VAL>` if zero flag is set
+- `JNZ` Jump to `<VAL>` if zero flag is not set
+- `JN` Jump to `<VAL>` if negative flag is set
+- `SB` Set at `<MEMORY/REG>` bit number `<VAL>` to 1
+- `CB` Clear at `<MEMORY/REG>` bit number `<VAL>` to 0
+- `OUT` Prints value in `<MEMORY/REG>` to console (emulator only)
+
+## Unique features
+All immediate instruction variations are implicit, the user does not need to write them. Instead the compiler takes the context of the second operand to choose the operation type and +1 for an immmediate operation.
+
+Memory addresses are indicated with a *  
+Hex is indicated with a $  
+Denary is the default  
+Labels are indicated with a .  
+Comments are indicated with a ;
+
+The emulator provides a memory dump after execution.
 
 ## To do
 - Allow inline comments
-- Finish adding full instruction set
+- Finish implementing instruction set into emulator
+- Add logical operations to instruction set
