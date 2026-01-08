@@ -8,6 +8,43 @@ Then I run the byte code in the emulator.
 
 ![](Z8_Compiler_and_Emulator.gif)
 
+## Example code pipeline
+The assembly file
+```
+.fibonacci
+    LDD y, 5
+    LDD a, 1
+    LDD x, 1
+    LDD z, 0
+.loop
+    LDD z, a
+    ADC x
+    LDD x, z
+    OUT a
+    DEC y
+    JNZ .loop
+```
+Compiles to a hex file
+```
+0200A60005
+0200A40001
+0200A50001
+0200A70000
+0100A700A4
+0600A50000
+0100A500A7
+1C00A40000
+0B00A60000
+1800040000
+```
+And is executed with a result of
+```
+2
+3
+5
+8
+13
+```
 
 ## Instruction Set
 - `NOP` No operation
