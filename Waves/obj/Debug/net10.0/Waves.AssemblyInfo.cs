@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Waves")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94038c432fe912dfa7575dd49ff4b222ca89057a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ae65a522f613ba904a513a186037d9b405702d7d")]
 [assembly: System.Reflection.AssemblyProductAttribute("Waves")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Waves")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

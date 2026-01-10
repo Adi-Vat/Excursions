@@ -17,7 +17,7 @@ class Program
 
     static void Main()
     {
-        Raylib.InitWindow(screenWidth, screenHeight, "Electric Field Visualizer");
+        Raylib.InitWindow(screenWidth, screenHeight, "Waves");
         Raylib.SetTargetFPS(60);
 
         while (!Raylib.WindowShouldClose())
