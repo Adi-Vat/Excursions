@@ -1,5 +1,7 @@
 # Excursions
-Small projects on things I find interesting
+EEE student.
+This repo contains small 1 day - 1 week projects, each done to understand something from first principles.
+Click on the links to read more.
 
 ## [ASCII Graph Viewer](/ASCIIGraphViewer/)
 ![](ASCIIGraphViewer/GraphViewer.gif)
