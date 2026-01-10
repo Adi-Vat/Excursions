@@ -1,6 +1,6 @@
 # Z8 Compiler + Emulator
 A compiler for my (toy) 'Z8' assembly language. Inspired (sort of) by z80 ASM.
-I've also included an emulator to execute the machine code. The code can actually be executed on an FPGA with a little CPU
+I've also included an emulator to execute the machine code. The code can be run on an FPGA with a little CPU
 made in System Verilog, but that's not included here.
 
 As an example, I've written a Fibonacci sequence algorithm, and compiled it into byte code.
@@ -80,11 +80,11 @@ And is executed with a result of
 ## Unique features
 All immediate instruction variations are implicit, the user does not need to write them. Instead the compiler takes the context of the second operand to choose the operation type and +1 for an immmediate operation.
 
-Memory addresses are indicated with a *  
-Hex is indicated with a $  
+Memory addresses are indicated with a `*`  
+Hex is indicated with a `$`  
 Denary is the default  
-Labels are indicated with a .  
-Comments are indicated with a ;
+Labels are indicated with a `.`  
+Comments are indicated with a `;`
 
 The emulator provides a memory dump after execution.
 
@@ -92,3 +92,4 @@ The emulator provides a memory dump after execution.
 - Allow inline comments
 - Finish implementing instruction set into emulator
 - Add logical operations to instruction set
+- Fix possible future error where JMP `<VAL>` does not compile correctly; `<VAL>` will be compiled as the text-editor line **not** the machine code line as it should be (and as is done automatically with labels)
