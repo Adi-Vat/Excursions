@@ -19,3 +19,9 @@ This provides a **restoring force** to move the point back towards equilibrium w
 
 To get $u(x\pm \Delta x$, t) I get the point to the left and right of the current point.  
 To get $u(x, t - \Delta t$) I store the previous frame's field data. 
+
+## To Do
+- Generalize to 2D
+- In 2D, add vectors
+- Add relationship between perpendicular vector fields
+- Implement curl
