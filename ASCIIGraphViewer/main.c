@@ -27,6 +27,9 @@ float selectedX;
 float selectedY;
 float derivative;
 
+int screenSelectedX;
+int screenSelectedY;
+
 int main(){
     bool shouldCloseWindow;
 
@@ -109,6 +112,7 @@ void drawGraph(){
     }
 
     int previousK = 0;
+    screenSelectedY = -1;
 
     for(int i = -1; i < SCREEN_WIDTH; i++){
         // convert horizontal screen index to world space
@@ -150,6 +154,8 @@ void drawGraph(){
         if(less > 0 && less < SCREEN_HEIGHT){
             if(i == SCREEN_WIDTH/2){
                 screenTexture[i][less] = 7;
+                screenSelectedX = i;
+                screenSelectedY = less;
             }
         }
     }
@@ -166,6 +172,14 @@ void drawScreen(){
             }
             else if(y == 0 || y == SCREEN_HEIGHT - 1){
                 characterValue = 3;
+            }
+
+            if(x == SCREEN_WIDTH - 1 && y == screenSelectedY){
+                characterValue = 8;
+            }
+
+            if(y == 0 && x == screenSelectedX){
+                characterValue = 6;
             }
             
             switch(characterValue){
@@ -192,6 +206,9 @@ void drawScreen(){
                     break;
                 case 7:
                     printf("@");
+                    break;
+                case 8:
+                    printf("<");
                     break;
                 default:
                     printf(".");
