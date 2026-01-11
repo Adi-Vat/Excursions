@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Intrinsics.X86;
+using System.Text.RegularExpressions;
 
 static class Program
 {
@@ -10,7 +11,8 @@ static class Program
         Add,
         Subtract,
         Multiply,
-        Divide
+        Divide,
+        Juxtapose
     }
 
     static char[] operatorCharacters = {
@@ -19,57 +21,146 @@ static class Program
         '-',
         '*',
         '/',
-        '(',
-        ')'
+        '&',
     };
 
-    static int[] precedence =
+    enum TokenType
     {
-        0,
-        1,1,
-        2,2,
-        3,3
-    };
+        Operand,
+        Leftbracket,
+        Rightbracket,
+        Operator
+    }
 
     static void Main(){
-        //string? equationStr = Console.ReadLine();
-        //DecomposeEquation(equationStr);
-        //string val = SplitBrackets("a*(2+3(c+b))");
-        //(string val, string other) = ExtractBracketExpression("a*(2+3(c+b))", 0);
-        //Console.WriteLine(val + "\n" + other);
-        //string expression = "a*(2+3(c+b))";
-        //expression = FixImpliedMultiplication(expression);
-        //string outValue = SplitBrackets(expression, 0);
-        string rpnExpression = rpn("3+5/(6*(7+2))"); 
-        GenerateTree(rpnExpression);
-    }
+        /*
+        string equation = "a * d(2+3(c+b))/5";
+        equation = equation.Replace(" ", "");
+        equation = ApplyImplicitMultiplication(equation);
+        List<string> rpnExpression = rpn(equation.Split("=")[0]);
+        List<Node> nodeTree = GenerateTree(rpnExpression);
 
-    static void ConvertEquationToTree(string equation)
-    {
-        Node equ = new Node(Node.NodeType.Operation, (int)Operations.Equals);
-        string lhs = equation.Split("=")[0];
-        string rhs = equation.Split("=")[1];
-    }
-
-    static Node GenerateTree(string rpnExpression)
-    {
-        Node headNode = new Node(Node.NodeType.Operation, (int)Operations.Equals);
-
-        Stack<string> opStack = new Stack<string>(); 
-
-        for(int i = 0; i < rpnExpression.Count(); i++)
+        nodeTree[nodeTree.Count - 1].PrintPretty("", true);
+        */
+        List<string> output = rpnFixed("2 * 3(1+4(3+5)/5)");
+        List<Node> nodeTree = GenerateTree(output);
+        nodeTree.Reverse();
+        nodeTree[0].PrintPretty("", true);
+        /*
+        foreach(Node node in nodeTree)
         {
-            char element = rpnExpression[i];
-            if(!operatorCharacters.Contains(element))
+            Console.Write("[" + nodeTree.IndexOf(node) + "] : " + node.value);
+            if(node.leftChild != null) Console.Write("  [" + nodeTree.IndexOf(node.leftChild)+ "]");
+            if(node.rightChild != null) Console.Write(" | [" + nodeTree.IndexOf(node.rightChild)+ "]");
+
+            Console.Write("\n");
+        }*/
+    }
+
+    // returns list of nodes, last item is the head node
+    static List<Node> GenerateTree(List<string> rpnExpression)
+    {   
+        List<Node> operatorNodes = new List<Node>();
+        List<Node> allNodes = new List<Node>();
+        // While there are sub-expressions to evaluate
+        int ptr = 0;
+        while(rpnExpression.Count() > 1)
+        {
+            string expressionToken = rpnExpression[ptr];
+
+            // Reach the first operator 
+            if (operatorCharacters.Contains(expressionToken[0]))
             {
+                // Convert between operation symbol and name (for the enum)
+                Operations operationName = (Operations)operatorCharacters.IndexOf(expressionToken[0]);
+                Node newOperation = new Node(Node.NodeType.Operation, operationName.ToString());
                 
+                // Get the two operands associated with this operator
+                string operandA = rpnExpression[ptr - 2];
+                string operandB = rpnExpression[ptr - 1];
+
+                // If either operand is a reference to a node, connect them up
+                if(operandA[0] == '#')
+                {
+                    int nodeIndex = Int32.Parse(operandA.Substring(1));
+                    newOperation.leftChild = operatorNodes[nodeIndex];
+                }
+                else // If its not, check if it's a variable or a constant
+                {
+                    Node leftChildNode = new Node(Node.NodeType.Constant, operandA);
+                    newOperation.leftChild = leftChildNode;
+                    allNodes.Add(leftChildNode);
+                }
+
+                if(operandB[0] == '#')
+                {
+                    int nodeIndex = Int32.Parse(operandB.Substring(1));
+                    newOperation.rightChild = operatorNodes[nodeIndex];
+                }
+                else
+                {
+                    Node rightChildNode = new Node(Node.NodeType.Constant, operandB);
+                    newOperation.rightChild = rightChildNode;
+                    allNodes.Add(rightChildNode);
+                }
+
+                int operatorIndex = operatorNodes.Count();
+                string expressionToAdd = "#" + operatorIndex;
+                
+                // Add the operator as a node to the operator nodes list
+                operatorNodes.Add(newOperation);
+
+                allNodes.Add(newOperation);
+
+                // Remove the used sub expressions
+                for(int numExpressionTokens = 0; numExpressionTokens < 3; numExpressionTokens++)
+                {
+                    rpnExpression.RemoveAt(ptr);
+                    ptr--;
+                }
+
+                // Add the new composite sub expression
+                rpnExpression.Insert(ptr + 1, expressionToAdd);
+
+                ptr = 0;
+            }
+            else ptr++;
+        }
+
+        return allNodes;
+    }
+
+    static string ApplyImplicitMultiplication(string equationStr)
+    {
+        string newEquationStr = "";
+
+        for(int i = 0; i < equationStr.Count(); i++)
+        {
+            newEquationStr += equationStr[i];
+            // Check if there's an implicit multiplication
+            if(i == equationStr.Count()) break;
+
+            if(i < equationStr.Count() - 1 && equationStr[i+1] == '(' && equationStr[i] != '(')
+            {
+                if (!operatorCharacters.Contains(equationStr[i]))
+                {
+                    newEquationStr += '&';
+                }
+            }
+
+            if(i > 0 && equationStr[i-1] == ')' && equationStr[i] != ')')
+            {
+                if (!operatorCharacters.Contains(equationStr[i]))
+                {
+                    newEquationStr += '&';
+                }
             }
         }
 
-        return headNode;
+        return newEquationStr;
     }
 
-    static string rpn(string expression)
+    static List<string> tokenize(string expression)
     {
         List<string> tokens = new List<string>();
 
@@ -125,203 +216,79 @@ static class Program
             expressionPtr++;
         } 
 
-        
-        Queue<string> outputQueue = new Queue<string>();
+        return tokens;
+    }
+
+    static List<string> rpnFixed(string expression)
+    {   
+        expression = Regex.Replace(expression, @"\s", string.Empty);
+        expression = ApplyImplicitMultiplication(expression);
+        List<string> tokens = tokenize(expression);
+        List<string> output = new List<string>();
         Stack<string> operatorStack = new Stack<string>();
 
-        // Only parses 1 character variables
-        for(int i = 0; i < tokens.Count(); i++)
+        foreach(string tok in tokens)
         {
-            char character = expression[i];
-            
-            // character is an operand
-            if(operatorCharacters.Contains(character))
+            TokenType tokenType = TokenType.Operand;
+
+            if (operatorCharacters.Contains(tok[0])) tokenType = TokenType.Operator;    
+            else if(tok == "(") tokenType = TokenType.Leftbracket;
+            else if(tok == ")") tokenType = TokenType.Rightbracket;
+
+            switch (tokenType)
             {
-                char o1 = character;
-                if(operatorStack.Count > 0)
-                {
-                    char o2 = operatorStack.Peek()[0];
-                    int deltaPrecedence = precedence[operatorCharacters.IndexOf(o1)] - precedence[operatorCharacters.IndexOf(o2)];
-                    // p > 0; o1 > o2
-                    // p = 0; o1 = o2
-                    // p < 0; o2 > o1
-                    bool keepGoing = o2 != '(' && (deltaPrecedence < 0 || (deltaPrecedence == 0 && o1 != '^'));
-                    // Character is an operator
-                    while (keepGoing)
+                case TokenType.Operand:
+                    output.Add(tok);
+                    break;
+                case TokenType.Operator:
+                    string? topOfStack;
+                    operatorStack.TryPeek(out topOfStack);
+                    bool emptyStack = operatorStack.Count == 0;
+
+                    while(!emptyStack && (getPrecedence(tok) <= getPrecedence(topOfStack)) && tok != "^")
                     {
-                        operatorStack.Pop();
-                        outputQueue.Enqueue(o2.ToString());
-                        keepGoing = false;
-                        if(operatorStack.Count > 0)
-                        {
-                            o2 = operatorStack.Peek()[0];
-                            deltaPrecedence = precedence[operatorCharacters.IndexOf(o1)] - precedence[operatorCharacters.IndexOf(o2)];
-                            keepGoing = o2 != '(' && (deltaPrecedence < 0 || (deltaPrecedence == 0 && o1 != '^'));
-                        }
+                        output.Add(operatorStack.Pop());
+                        operatorStack.TryPeek(out topOfStack);
+                        emptyStack = operatorStack.Count == 0;
                     }
-                }
-                operatorStack.Push(o1.ToString());
-            } 
-            else if(character == '(')
-            {
-                operatorStack.Push(character.ToString());
-            } 
-            else if(character == ')')
-            {
-                char o2 = operatorStack.Peek()[0];
-                while(o2 != '(' && operatorStack.Count() > 0)
-                {
+                    
+                    operatorStack.Push(tok);
+                    
+                    break;
+                case TokenType.Leftbracket:
+                    operatorStack.Push(tok);
+                    break;
+                case TokenType.Rightbracket:
+                    emptyStack = operatorStack.Count == 0;
+                    operatorStack.TryPeek(out topOfStack);
+
+                    while(topOfStack != "(" && !emptyStack)
+                    {
+                        // pop and add everything inside the brackets
+                        output.Add(operatorStack.Pop());
+                        emptyStack = operatorStack.Count == 0;
+                        operatorStack.TryPeek(out topOfStack);
+                    }
+                    // pop the left bracket
                     operatorStack.Pop();
-                    outputQueue.Enqueue(o2.ToString());    
-                }
-
-                // There must be a left parenthesis at the top of the operator stack
-                operatorStack.Pop();
-                // deal with functions here 
-            }
-            else
-            {
-                outputQueue.Enqueue(character.ToString());
+                    break;
             }
         }
 
-        while(operatorStack.Count() > 0)
+        while(operatorStack.Count > 0)
         {
-            string o1 = operatorStack.Pop();
-            outputQueue.Enqueue(o1);
+            output.Add(operatorStack.Pop());
         }
 
-        string outputExpression = "";
-        foreach(string element in outputQueue)
-        {
-            if(element != "(" && element != ")") outputExpression += element;
-        }
-
-        return outputExpression;
+        return output;
     }
 
-    static void DecomposeEquation(string? equationStr)
+    static int getPrecedence(string token)
     {
-        if(equationStr == null) return;
-        // Remove whitespace
-        equationStr = equationStr.Replace(" ", "");
-        string newEquationStr = "";
-
-        for(int i = 0; i < equationStr.Count(); i++)
-        {
-            newEquationStr += equationStr[i];
-            // Check if there's an implicit multiplication
-            if(i == equationStr.Count() - 1) break;
-
-            if(equationStr[i+1] == '(')
-            {
-                if (!operatorCharacters.Contains(equationStr[i]))
-                {
-                    newEquationStr += '*';
-                }
-            }
-        }
-
-        string[] expressions = newEquationStr.Split("=");
-        if(expressions.Count() != 2) return;
-        
-        string lhs = expressions[0];
-        string rhs = expressions[1];
-
-        
-
-        // Break down LHS
-        /*
-        while (!lhs.IsWhiteSpace())
-        {
-            
-        }*/
-
-        
-
-        // Compute LHS
-        bool lhsSimplified = false;
-        int iterations = 0;
-        /*
-        while (!lhsSimplified)
-        {
-            if(iterations > MAX_ITERATIONS) break;
-
-            iterations ++;
-        }
-        */
-    }
-
-    static string FixImpliedMultiplication(string equationStr)
-    {
-        string newEquationStr = "";
-
-        for(int i = 0; i < equationStr.Count(); i++)
-        {
-            newEquationStr += equationStr[i];
-            // Check if there's an implicit multiplication
-            if(i == equationStr.Count() - 1) break;
-
-            if(equationStr[i+1] == '(')
-            {
-                if (!operatorCharacters.Contains(equationStr[i]))
-                {
-                    newEquationStr += '*';
-                }
-            }
-        }
-
-        return newEquationStr;
-    }
-
-    static string SplitBrackets(string expression, int bracketIndex)
-    {
-        // a * (2+3(c+b))
-        // a * $0
-        // $0 = 2+3(c+b)
-        // $0 = 2+3*$2
-        // $1 = c+b
-        if(!expression.Contains('(')) return expression;
-
-        (string bracketExpression, string outsideExpression) = ExtractBracketExpression(expression, bracketIndex);
-        Console.WriteLine(outsideExpression + ", $" +bracketIndex + " = "+ bracketExpression);
-        return SplitBrackets(bracketExpression, bracketIndex + 1); 
-    }
-
-    static (string bracket,string outsideBracket) ExtractBracketExpression(string expression, int bracketIndex)
-    {
-        // a * (b + c) + d
-        int bracketsNum = 0;
-        int openBracketIndex = 0;
-        int closeBracketIndex = 0;
-        // a * [(]b + c[)] + d
-        for(int i = 0; i < expression.Count(); i++)
-        {
-            if(expression[i] == '(')
-            {
-                if(bracketsNum == 0) openBracketIndex = i; 
-                bracketsNum++;    
-            }
-            else if(expression[i] == ')')
-            {
-                bracketsNum--;
-                if(bracketsNum == 0) closeBracketIndex = i;
-            }    
-        }
-
-        //Console.WriteLine(openBracketIndex + "  " + closeBracketIndex);
-
-        // No brackets
-        //if ((openBracketIndex | closeBracketIndex) == 0) return("", expression);
-
-        string bracketStr = expression.Substring(openBracketIndex+1, closeBracketIndex-openBracketIndex-1);
-        
-        string remainderStr = expression;
-        if(bracketStr != "") remainderStr = expression.Replace(bracketStr, "$"+bracketIndex);
-        remainderStr = remainderStr.Replace("(", "");
-        remainderStr = remainderStr.Replace(")", "");
-
-        return (bracketStr, remainderStr);
+        if(token == "+" || token == "-") return 1;
+        else if(token == "*" || token == "/") return 2;
+        else if(token == "&" || token == "^") return 3;
+        else return -1;
     }
 }
 
@@ -336,15 +303,34 @@ class Node
 
     public NodeType nodeType;
 
-    public int value;
+    public string value;
 
     public Node? parent;
     public Node? leftChild;
     public Node? rightChild;
 
-    public Node(NodeType _nodeType, int _value)
+    public Node(NodeType _nodeType, string _value)
     {
         nodeType = _nodeType;
         value = _value;
+    }
+
+    public void PrintPretty(string indent, bool last)
+    {
+        Console.Write(indent);
+        if (last)
+        {
+            Console.Write("\\->");
+            indent += " ";
+        }
+        else
+        {
+            Console.Write("|->");
+            indent += "| ";
+        }
+        Console.WriteLine(value);
+
+        if(leftChild != null) leftChild.PrintPretty(indent, false);
+        if(rightChild != null) rightChild.PrintPretty(indent, true);
     }
 }

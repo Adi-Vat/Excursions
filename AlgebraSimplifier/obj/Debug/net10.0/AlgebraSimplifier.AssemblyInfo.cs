@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AlgebraSimplifier")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dbff5f22ffc99750ef98a1b82a550a9e5b53e208")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a850924b0aa22c7087b7d73bb8ce907afb702249")]
 [assembly: System.Reflection.AssemblyProductAttribute("AlgebraSimplifier")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AlgebraSimplifier")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -6,7 +6,7 @@
 #include <math.h>
 #include <conio.h>
 
-#define SCREEN_WIDTH 40
+#define SCREEN_WIDTH 60
 #define SCREEN_HEIGHT 30
 #define MAX_ZOOM 50
 #define MIN_ZOOM 0.1f
