@@ -21,7 +21,7 @@ static class Program
         '-',
         '*',
         '/',
-        '&',
+        '@',
     };
 
     enum TokenType
@@ -42,10 +42,11 @@ static class Program
 
         nodeTree[nodeTree.Count - 1].PrintPretty("", true);
         */
-        List<string> output = rpnFixed("2 * 3(1+4(3+5)/5)");
+        List<string> output = rpnFixed("2(a)(b)");
         List<Node> nodeTree = GenerateTree(output);
-        nodeTree.Reverse();
+        Console.WriteLine(nodeTree.Count);
         nodeTree[0].PrintPretty("", true);
+        //ApplySimplificationRules(nodeTree);
         /*
         foreach(Node node in nodeTree)
         {
@@ -57,6 +58,31 @@ static class Program
         }*/
     }
 
+    static (List<Node> simplifiedTree, bool wasSimplified) ApplySimplificationRules(List<Node> allNodes)
+    {
+        List<Node> simplifiedTree = new List<Node>();
+        bool wasSimplified = false;
+
+        // Apply simplification rules
+        // RULE 1: distribute
+        List<List<Node>> variables = new List<List<Node>>();
+        allNodes[0].ReturnType(0, variables, Node.NodeType.Variable);
+        
+        for(int x = 0; x < variables.Count; x++)
+        {   
+            if(variables[x].Count == 0) continue;
+
+            Console.Write(x + ": ");
+            for(int y = 0; y < variables[x].Count; y++)
+            {
+                Console.Write(variables[x][y].value + " ");
+            }
+            Console.Write("\n");
+        }
+
+        return (simplifiedTree, wasSimplified);
+    }
+
     // returns list of nodes, last item is the head node
     static List<Node> GenerateTree(List<string> rpnExpression)
     {   
@@ -64,6 +90,9 @@ static class Program
         List<Node> allNodes = new List<Node>();
         // While there are sub-expressions to evaluate
         int ptr = 0;
+        
+        //foreach(string tok in rpnExpression) Console.WriteLine(tok);
+
         while(rpnExpression.Count() > 1)
         {
             string expressionToken = rpnExpression[ptr];
@@ -87,7 +116,15 @@ static class Program
                 }
                 else // If its not, check if it's a variable or a constant
                 {
-                    Node leftChildNode = new Node(Node.NodeType.Constant, operandA);
+                    Node.NodeType thisNodeType = Node.NodeType.Variable;
+
+                    int val = 0;
+                    if(Int32.TryParse(operandA, out val))
+                    {
+                        thisNodeType = Node.NodeType.Constant;
+                    }
+
+                    Node leftChildNode = new Node(thisNodeType, operandA);
                     newOperation.leftChild = leftChildNode;
                     allNodes.Add(leftChildNode);
                 }
@@ -99,7 +136,15 @@ static class Program
                 }
                 else
                 {
-                    Node rightChildNode = new Node(Node.NodeType.Constant, operandB);
+                    Node.NodeType thisNodeType = Node.NodeType.Variable;
+
+                    int val = 0;
+                    if(Int32.TryParse(operandB, out val))
+                    {
+                        thisNodeType = Node.NodeType.Constant;
+                    }
+
+                    Node rightChildNode = new Node(thisNodeType, operandB);
                     newOperation.rightChild = rightChildNode;
                     allNodes.Add(rightChildNode);
                 }
@@ -127,37 +172,54 @@ static class Program
             else ptr++;
         }
 
+        // Reverse so that the head node is the first item in the list
+        allNodes.Reverse();
         return allNodes;
     }
 
-    static string ApplyImplicitMultiplication(string equationStr)
+    static List<string> ApplyImplicitMultiplication(List<string> equationList)
     {
-        string newEquationStr = "";
+        List<string> newEquationList = new List<string>();
 
-        for(int i = 0; i < equationStr.Count(); i++)
+        for(int i = 0; i < equationList.Count(); i++)
         {
-            newEquationStr += equationStr[i];
-            // Check if there's an implicit multiplication
-            if(i == equationStr.Count()) break;
+            newEquationList.Add(equationList[i]);
 
-            if(i < equationStr.Count() - 1 && equationStr[i+1] == '(' && equationStr[i] != '(')
+            // Check behind
+            // Apply implicit multiplication only when:
+            // (a+b)(b+c) [maybe also remove un-necessary brackets in pre-processing]
+            // > right - left bracket back to back ')('
+            // 2a
+            // > constant and variable juxtaposed
+            // 3(a + b), a(a + b)
+            // > constant/variable next to left backet 
+            if(i < equationList.Count - 1)
             {
-                if (!operatorCharacters.Contains(equationStr[i]))
-                {
-                    newEquationStr += '&';
-                }
-            }
+                TokenType thisTokenType = getTokenType(equationList[i]);
+                TokenType nextTokenType = getTokenType(equationList[i + 1]);
 
-            if(i > 0 && equationStr[i-1] == ')' && equationStr[i] != ')')
-            {
-                if (!operatorCharacters.Contains(equationStr[i]))
-                {
-                    newEquationStr += '&';
-                }
+                bool applyMutliplier = false;
+
+                if(thisTokenType == TokenType.Rightbracket && nextTokenType == TokenType.Leftbracket) applyMutliplier = true;
+                else if(thisTokenType == TokenType.Rightbracket && nextTokenType == TokenType.Operand) applyMutliplier = true;
+                else if(thisTokenType == TokenType.Operand && nextTokenType == TokenType.Leftbracket) applyMutliplier = true;
+
+                if(applyMutliplier) newEquationList.Insert(i+1, "@");
             }
         }
 
-        return newEquationStr;
+        return newEquationList;
+    }
+
+    static TokenType getTokenType(string tok)
+    {
+        TokenType tokenType = TokenType.Operand;
+
+        if (operatorCharacters.Contains(tok[0])) tokenType = TokenType.Operator;    
+        else if(tok == "(") tokenType = TokenType.Leftbracket;
+        else if(tok == ")") tokenType = TokenType.Rightbracket;
+
+        return tokenType;
     }
 
     static List<string> tokenize(string expression)
@@ -222,18 +284,15 @@ static class Program
     static List<string> rpnFixed(string expression)
     {   
         expression = Regex.Replace(expression, @"\s", string.Empty);
-        expression = ApplyImplicitMultiplication(expression);
         List<string> tokens = tokenize(expression);
+        tokens = ApplyImplicitMultiplication(tokens);
+
         List<string> output = new List<string>();
         Stack<string> operatorStack = new Stack<string>();
-
+    
         foreach(string tok in tokens)
         {
-            TokenType tokenType = TokenType.Operand;
-
-            if (operatorCharacters.Contains(tok[0])) tokenType = TokenType.Operator;    
-            else if(tok == "(") tokenType = TokenType.Leftbracket;
-            else if(tok == ")") tokenType = TokenType.Rightbracket;
+            TokenType tokenType = getTokenType(tok);
 
             switch (tokenType)
             {
@@ -274,7 +333,7 @@ static class Program
                     break;
             }
         }
-
+        Console.Write("\n");
         while(operatorStack.Count > 0)
         {
             output.Add(operatorStack.Pop());
@@ -287,7 +346,7 @@ static class Program
     {
         if(token == "+" || token == "-") return 1;
         else if(token == "*" || token == "/") return 2;
-        else if(token == "&" || token == "^") return 3;
+        else if(token == "@" || token == "^") return 3;
         else return -1;
     }
 }
@@ -332,5 +391,18 @@ class Node
 
         if(leftChild != null) leftChild.PrintPretty(indent, false);
         if(rightChild != null) rightChild.PrintPretty(indent, true);
+    }
+
+    public void ReturnType(int level, List<List<Node>> variables, NodeType requestedType)
+    {
+        if(level >= variables.Count) variables.Add(new List<Node>());
+
+        if(nodeType == requestedType)
+        {
+            variables[level].Add(this);
+        }
+
+        if(leftChild != null) leftChild.ReturnType(level + 1, variables, requestedType);
+        if(rightChild != null) rightChild.ReturnType(level + 1, variables, requestedType);
     }
 }
