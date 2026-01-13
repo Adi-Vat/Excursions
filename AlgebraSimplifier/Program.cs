@@ -42,9 +42,9 @@ static class Program
 
         nodeTree[nodeTree.Count - 1].PrintPretty("", true);
         */
-        List<string> output = rpnFixed("2(a)(b)");
+        List<string> output = rpnFixed("2(a)(b(c)) + cd");
         List<Node> nodeTree = GenerateTree(output);
-        Console.WriteLine(nodeTree.Count);
+        ApplySimplificationRules(nodeTree);
         nodeTree[0].PrintPretty("", true);
         //ApplySimplificationRules(nodeTree);
         /*
@@ -91,12 +91,13 @@ static class Program
         // While there are sub-expressions to evaluate
         int ptr = 0;
         
-        //foreach(string tok in rpnExpression) Console.WriteLine(tok);
+        Console.Write("\n");
+        foreach(string tok in rpnExpression) Console.Write(tok);
+        Console.Write("\n");
 
         while(rpnExpression.Count() > 1)
         {
             string expressionToken = rpnExpression[ptr];
-
             // Reach the first operator 
             if (operatorCharacters.Contains(expressionToken[0]))
             {
@@ -192,22 +193,30 @@ static class Program
             // 2a
             // > constant and variable juxtaposed
             // 3(a + b), a(a + b)
-            // > constant/variable next to left backet 
+            // > constant/variable next to left backet
+            // Two different items next to each other, 2a, 3(, )a, a2, )(
+            // or they're both variables, ab, bc etc 
+            // but not (a, a), )), ((
             if(i < equationList.Count - 1)
             {
                 TokenType thisTokenType = getTokenType(equationList[i]);
                 TokenType nextTokenType = getTokenType(equationList[i + 1]);
 
                 bool applyMutliplier = false;
+        
+                if(thisTokenType != nextTokenType) applyMutliplier = true;
+                else if(thisTokenType == TokenType.Operand && nextTokenType == TokenType.Operand) applyMutliplier = true;
 
-                if(thisTokenType == TokenType.Rightbracket && nextTokenType == TokenType.Leftbracket) applyMutliplier = true;
-                else if(thisTokenType == TokenType.Rightbracket && nextTokenType == TokenType.Operand) applyMutliplier = true;
-                else if(thisTokenType == TokenType.Operand && nextTokenType == TokenType.Leftbracket) applyMutliplier = true;
+                if(thisTokenType == TokenType.Operator || nextTokenType == TokenType.Operator) applyMutliplier = false;
+                if(thisTokenType == TokenType.Leftbracket) applyMutliplier = false;
+                if(nextTokenType == TokenType.Rightbracket) applyMutliplier = false;
 
-                if(applyMutliplier) newEquationList.Insert(i+1, "@");
+                if(applyMutliplier) newEquationList.Add("@");
             }
         }
-
+        Console.Write("\n");
+        foreach(string token in newEquationList) Console.Write(token);
+        Console.Write("\n");
         return newEquationList;
     }
 
@@ -268,7 +277,7 @@ static class Program
                 // Add the function to the token list
                 tokens.Add(functionTokenStr);
             }
-            else
+            else if (character != ' ')
             {
                 tokens.Add(character.ToString());
             }
@@ -283,7 +292,7 @@ static class Program
 
     static List<string> rpnFixed(string expression)
     {   
-        expression = Regex.Replace(expression, @"\s", string.Empty);
+        //expression = Regex.Replace(expression, @"\s", string.Empty);
         List<string> tokens = tokenize(expression);
         tokens = ApplyImplicitMultiplication(tokens);
 
@@ -333,7 +342,6 @@ static class Program
                     break;
             }
         }
-        Console.Write("\n");
         while(operatorStack.Count > 0)
         {
             output.Add(operatorStack.Pop());
@@ -402,7 +410,17 @@ class Node
             variables[level].Add(this);
         }
 
-        if(leftChild != null) leftChild.ReturnType(level + 1, variables, requestedType);
-        if(rightChild != null) rightChild.ReturnType(level + 1, variables, requestedType);
+        int nextLevel = level + 1;
+
+        if(requestedType == NodeType.Variable)
+        {
+            if(value == "Juxtapose" || value == "Multiply")
+            {
+                nextLevel = level;
+            }
+        }
+
+        if(leftChild != null) leftChild.ReturnType(nextLevel, variables, requestedType);
+        if(rightChild != null) rightChild.ReturnType(nextLevel, variables, requestedType);
     }
 }
