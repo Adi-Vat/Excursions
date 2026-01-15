@@ -1,5 +1,5 @@
 # Excursions
-EEE student.
+EEE/CSE student.
 This repo contains small 1 day - 1 week projects, each done to understand something from first principles.
 Click on the links to read more.
 
