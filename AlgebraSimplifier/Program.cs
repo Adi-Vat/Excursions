@@ -42,7 +42,7 @@ static class Program
 
         nodeTree[nodeTree.Count - 1].PrintPretty("", true);
         */
-        List<string> output = rpnFixed("2(a)(b(c)) + cd");
+        List<string> output = rpnFixed("2(a+b+c)");
         List<Node> nodeTree = GenerateTree(output);
         ApplySimplificationRules(nodeTree);
         nodeTree[0].PrintPretty("", true);
@@ -64,22 +64,8 @@ static class Program
         bool wasSimplified = false;
 
         // Apply simplification rules
-        // RULE 1: distribute
-        List<List<Node>> variables = new List<List<Node>>();
-        allNodes[0].ReturnType(0, variables, Node.NodeType.Variable);
+        // RULE 1: associate
         
-        for(int x = 0; x < variables.Count; x++)
-        {   
-            if(variables[x].Count == 0) continue;
-
-            Console.Write(x + ": ");
-            for(int y = 0; y < variables[x].Count; y++)
-            {
-                Console.Write(variables[x][y].value + " ");
-            }
-            Console.Write("\n");
-        }
-
         return (simplifiedTree, wasSimplified);
     }
 
@@ -399,28 +385,5 @@ class Node
 
         if(leftChild != null) leftChild.PrintPretty(indent, false);
         if(rightChild != null) rightChild.PrintPretty(indent, true);
-    }
-
-    public void ReturnType(int level, List<List<Node>> variables, NodeType requestedType)
-    {
-        if(level >= variables.Count) variables.Add(new List<Node>());
-
-        if(nodeType == requestedType)
-        {
-            variables[level].Add(this);
-        }
-
-        int nextLevel = level + 1;
-
-        if(requestedType == NodeType.Variable)
-        {
-            if(value == "Juxtapose" || value == "Multiply")
-            {
-                nextLevel = level;
-            }
-        }
-
-        if(leftChild != null) leftChild.ReturnType(nextLevel, variables, requestedType);
-        if(rightChild != null) rightChild.ReturnType(nextLevel, variables, requestedType);
     }
 }
