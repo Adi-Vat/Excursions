@@ -2,11 +2,11 @@ import pygame
 import math
 import time
 
-C = 400
+C = 500
 TIME_STEP = 0.0005
 DISTANCE_STEP = 1
-FIELD_PER_PIXEL = 0.05
-SCREEN_WIDTH, SCREEN_HEIGHT = (1200, 800)
+FIELD_PER_PIXEL = 0.075
+SCREEN_WIDTH, SCREEN_HEIGHT = (800, 600)
 fieldWidth = int(SCREEN_WIDTH * FIELD_PER_PIXEL)
 fieldHeight = int(SCREEN_HEIGHT * FIELD_PER_PIXEL)
 field = [[0]*fieldHeight for _ in range(fieldWidth)]
@@ -19,15 +19,20 @@ def computeFieldEquation(i, k):
     amplitude = field[i][k]
     oldAmplitude = oldField[i][k]
     leftIndex = i-1
-    #if leftIndex < 0: leftIndex = fieldWidth - 1
     rightIndex = i + 1
-    #if rightIndex > fieldWidth - 1: rightIndex = 0
     upIndex = k-1
-    #if upIndex < 0: upIndex = fieldHeight - 1
     downIndex = k + 1
-    #if downIndex > fieldHeight - 1: downIndex = 0
 
-    
+    if leftIndex < 0: leftIndex = fieldWidth - 1
+    leftAmplitude = field[leftIndex][k]
+    if rightIndex > fieldWidth - 1: rightIndex = 0
+    rightAmplitude = field[rightIndex][k]
+    if upIndex < 0: upIndex = fieldHeight - 1
+    upAmplitude = field[i][upIndex]
+    if downIndex > fieldHeight - 1: downIndex = 0
+    downAmplitude = field[i][downIndex]
+
+    '''
     if leftIndex < 0: leftAmplitude = 0
     else: leftAmplitude = field[leftIndex][k]
 
@@ -39,7 +44,7 @@ def computeFieldEquation(i, k):
     
     if downIndex > fieldHeight - 1: downAmplitude = 0
     else: downAmplitude = field[i][downIndex]
-
+    '''
     sourceAmount = 0
     elapsed_time = pygame.time.get_ticks() / 1000.0 - start_time  # Use elapsed time
     if i == fieldWidth // 2 and k == fieldHeight // 2:
@@ -71,8 +76,8 @@ def drawField():
             screenX = x/FIELD_PER_PIXEL
             screenY = y/FIELD_PER_PIXEL
             amplitude = abs(field[x][y])  # Get absolute value
-            if amplitude > 0.1:  # Only draw if visible
-                radius = min(5, int(amplitude * 5))  # Cap the radius
+            if amplitude > 0.01:  # Only draw if visible
+                radius = min(3, int(amplitude * 3))  # Cap the radius
                 pygame.draw.circle(screen, (255, 255, 255), (int(screenX), int(screenY)), radius)
 
 pygame.init()
@@ -86,6 +91,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                field = oldField = newField = [[0]*fieldHeight for _ in range(fieldWidth)]
 
     screen.fill((0, 0, 0))
     calculateNextField()
