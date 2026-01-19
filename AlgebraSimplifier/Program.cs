@@ -42,7 +42,7 @@ static class Program
 
         nodeTree[nodeTree.Count - 1].PrintPretty("", true);
         */
-        List<string> output = rpnFixed("2(a+b+c)");
+        List<string> output = rpnFixed("-5");
         List<Node> nodeTree = GenerateTree(output);
         ApplySimplificationRules(nodeTree);
         nodeTree[0].PrintPretty("", true);
@@ -65,7 +65,15 @@ static class Program
 
         // Apply simplification rules
         // RULE 1: associate
-        
+        // (a + b) + c = a + (b + c) = a + b + c
+        // from the top, continue on the path of the same operation for addition/multiplication
+        List<Node> flatOperands = new List<Node>();
+        allNodes[0].Associate();
+        /*
+        Console.Write("\n");
+        foreach(Node node in flatOperands) Console.Write(node.value + " ");
+        Console.Write("\n");
+        */
         return (simplifiedTree, wasSimplified);
     }
 
@@ -76,10 +84,6 @@ static class Program
         List<Node> allNodes = new List<Node>();
         // While there are sub-expressions to evaluate
         int ptr = 0;
-        
-        Console.Write("\n");
-        foreach(string tok in rpnExpression) Console.Write(tok);
-        Console.Write("\n");
 
         while(rpnExpression.Count() > 1)
         {
@@ -99,7 +103,7 @@ static class Program
                 if(operandA[0] == '#')
                 {
                     int nodeIndex = Int32.Parse(operandA.Substring(1));
-                    newOperation.leftChild = operatorNodes[nodeIndex];
+                    newOperation.children.Add(operatorNodes[nodeIndex]);
                 }
                 else // If its not, check if it's a variable or a constant
                 {
@@ -111,15 +115,15 @@ static class Program
                         thisNodeType = Node.NodeType.Constant;
                     }
 
-                    Node leftChildNode = new Node(thisNodeType, operandA);
-                    newOperation.leftChild = leftChildNode;
-                    allNodes.Add(leftChildNode);
+                    Node newChildNode = new Node(thisNodeType, operandA);
+                    newOperation.children.Add(newChildNode);
+                    allNodes.Add(newChildNode);
                 }
 
                 if(operandB[0] == '#')
                 {
                     int nodeIndex = Int32.Parse(operandB.Substring(1));
-                    newOperation.rightChild = operatorNodes[nodeIndex];
+                    newOperation.children.Add(operatorNodes[nodeIndex]);
                 }
                 else
                 {
@@ -131,9 +135,9 @@ static class Program
                         thisNodeType = Node.NodeType.Constant;
                     }
 
-                    Node rightChildNode = new Node(thisNodeType, operandB);
-                    newOperation.rightChild = rightChildNode;
-                    allNodes.Add(rightChildNode);
+                    Node newChildNode = new Node(thisNodeType, operandB);
+                    newOperation.children.Add(newChildNode);
+                    allNodes.Add(newChildNode);
                 }
 
                 int operatorIndex = operatorNodes.Count();
@@ -200,9 +204,7 @@ static class Program
                 if(applyMutliplier) newEquationList.Add("@");
             }
         }
-        Console.Write("\n");
-        foreach(string token in newEquationList) Console.Write(token);
-        Console.Write("\n");
+
         return newEquationList;
     }
 
@@ -358,9 +360,7 @@ class Node
 
     public string value;
 
-    public Node? parent;
-    public Node? leftChild;
-    public Node? rightChild;
+    public List<Node> children = new List<Node>();
 
     public Node(NodeType _nodeType, string _value)
     {
@@ -383,7 +383,37 @@ class Node
         }
         Console.WriteLine(value);
 
-        if(leftChild != null) leftChild.PrintPretty(indent, false);
-        if(rightChild != null) rightChild.PrintPretty(indent, true);
+        for(int i = 0; i < children.Count(); i++)
+        {
+            bool _last = i == children.Count() - 1;
+            children[i].PrintPretty(indent, _last);
+        }
+    }
+
+    public void Associate()
+    {
+        foreach(Node child in children) child.Associate();
+
+        if(value == "Add")
+        {
+            List<Node> newChildren = new List<Node>();
+            foreach(Node child in children)
+            {
+                if(child.value == "Add") newChildren.AddRange(child.children);
+                else newChildren.Add(child);
+            }
+
+            children = newChildren;
+        } else if(value == "Multiply" || value == "Juxtapose")
+        {
+            List<Node> newChildren = new List<Node>();
+            foreach(Node child in children)
+            {
+                if(child.value == "Multiply" || child.value == "Juxtapose") newChildren.AddRange(child.children);
+                else newChildren.Add(child);
+            }
+
+            children = newChildren;
+        }
     }
 }
