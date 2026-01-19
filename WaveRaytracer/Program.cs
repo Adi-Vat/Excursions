@@ -6,7 +6,7 @@ static class WaveRaytracer
     const int width = 800;
     const int height = 600;
     static List<Source> sources = new List<Source>();
-    const int numberRaysPerSource = 10;
+    const int numberRaysPerSource = 8;
 
     static void Start()
     {

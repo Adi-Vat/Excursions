@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WaveRaytracer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20aac6ef9fb9e74bb6b1ffc631535e33f2cfb312")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+44c339b549aec7b9450d677cd9c2a254292e8fba")]
 [assembly: System.Reflection.AssemblyProductAttribute("WaveRaytracer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WaveRaytracer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
