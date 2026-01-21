@@ -7,6 +7,7 @@ static class WaveRaytracer
     const int height = 600;
     static List<Source> sources = new List<Source>();
     const int numberRaysPerSource = 8;
+    static List<Collider> colliders = new List<Collider>();
 
     static void Start()
     {
@@ -48,6 +49,31 @@ static class WaveRaytracer
         }
     }
 
+    static float distanceToNearestCollider(Vector2 point)
+    {
+        float nearestDistance = -1;
+
+        foreach(Collider col in colliders)
+        {
+            if(col.points.Count < 2) continue;
+            // Get edge/line
+            for(int i = 0; i < col.points.Count - 2; i++)
+            {
+                Vector2 p1 = col.points[i];
+                Vector2 p2 = col.points[i+1];
+
+                float A = p1.Y - p2.Y;
+                float B = p2.X - p1.X;
+                float C = p1.X*p2.Y - p2.X*p1.Y;
+
+                float d = (float)(Math.Abs(A * point.X + B*point.Y + C)/Math.Sqrt((A*A + B*B)));
+                if(d < nearestDistance || nearestDistance < 0) nearestDistance = d;
+            }
+        }
+
+        return nearestDistance;
+    }
+
     static void ComputeRay(Vector2 startPosition, Vector2 direction, float length)
     {
         
@@ -69,4 +95,9 @@ class Source
         position = _position;
         frequency = _frequency;
     }
+}
+
+class Collider
+{
+    public List<Vector2> points = new List<Vector2>();
 }
