@@ -2,7 +2,6 @@
 using Raylib_cs;
 using System.Runtime.CompilerServices;
 using System.IO.Ports;
-//using System.Windows.Forms;
 
 class Program
 {
@@ -23,6 +22,7 @@ class Program
     static bool showPointStrength = false;
     static SerialPort arduino = new SerialPort();
     static float[] frequencies = {869.70f, 867.40f, 868.65f, 866.70f};  
+    static bool usingArduino = false;
 
     static void PanImage()
     {
@@ -263,23 +263,24 @@ class Program
         ComputeBoyerWatson();
         arduino.WriteLine("L"+newLayer);
     }
-
+    
     public static void Main()
-    {   
+    {
+        if (usingArduino)
+        {
+            arduino = new SerialPort();
+            arduino.PortName = "COM16";
+            arduino.BaudRate = 115200;
+            arduino.ReadTimeout = 2000;
+            arduino.WriteTimeout = 2000;
+            arduino.DtrEnable = true; 
+            arduino.RtsEnable = true; 
+            arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
+            arduino.Open();
+            Thread.Sleep(2000); // Must wait!
+            Console.WriteLine("Connected to Arduino!");
+        } 
         
-        arduino = new SerialPort();
-        arduino.PortName = "COM16";
-        arduino.BaudRate = 115200;
-        arduino.ReadTimeout = 2000;
-        arduino.WriteTimeout = 2000;
-        arduino.DtrEnable = true;  // Add this
-        arduino.RtsEnable = true;  // Add this
-        arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
-        arduino.Open();
-        Thread.Sleep(2000); // Must wait!
-        Console.WriteLine("Connected to Arduino!");
-        
-
         for(int i = 0; i < 4; i++) pointCloud[i] = new List<MeasurementPoint>();
 
         camera.Zoom = 1.0f;
@@ -341,16 +342,10 @@ class Program
                     key = Raylib.GetCharPressed();  // Check next character in the queue
                 }
 
-                if (Raylib.IsKeyPressed(KeyboardKey.Tab))
+                if (usingArduino && Raylib.IsKeyPressed(KeyboardKey.Tab))
                 {
-                    /*
-                    string pointDbm = GetDataFromArduino(">");
-                    
-                    
-                    */
                     Console.WriteLine("asking for data");
-                    arduino.WriteLine(">");
-                    
+                    arduino.WriteLine(">");   
                 }
                 
                 if (Raylib.IsKeyPressed(KeyboardKey.Enter))
