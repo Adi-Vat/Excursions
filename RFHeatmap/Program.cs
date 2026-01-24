@@ -1,7 +1,8 @@
 ﻿using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
 using Raylib_cs;
 using System.Runtime.CompilerServices;
+using System.IO.Ports;
+//using System.Windows.Forms;
 
 class Program
 {
@@ -9,10 +10,19 @@ class Program
     const int screenHeight = 800;
     const float ROOT_3 = 1.7320508f;
     static Camera2D camera;
-    static List<MeasurementPoint> pointCloud = new List<MeasurementPoint>();
+    static List<MeasurementPoint>[] pointCloud = new List<MeasurementPoint>[4];
+    static int layer = 0;
     const int pointRadius = 5;
     static List<Circumcircle> circumcircles = new List<Circumcircle>();
     static List<Triangle> triangles = new List<Triangle>();
+    const int minValue = -80;
+    const int maxValue = -25;
+    static MeasurementPoint? currentlySelectedPoint;
+    static bool editingPoint = false;
+    static string editingPointValueStr = "";
+    static bool showPointStrength = false;
+    static SerialPort arduino = new SerialPort();
+    static float[] frequencies = {869.70f, 867.40f, 868.65f, 866.70f};  
 
     static void PanImage()
     {
@@ -41,28 +51,57 @@ class Program
 
     static void AddMeasurementPoint()
     {
+        editingPointValueStr = "";
+        MeasurementPoint? nearestPoint = null;
+        nearestPoint = getClosestPointToMouse();
+        if(nearestPoint != null)
+        {
+            editingPointValueStr = nearestPoint.strength.ToString();
+            editingPoint = true;
+            currentlySelectedPoint = nearestPoint;
+            return;
+        }
+
         Vector2 mouseWorldPos = Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
         MeasurementPoint newPoint = new MeasurementPoint(mouseWorldPos, 1f);
-        pointCloud.Add(newPoint);
-    }
+        newPoint.strength = 0;
+        editingPoint = true;
+        currentlySelectedPoint = newPoint;
+        pointCloud[layer].Add(newPoint);
+    }   
 
     static void RemoveMeasurementPoint()
     {
-        Vector2 mouseWorldPos = Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
-        MeasurementPoint? pointToRemove = null;
+        MeasurementPoint? pointToRemove = getClosestPointToMouse();
+        
+        if(pointToRemove != null) pointCloud[layer].Remove(pointToRemove);
+    }
 
-        foreach(MeasurementPoint point in pointCloud)
+    static void MoveMeasurementPoint()
+    {
+        if(currentlySelectedPoint == null) return;
+
+        editingPoint = false;
+        currentlySelectedPoint.position = Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
+    }
+
+    static MeasurementPoint? getClosestPointToMouse()
+    {
+        Vector2 mouseWorldPos = Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
+        MeasurementPoint? selectedPoint = null;
+
+        foreach(MeasurementPoint point in pointCloud[layer])
         {
             // Check if the mouse hovers over any point
             float distToMouse = Vector2.Distance(mouseWorldPos, point.position);
             if(distToMouse <= pointRadius)
             {
-                pointToRemove = point;
+                selectedPoint = point;
                 break;
             }
         }
-        
-        if(pointToRemove != null) pointCloud.Remove(pointToRemove);
+
+        return selectedPoint;
     }
 
     static void ComputeBoyerWatson()
@@ -71,7 +110,7 @@ class Program
         Triangle superTriangle = GetSuperTriangle();
         triangulation.Add(superTriangle);
 
-        foreach(MeasurementPoint vertex in pointCloud)
+        foreach(MeasurementPoint vertex in pointCloud[layer])
         {
             List<Triangle> badTriangles = new List<Triangle>();
             Dictionary<Edge, int> edgeDictionary = new Dictionary<Edge, int>();
@@ -154,7 +193,7 @@ class Program
     {
         Vector2 topLeftPoint = Vector2.NaN;
         Vector2 bottomRightPoint = Vector2.NaN;
-        foreach(MeasurementPoint point in pointCloud)
+        foreach(MeasurementPoint point in pointCloud[layer])
         {
             if(point.position.X < topLeftPoint.X || float.IsNaN(topLeftPoint.X))
                 topLeftPoint.X = point.position.X;
@@ -182,26 +221,73 @@ class Program
     }
 
     static void DrawHeatmap()
-    {   
-        
-        foreach(MeasurementPoint point in pointCloud)
+    {
+        Rlgl.Begin(4);
+        foreach(Triangle triangle in triangles)
         {
-            Raylib.DrawCircle((int)point.position.X, (int)point.position.Y, pointRadius, Color.Red);
+            // One triangle, three points
+            for(int i = 0; i < 3; i++)
+            {
+                // Define color for next vertex
+                float lerpValue = (triangle.verts[i].strength - minValue) / (maxValue - minValue);
+                
+                if(lerpValue < 0.2f) Rlgl.Color4ub(0, 0, 255, 125);
+                else if(lerpValue < 0.4f) Rlgl.Color4ub(0, 255, 0, 125);
+                else if(lerpValue < 0.8f) Rlgl.Color4ub(255, 255, 0, 125);
+                else Rlgl.Color4ub(255, 0, 0, 125);
+
+                // Define vertex
+                Rlgl.Vertex2f(triangle.verts[i].position.X, triangle.verts[i].position.Y);
+            }
         }
-        
-        foreach(Triangle tri in triangles)
+        Rlgl.End();
+        foreach(MeasurementPoint measurementPoint in pointCloud[layer])
         {
-            Raylib.DrawTriangleLines(tri.verts[0].position, tri.verts[1].position, tri.verts[2].position, Color.Red);
+            bool drawTextLocal = false;
+            Raylib.DrawCircle((int)measurementPoint.position.X, (int)measurementPoint.position.Y, 2f, Color.Black);
+            if(measurementPoint == currentlySelectedPoint)
+            {
+                Raylib.DrawCircle((int)measurementPoint.position.X, (int)measurementPoint.position.Y, 1.5f, Color.White);
+                drawTextLocal = true;
+            }
+            else if(showPointStrength) drawTextLocal = true;
+
+            if(drawTextLocal)
+                 Raylib.DrawText(measurementPoint.strength.ToString(), (int)measurementPoint.position.X + 5, (int)measurementPoint.position.Y + 5, 18, Color.Black);
         }
     }
 
-    public static void Main()
+    static void ChangeLayer(int newLayer)
     {
+        layer = newLayer;
+        ComputeBoyerWatson();
+        arduino.WriteLine("L"+newLayer);
+    }
+
+    public static void Main()
+    {   
+        
+        arduino = new SerialPort();
+        arduino.PortName = "COM16";
+        arduino.BaudRate = 115200;
+        arduino.ReadTimeout = 2000;
+        arduino.WriteTimeout = 2000;
+        arduino.DtrEnable = true;  // Add this
+        arduino.RtsEnable = true;  // Add this
+        arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
+        arduino.Open();
+        Thread.Sleep(2000); // Must wait!
+        Console.WriteLine("Connected to Arduino!");
+        
+
+        for(int i = 0; i < 4; i++) pointCloud[i] = new List<MeasurementPoint>();
+
         camera.Zoom = 1.0f;
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);    
         Raylib.InitWindow(screenWidth, screenHeight, "RF Heatmap");
-        Image img = Raylib.LoadImage("C:/Users/Adi/Documents/Excursions/RFHeatmap/floormaps/868_Floor2.png");
+        Image img = Raylib.LoadImage("C:/Users/Adi/Documents/Excursions/RFHeatmap/floormaps/4 floors.png");
         Texture2D texture = Raylib.LoadTextureFromImage(img);
+        Rlgl.DisableBackfaceCulling();
 
         Raylib.SetTargetFPS(60);
 
@@ -210,63 +296,127 @@ class Program
             PanImage();
             CamZoom();
 
-            if(Raylib.IsMouseButtonPressed(MouseButton.Left)) AddMeasurementPoint();
-            if(Raylib.IsMouseButtonPressed(MouseButton.Right)) RemoveMeasurementPoint();
-            if(Raylib.IsKeyPressed(KeyboardKey.Space)) ComputeBoyerWatson();
+            if(Raylib.IsKeyPressed(KeyboardKey.H)) showPointStrength = !showPointStrength;
 
-            Raylib.BeginDrawing();
-            Raylib.BeginMode2D(camera);
-            
-            Raylib.ClearBackground(Color.Black);
-            Raylib.DrawTexture(texture, 0, 0, Color.White);
-            DrawHeatmap();
-            Raylib.EndMode2D();
-            Raylib.EndDrawing();
+            if (!editingPoint)
+            {
+                if(Raylib.IsMouseButtonPressed(MouseButton.Left)) AddMeasurementPoint();
+                if(Raylib.IsMouseButtonPressed(MouseButton.Right)) RemoveMeasurementPoint();
+                if(Raylib.IsKeyPressed(KeyboardKey.Space)) ComputeBoyerWatson();
+                if(Raylib.IsKeyPressed(KeyboardKey.One)) ChangeLayer(0);
+                if(Raylib.IsKeyPressed(KeyboardKey.Two)) ChangeLayer(1);
+                if(Raylib.IsKeyPressed(KeyboardKey.Three)) ChangeLayer(2);
+                if(Raylib.IsKeyPressed(KeyboardKey.Four)) ChangeLayer(3);
+            }
+            else
+            {
+                // Get char pressed (unicode character) on the queue
+                int key = Raylib.GetCharPressed();
+                
+                int editingPointValue;
+                if(currentlySelectedPoint == null) return;
+
+                if(Int32.TryParse(editingPointValueStr, out editingPointValue))
+                {
+                    currentlySelectedPoint.strength = editingPointValue;
+                }
+                else
+                {
+                    currentlySelectedPoint.strength = -0;
+                }
+
+                if (Raylib.IsKeyPressed(KeyboardKey.Backspace))
+                {
+                    if(editingPointValueStr.Length == 0) editingPointValueStr = "";
+                    else editingPointValueStr = editingPointValueStr.Remove(editingPointValueStr.Length - 1);
+                }
+
+                // Check if more characters have been pressed on the same frame
+                while (key > 0)
+                {
+                    if ((key >= 32) && (key <= 125))
+                    {
+                        editingPointValueStr += (char)key;
+                    }
+                    key = Raylib.GetCharPressed();  // Check next character in the queue
+                }
+
+                if (Raylib.IsKeyPressed(KeyboardKey.Tab))
+                {
+                    /*
+                    string pointDbm = GetDataFromArduino(">");
+                    
+                    
+                    */
+                    Console.WriteLine("asking for data");
+                    arduino.WriteLine(">");
+                    
+                }
+                
+                if (Raylib.IsKeyPressed(KeyboardKey.Enter))
+                {
+                    editingPoint = false;
+                    currentlySelectedPoint = null;
+                }
+            }
+
+            DrawScreen(texture);
         }
 
         Raylib.UnloadTexture(texture);
         Raylib.CloseWindow();
     }
-
-    static (bool validTriangle, Circumcircle returnCircle) getCircumcircle(Vector2 p1, Vector2 p2, Vector2 p3)
+    /*
+    static void SaveFile()
     {
-        float radius = 0;
-        Vector2 centre = Vector2.Zero;
+        SaveFileDialog saveDialog = new SaveFileDialog();
+        DialogResult result = saveDialog.ShowDialog();
+    }*/
 
-        float grad1 = (p1.Y - p2.Y)/(p1.X - p2.X);
-        float grad2 = (p1.Y - p3.Y)/(p1.X - p3.X);
+    private static void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
+    {
+        // Show all the incoming data in the port's buffer in the output window
+        string inData = arduino.ReadExisting();
+        Console.WriteLine("data : " + inData);
 
-        if(grad1 == grad2) return(false, new Circumcircle(Vector2.Zero, 0));
+        float dbmAmount = 0;
+        float.TryParse(inData, out dbmAmount);
+        Console.WriteLine(dbmAmount);
+        if(currentlySelectedPoint != null) currentlySelectedPoint.strength = dbmAmount;
+        editingPoint = false;
+        currentlySelectedPoint = null;
+    }
 
-        // Caclulate perp. bisector of p1,p2
-        Vector2 midpoint12 = new Vector2(0.5f*(p1.X + p2.X), 0.5f*(p1.Y + p2.Y));
-        float gradPerpBisector12 = -1/grad1;
-        // y = mx + c
-        // 0 = mx + c - y
-        // -c = mx - y
-        // c = -(mx - y)
-        float c12 = -(gradPerpBisector12 * midpoint12.X - midpoint12.Y);
-
-        // Calculate perp. bisector p1,p3
-        Vector2 midpoint13 = new Vector2(0.5f*(p1.X + p3.X), 0.5f*(p1.Y + p3.Y));
-        float gradPerpBisector13 = -1/grad2;
-        float c13 = -(gradPerpBisector13 * midpoint13.X - midpoint13.Y);
-
-        // Find intersection of two perp. bisectors
-        // y = m1x + c1
-        // y = m2x + c2
-        // m1x + c1 = m2x + c2
-        // m1x = m2x + c2 - c1
-        // x (m1-m2) = c2-c1
-        // x = (c2-c1)/(m1-m2)
-        float xIntersect = (c13 - c12)/(gradPerpBisector12 - gradPerpBisector13);
-        float yIntersect = gradPerpBisector12 * xIntersect + c12;
-
-        centre = new Vector2(xIntersect, yIntersect);
-
-        radius = Vector2.Distance(p1, centre);
+    static void DrawScreen(Texture2D texture)
+    {
+        Raylib.BeginDrawing();
+        Raylib.BeginMode2D(camera);
         
-        return (true, new Circumcircle(centre, radius));
+        Raylib.ClearBackground(Color.Black);
+        Raylib.DrawTexture(texture, 0, 0, Color.White);
+        DrawHeatmap();
+        Raylib.EndMode2D();
+        Raylib.DrawText("Layer " + (layer + 1) + "  " + frequencies[layer] + " MHz", 10, 10, 40, Color.Black);
+        Raylib.EndDrawing();
+    }
+
+    static (bool valid, Circumcircle circle) getCircumcircle(Vector2 a, Vector2 b, Vector2 c)
+    {
+        float d = 2 * (a.X*(b.Y-c.Y) + b.X*(c.Y-a.Y) + c.X*(a.Y-b.Y));
+        if (MathF.Abs(d) < 1e-6f)
+            return (false, new Circumcircle(Vector2.Zero, 0));
+
+        float aSq = a.LengthSquared();
+        float bSq = b.LengthSquared();
+        float cSq = c.LengthSquared();
+
+        float ux = (aSq*(b.Y-c.Y) + bSq*(c.Y-a.Y) + cSq*(a.Y-b.Y)) / d;
+        float uy = (aSq*(c.X-b.X) + bSq*(a.X-c.X) + cSq*(b.X-a.X)) / d;
+
+        Vector2 center = new Vector2(ux, uy);
+        float radius = Vector2.Distance(center, a);
+
+        return (true, new Circumcircle(center, radius));
     }
 
     static (Vector2 p1, Vector2 p2, Vector2 p3) getEquilateralTriangleFromIncircle(Vector2 centre, float radius)
