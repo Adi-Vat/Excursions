@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Adi\\Documents\\Excursions\\RFHeatmap\\RFHeatmap.csproj": {}
+    "C:\\Users\\Adi\\Documents\\Excursions\\RFMapper\\RFHeatmap\\RFHeatmap.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Adi\\Documents\\Excursions\\RFHeatmap\\RFHeatmap.csproj": {
+    "C:\\Users\\Adi\\Documents\\Excursions\\RFMapper\\RFHeatmap\\RFHeatmap.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Adi\\Documents\\Excursions\\RFHeatmap\\RFHeatmap.csproj",
+        "projectUniqueName": "C:\\Users\\Adi\\Documents\\Excursions\\RFMapper\\RFHeatmap\\RFHeatmap.csproj",
         "projectName": "RFHeatmap",
-        "projectPath": "C:\\Users\\Adi\\Documents\\Excursions\\RFHeatmap\\RFHeatmap.csproj",
+        "projectPath": "C:\\Users\\Adi\\Documents\\Excursions\\RFMapper\\RFHeatmap\\RFHeatmap.csproj",
         "packagesPath": "C:\\Users\\Adi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Adi\\Documents\\Excursions\\RFHeatmap\\obj\\",
+        "outputPath": "C:\\Users\\Adi\\Documents\\Excursions\\RFMapper\\RFHeatmap\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Adi\\AppData\\Roaming\\NuGet\\NuGet.Config"

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RFHeatmap")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a6bcee937306e17b3ef5d7f4bc19304baf2d4ce2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+54a39dbe812f44e2f55b00a923bdd1140b7c7d51")]
 [assembly: System.Reflection.AssemblyProductAttribute("RFHeatmap")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RFHeatmap")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -261,7 +261,8 @@ class Program
     {
         layer = newLayer;
         ComputeBoyerWatson();
-        arduino.WriteLine("L"+newLayer);
+        
+        if(usingArduino) arduino.WriteLine("L"+newLayer);
     }
     
     public static void Main()
@@ -286,7 +287,9 @@ class Program
         camera.Zoom = 1.0f;
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);    
         Raylib.InitWindow(screenWidth, screenHeight, "RF Heatmap");
-        Image img = Raylib.LoadImage("C:/Users/Adi/Documents/Excursions/RFHeatmap/floormaps/4 floors.png");
+        Console.WriteLine(Directory.GetCurrentDirectory());
+        string projectRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..");
+        Image img = Raylib.LoadImage(Path.Combine(projectRoot, "floormaps\\870.5_Floor2.png"));
         Texture2D texture = Raylib.LoadTextureFromImage(img);
         Rlgl.DisableBackfaceCulling();
 
@@ -314,7 +317,7 @@ class Program
                 // Get char pressed (unicode character) on the queue
                 int key = Raylib.GetCharPressed();
                 
-                int editingPointValue;
+                int editingPointValue;  
                 if(currentlySelectedPoint == null) return;
 
                 if(Int32.TryParse(editingPointValueStr, out editingPointValue))

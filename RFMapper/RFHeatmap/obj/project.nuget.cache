@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "sNB3zKIHZAw=",
+  "dgSpecHash": "feEfJD60g74=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Adi\\Documents\\Excursions\\RFHeatmap\\RFHeatmap.csproj",
+  "projectFilePath": "C:\\Users\\Adi\\Documents\\Excursions\\RFMapper\\RFHeatmap\\RFHeatmap.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Adi\\.nuget\\packages\\raylib-cs\\7.0.2\\raylib-cs.7.0.2.nupkg.sha512",
     "C:\\Users\\Adi\\.nuget\\packages\\runtime.android-arm.runtime.native.system.io.ports\\10.0.2\\runtime.android-arm.runtime.native.system.io.ports.10.0.2.nupkg.sha512",
