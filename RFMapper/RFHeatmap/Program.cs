@@ -44,7 +44,6 @@ class Program
             camera.Offset = Vector2.Zero;
         }
     }
-
     static void CamZoom()
     {
         float wheel = Raylib.GetMouseWheelMove();
@@ -160,14 +159,17 @@ class Program
     static void ChangeLayer(int newLayer)
     {
         layer = newLayer;
-        ComputeBoyerWatson();
+        ComputeBowyerWatson();
         
         if(usingArduino) arduino.WriteLine("L"+newLayer);
     }
     #endregion
 
     #region Triangulation
-    static void ComputeBoyerWatson()
+    /* Performs the Bowyer-Watson Delaunay triangle algorithm to generate best-case triangles
+    with the most even internal angles
+    https://www.gorillasun.de/blog/bowyer-watson-algorithm-for-delaunay-triangulation/ */
+    static void ComputeBowyerWatson()
     {
         List<Triangle> triangulation = new List<Triangle>();
         Triangle superTriangle = GetSuperTriangle();
@@ -189,6 +191,7 @@ class Program
                 if(distSq <= circumcircle.radius * circumcircle.radius) badTriangles.Add(tri); 
             }
 
+            // Get a list of outside edges of the bad triangles
             List<Edge> polygon = new List<Edge>();
             foreach(Triangle badTri in badTriangles)
             {
@@ -198,6 +201,7 @@ class Program
                 edgeDictionary = CountEdge(edgeDictionary, badVerts[2], badVerts[0]);
             }
 
+            // Create the polygonal hole of bad triangles
             foreach(Edge badEdge in edgeDictionary.Keys)
             {
                 if(edgeDictionary[badEdge] == 1)
@@ -218,6 +222,7 @@ class Program
             }
         }
         
+        // Remove all triangles connected to the inital super triangle
         for(int k = triangulation.Count - 1; k >= 0; k--)
         {
             bool removeTriangle = false;
@@ -237,6 +242,7 @@ class Program
         triangles = triangulation;
     }
 
+    // Counts how many times an edge is used by triangles
     static Dictionary<Edge, int> CountEdge(Dictionary<Edge, int> dict, MeasurementPoint a, MeasurementPoint b)
     {
         Edge edge = new Edge(a,b);
@@ -323,7 +329,7 @@ class Program
     {
         if(Raylib.IsMouseButtonPressed(MouseButton.Left)) AddMeasurementPoint();
         if(Raylib.IsMouseButtonPressed(MouseButton.Right)) RemoveMeasurementPoint();
-        if(Raylib.IsKeyPressed(KeyboardKey.Space)) ComputeBoyerWatson();
+        if(Raylib.IsKeyPressed(KeyboardKey.Space)) ComputeBowyerWatson();
         if(Raylib.IsKeyPressed(KeyboardKey.One)) ChangeLayer(0);
         if(Raylib.IsKeyPressed(KeyboardKey.Two)) ChangeLayer(1);
         if(Raylib.IsKeyPressed(KeyboardKey.Three)) ChangeLayer(2);
