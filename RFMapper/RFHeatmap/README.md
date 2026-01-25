@@ -1,5 +1,7 @@
 # RF Signal Heatmap
-Create a heatmap of the RF signal power values (dBm) for 4 different frequenices. The heatmap is coloured red -> yellow -> green -> blue.  
+Create a heatmap of the RF signal power values (dBm) for 4 different frequenices. The heatmap is coloured   
+red -> yellow -> green -> blue.   
+
 Click on wherever the reading was/is being taking on the map and assign the dBm value to that point.  Hit the spacebar and 
 the point cloud is resolved into a mesh, which is then coloured based on the intensity of the signal at each point.  
 If an Arduino with the correct protocol is connected, the power value at a position can be automatically tabulated by pressing Tab.  
