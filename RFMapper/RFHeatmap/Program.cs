@@ -5,25 +5,31 @@ using System.IO.Ports;
 
 class Program
 {
+    // constants
     const int screenWidth = 1200;
     const int screenHeight = 800;
     const float ROOT_3 = 1.7320508f;
-    static Camera2D camera;
-    static List<MeasurementPoint>[] pointCloud = new List<MeasurementPoint>[4];
-    static int layer = 0;
     const int pointRadius = 5;
-    static List<Circumcircle> circumcircles = new List<Circumcircle>();
-    static List<Triangle> triangles = new List<Triangle>();
+    // screen stuff
+    static Camera2D camera;
+    static Texture2D screenTexture;
+    // arduino stuff
+    static SerialPort arduino = new SerialPort();
+    static bool usingArduino = false;
+    // triangulation stuff
+    static List<MeasurementPoint>[] pointCloud = new List<MeasurementPoint>[4];
     const int minValue = -80;
     const int maxValue = -25;
     static MeasurementPoint? currentlySelectedPoint;
+    static List<Triangle> triangles = new List<Triangle>();
+    static float[] frequencies = {869.70f, 867.40f, 868.65f, 866.70f};  
+    static int layer = 0;
+    // point editing stuff
     static bool editingPoint = false;
     static string editingPointValueStr = "";
     static bool showPointStrength = false;
-    static SerialPort arduino = new SerialPort();
-    static float[] frequencies = {869.70f, 867.40f, 868.65f, 866.70f};  
-    static bool usingArduino = false;
-
+    
+    #region Screen
     static void PanImage()
     {
         if (Raylib.IsMouseButtonDown(MouseButton.Middle))
@@ -48,7 +54,6 @@ class Program
         float scale = 0.2f*wheel;
         camera.Zoom = Math.Clamp(MathF.Exp(MathF.Log(camera.Zoom) + scale), 0.125f, 64.0f);
     }
-
     static void AddMeasurementPoint()
     {
         editingPointValueStr = "";
@@ -103,7 +108,65 @@ class Program
 
         return selectedPoint;
     }
+    
+    static void DrawHeatmap()
+    {
+        Rlgl.Begin(4);
+        foreach(Triangle triangle in triangles)
+        {
+            // One triangle, three points
+            for(int i = 0; i < 3; i++)
+            {
+                // Define color for next vertex
+                float lerpValue = (triangle.verts[i].strength - minValue) / (maxValue - minValue);
+                
+                if(lerpValue < 0.2f) Rlgl.Color4ub(0, 0, 255, 125);
+                else if(lerpValue < 0.4f) Rlgl.Color4ub(0, 255, 0, 125);
+                else if(lerpValue < 0.8f) Rlgl.Color4ub(255, 255, 0, 125);
+                else Rlgl.Color4ub(255, 0, 0, 125);
 
+                // Define vertex
+                Rlgl.Vertex2f(triangle.verts[i].position.X, triangle.verts[i].position.Y);
+            }
+        }
+        Rlgl.End();
+        foreach(MeasurementPoint measurementPoint in pointCloud[layer])
+        {
+            bool drawTextLocal = false;
+            Raylib.DrawCircle((int)measurementPoint.position.X, (int)measurementPoint.position.Y, 2f, Color.Black);
+            if(measurementPoint == currentlySelectedPoint)
+            {
+                Raylib.DrawCircle((int)measurementPoint.position.X, (int)measurementPoint.position.Y, 1.5f, Color.White);
+                drawTextLocal = true;
+            }
+            else if(showPointStrength) drawTextLocal = true;
+
+            if(drawTextLocal)
+                 Raylib.DrawText(measurementPoint.strength.ToString(), (int)measurementPoint.position.X + 5, (int)measurementPoint.position.Y + 5, 18, Color.Black);
+        }
+    }
+    static void DrawScreen(Texture2D texture)
+    {
+        Raylib.BeginDrawing();
+        Raylib.BeginMode2D(camera);
+        Raylib.ClearBackground(Color.Black);
+        Raylib.DrawTexture(texture, 0, 0, Color.White);
+        DrawHeatmap();
+        Raylib.EndMode2D();
+        Raylib.DrawText("Layer " + (layer + 1) + "  " + frequencies[layer] + " MHz", 10, 10, 40, Color.Black);
+        Raylib.EndDrawing();
+    }
+
+    static void ChangeLayer(int newLayer)
+    {
+        layer = newLayer;
+        ComputeBoyerWatson();
+        
+        if(usingArduino) arduino.WriteLine("L"+newLayer);
+    }
+    #endregion
+
+    #region Triangulation
     static void ComputeBoyerWatson()
     {
         List<Triangle> triangulation = new List<Triangle>();
@@ -119,7 +182,7 @@ class Program
             {
                 // Check if the vertex is inside the circumcircle of this triangle
                 (bool validTriangle, Circumcircle circumcircle) = 
-                    getCircumcircle(tri.verts[0].position, tri.verts[1].position, tri.verts[2].position);
+                    GetCircumcircle(tri.verts[0].position, tri.verts[1].position, tri.verts[2].position);
                 if(!validTriangle) continue;
                 // Distance to circumcircle
                 float distSq = Vector2.DistanceSquared(vertex.position, circumcircle.centre);
@@ -210,7 +273,7 @@ class Program
 
         Vector2 largestCircleCentre = new Vector2(0.5f*(topLeftPoint.X + bottomRightPoint.X), 0.5f*(topLeftPoint.Y + bottomRightPoint.Y));
         float largestCircleRadius = Vector2.Distance(largestCircleCentre, topLeftPoint);
-        (Vector2 p1, Vector2 p2, Vector2 p3) = getEquilateralTriangleFromIncircle(largestCircleCentre, largestCircleRadius);
+        (Vector2 p1, Vector2 p2, Vector2 p3) = GetEquilateralTriangleFromIncircle(largestCircleCentre, largestCircleRadius);
         
         MeasurementPoint point1 = new MeasurementPoint(p1, 0);
         MeasurementPoint point2 = new MeasurementPoint(p2, 0);
@@ -220,185 +283,7 @@ class Program
         return superTriangle;
     }
 
-    static void DrawHeatmap()
-    {
-        Rlgl.Begin(4);
-        foreach(Triangle triangle in triangles)
-        {
-            // One triangle, three points
-            for(int i = 0; i < 3; i++)
-            {
-                // Define color for next vertex
-                float lerpValue = (triangle.verts[i].strength - minValue) / (maxValue - minValue);
-                
-                if(lerpValue < 0.2f) Rlgl.Color4ub(0, 0, 255, 125);
-                else if(lerpValue < 0.4f) Rlgl.Color4ub(0, 255, 0, 125);
-                else if(lerpValue < 0.8f) Rlgl.Color4ub(255, 255, 0, 125);
-                else Rlgl.Color4ub(255, 0, 0, 125);
-
-                // Define vertex
-                Rlgl.Vertex2f(triangle.verts[i].position.X, triangle.verts[i].position.Y);
-            }
-        }
-        Rlgl.End();
-        foreach(MeasurementPoint measurementPoint in pointCloud[layer])
-        {
-            bool drawTextLocal = false;
-            Raylib.DrawCircle((int)measurementPoint.position.X, (int)measurementPoint.position.Y, 2f, Color.Black);
-            if(measurementPoint == currentlySelectedPoint)
-            {
-                Raylib.DrawCircle((int)measurementPoint.position.X, (int)measurementPoint.position.Y, 1.5f, Color.White);
-                drawTextLocal = true;
-            }
-            else if(showPointStrength) drawTextLocal = true;
-
-            if(drawTextLocal)
-                 Raylib.DrawText(measurementPoint.strength.ToString(), (int)measurementPoint.position.X + 5, (int)measurementPoint.position.Y + 5, 18, Color.Black);
-        }
-    }
-
-    static void ChangeLayer(int newLayer)
-    {
-        layer = newLayer;
-        ComputeBoyerWatson();
-        
-        if(usingArduino) arduino.WriteLine("L"+newLayer);
-    }
-    
-    public static void Main()
-    {
-        if (usingArduino)
-        {
-            arduino = new SerialPort();
-            arduino.PortName = "COM16";
-            arduino.BaudRate = 115200;
-            arduino.ReadTimeout = 2000;
-            arduino.WriteTimeout = 2000;
-            arduino.DtrEnable = true; 
-            arduino.RtsEnable = true; 
-            arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
-            arduino.Open();
-            Thread.Sleep(2000); // Must wait!
-            Console.WriteLine("Connected to Arduino!");
-        } 
-        
-        for(int i = 0; i < 4; i++) pointCloud[i] = new List<MeasurementPoint>();
-
-        camera.Zoom = 1.0f;
-        Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);    
-        Raylib.InitWindow(screenWidth, screenHeight, "RF Heatmap");
-        Console.WriteLine(Directory.GetCurrentDirectory());
-        string projectRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..");
-        Image img = Raylib.LoadImage(Path.Combine(projectRoot, "floormaps\\870.5_Floor2.png"));
-        Texture2D texture = Raylib.LoadTextureFromImage(img);
-        Rlgl.DisableBackfaceCulling();
-
-        Raylib.SetTargetFPS(60);
-
-        while (!Raylib.WindowShouldClose())
-        {
-            PanImage();
-            CamZoom();
-
-            if(Raylib.IsKeyPressed(KeyboardKey.H)) showPointStrength = !showPointStrength;
-
-            if (!editingPoint)
-            {
-                if(Raylib.IsMouseButtonPressed(MouseButton.Left)) AddMeasurementPoint();
-                if(Raylib.IsMouseButtonPressed(MouseButton.Right)) RemoveMeasurementPoint();
-                if(Raylib.IsKeyPressed(KeyboardKey.Space)) ComputeBoyerWatson();
-                if(Raylib.IsKeyPressed(KeyboardKey.One)) ChangeLayer(0);
-                if(Raylib.IsKeyPressed(KeyboardKey.Two)) ChangeLayer(1);
-                if(Raylib.IsKeyPressed(KeyboardKey.Three)) ChangeLayer(2);
-                if(Raylib.IsKeyPressed(KeyboardKey.Four)) ChangeLayer(3);
-            }
-            else
-            {
-                // Get char pressed (unicode character) on the queue
-                int key = Raylib.GetCharPressed();
-                
-                int editingPointValue;  
-                if(currentlySelectedPoint == null) return;
-
-                if(Int32.TryParse(editingPointValueStr, out editingPointValue))
-                {
-                    currentlySelectedPoint.strength = editingPointValue;
-                }
-                else
-                {
-                    currentlySelectedPoint.strength = -0;
-                }
-
-                if (Raylib.IsKeyPressed(KeyboardKey.Backspace))
-                {
-                    if(editingPointValueStr.Length == 0) editingPointValueStr = "";
-                    else editingPointValueStr = editingPointValueStr.Remove(editingPointValueStr.Length - 1);
-                }
-
-                // Check if more characters have been pressed on the same frame
-                while (key > 0)
-                {
-                    if ((key >= 32) && (key <= 125))
-                    {
-                        editingPointValueStr += (char)key;
-                    }
-                    key = Raylib.GetCharPressed();  // Check next character in the queue
-                }
-
-                if (usingArduino && Raylib.IsKeyPressed(KeyboardKey.Tab))
-                {
-                    Console.WriteLine("asking for data");
-                    arduino.WriteLine(">");   
-                }
-                
-                if (Raylib.IsKeyPressed(KeyboardKey.Enter))
-                {
-                    editingPoint = false;
-                    currentlySelectedPoint = null;
-                }
-            }
-
-            DrawScreen(texture);
-        }
-
-        Raylib.UnloadTexture(texture);
-        Raylib.CloseWindow();
-    }
-    /*
-    static void SaveFile()
-    {
-        SaveFileDialog saveDialog = new SaveFileDialog();
-        DialogResult result = saveDialog.ShowDialog();
-    }*/
-
-    private static void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
-    {
-        // Show all the incoming data in the port's buffer in the output window
-        string inData = arduino.ReadExisting();
-        Console.WriteLine("data : " + inData);
-
-        float dbmAmount = 0;
-        float.TryParse(inData, out dbmAmount);
-        Console.WriteLine(dbmAmount);
-        if(currentlySelectedPoint != null) currentlySelectedPoint.strength = dbmAmount;
-        editingPoint = false;
-        currentlySelectedPoint = null;
-    }
-
-    static void DrawScreen(Texture2D texture)
-    {
-        Raylib.BeginDrawing();
-        Raylib.BeginMode2D(camera);
-        
-        Raylib.ClearBackground(Color.Black);
-        Raylib.DrawTexture(texture, 0, 0, Color.White);
-        DrawHeatmap();
-        Raylib.EndMode2D();
-        Raylib.DrawText("Layer " + (layer + 1) + "  " + frequencies[layer] + " MHz", 10, 10, 40, Color.Black);
-        Raylib.EndDrawing();
-    }
-
-    static (bool valid, Circumcircle circle) getCircumcircle(Vector2 a, Vector2 b, Vector2 c)
+    static (bool valid, Circumcircle circle) GetCircumcircle(Vector2 a, Vector2 b, Vector2 c)
     {
         float d = 2 * (a.X*(b.Y-c.Y) + b.X*(c.Y-a.Y) + c.X*(a.Y-b.Y));
         if (MathF.Abs(d) < 1e-6f)
@@ -417,7 +302,7 @@ class Program
         return (true, new Circumcircle(center, radius));
     }
 
-    static (Vector2 p1, Vector2 p2, Vector2 p3) getEquilateralTriangleFromIncircle(Vector2 centre, float radius)
+    static (Vector2 p1, Vector2 p2, Vector2 p3) GetEquilateralTriangleFromIncircle(Vector2 centre, float radius)
     {
         Vector2 p1 = Vector2.Zero, p2 = Vector2.Zero, p3 = Vector2.Zero;
 
@@ -431,8 +316,139 @@ class Program
 
         return (p1, p2, p3);
     }
+    #endregion
+    
+    #region  User Input
+    static void GetKeyboardMouseInput()
+    {
+        if(Raylib.IsMouseButtonPressed(MouseButton.Left)) AddMeasurementPoint();
+        if(Raylib.IsMouseButtonPressed(MouseButton.Right)) RemoveMeasurementPoint();
+        if(Raylib.IsKeyPressed(KeyboardKey.Space)) ComputeBoyerWatson();
+        if(Raylib.IsKeyPressed(KeyboardKey.One)) ChangeLayer(0);
+        if(Raylib.IsKeyPressed(KeyboardKey.Two)) ChangeLayer(1);
+        if(Raylib.IsKeyPressed(KeyboardKey.Three)) ChangeLayer(2);
+        if(Raylib.IsKeyPressed(KeyboardKey.Four)) ChangeLayer(3);
+    }
+
+    static void GetTextInput()
+    {
+        // Get char pressed (unicode character) on the queue
+        int key = Raylib.GetCharPressed();
+        
+        int editingPointValue;  
+        if(currentlySelectedPoint == null) return;
+
+        if(Int32.TryParse(editingPointValueStr, out editingPointValue))
+        {
+            currentlySelectedPoint.strength = editingPointValue;
+        }
+        else
+        {
+            currentlySelectedPoint.strength = -0;
+        }
+
+        if (Raylib.IsKeyPressed(KeyboardKey.Backspace))
+        {
+            if(editingPointValueStr.Length == 0) editingPointValueStr = "";
+            else editingPointValueStr = editingPointValueStr.Remove(editingPointValueStr.Length - 1);
+        }
+
+        // Check if more characters have been pressed on the same frame
+        while (key > 0)
+        {
+            if ((key >= 32) && (key <= 125))
+            {
+                editingPointValueStr += (char)key;
+            }
+            key = Raylib.GetCharPressed();  // Check next character in the queue
+        }
+
+        if (usingArduino && Raylib.IsKeyPressed(KeyboardKey.Tab))
+        {
+            Console.WriteLine("asking for data");
+            arduino.WriteLine(">");   
+        }
+        
+        if (Raylib.IsKeyPressed(KeyboardKey.Enter))
+        {
+            editingPoint = false;
+            currentlySelectedPoint = null;
+        }
+    }
+    #endregion
+
+    #region Arduino
+    static void SetupArduino()
+    {
+        arduino = new SerialPort();
+        arduino.PortName = "COM16";
+        arduino.BaudRate = 115200;
+        arduino.ReadTimeout = 2000;
+        arduino.WriteTimeout = 2000;
+        arduino.DtrEnable = true; 
+        arduino.RtsEnable = true; 
+        arduino.DataReceived += new SerialDataReceivedEventHandler(ArduinoDataReceived);
+        arduino.Open();
+        Thread.Sleep(2000); // Must wait!
+        Console.WriteLine("Connected to Arduino!");
+    }
+    
+    private static void ArduinoDataReceived(object sender, SerialDataReceivedEventArgs e)
+    {
+        // Show all the incoming data in the port's buffer in the output window
+        string inData = arduino.ReadExisting();
+        Console.WriteLine("data : " + inData);
+
+        float dbmAmount = 0;
+        float.TryParse(inData, out dbmAmount);
+        Console.WriteLine(dbmAmount);
+        if(currentlySelectedPoint != null) currentlySelectedPoint.strength = dbmAmount;
+        editingPoint = false;
+        currentlySelectedPoint = null;
+    }
+    #endregion
+
+    static void Start()
+    {
+        for(int i = 0; i < 4; i++) pointCloud[i] = new List<MeasurementPoint>();
+
+        camera.Zoom = 1.0f;
+        Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);    
+        Raylib.InitWindow(screenWidth, screenHeight, "RF Heatmap");
+        Console.WriteLine(Directory.GetCurrentDirectory());
+        string projectRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..");
+        Image img = Raylib.LoadImage(Path.Combine(projectRoot, "floormaps\\870.5_Floor2.png"));
+        screenTexture = Raylib.LoadTextureFromImage(img);
+        Rlgl.DisableBackfaceCulling();
+    }
+
+    public static void Main()
+    {
+        if (usingArduino)SetupArduino();
+        
+        Start();
+
+        Raylib.SetTargetFPS(60);
+
+        while (!Raylib.WindowShouldClose())
+        {
+            PanImage();
+            CamZoom();
+
+            if(Raylib.IsKeyPressed(KeyboardKey.H)) showPointStrength = !showPointStrength;
+
+            if (editingPoint) GetTextInput();
+            else GetKeyboardMouseInput();
+
+            DrawScreen(screenTexture);
+        }
+
+        Raylib.UnloadTexture(screenTexture);
+        Raylib.CloseWindow();
+    }
 }
 
+#region Custom Classes
 class MeasurementPoint
 {
     public Vector2 position;
@@ -503,3 +519,4 @@ class Circumcircle
         radius = _radius;
     }
 }
+#endregion
