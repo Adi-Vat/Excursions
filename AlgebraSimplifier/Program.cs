@@ -1,7 +1,4 @@
-﻿using System.Runtime.Intrinsics.X86;
-using System.Text.RegularExpressions;
-
-static class Program
+﻿static class Program
 {
     const int MAX_ITERATIONS = 100;
 
@@ -12,7 +9,8 @@ static class Program
         Subtract,
         Multiply,
         Divide,
-        Juxtapose
+        Juxtapose,
+        Negate
     }
 
     static char[] operatorCharacters = {
@@ -22,6 +20,7 @@ static class Program
         '*',
         '/',
         '@',
+        '~'
     };
 
     enum TokenType
@@ -33,29 +32,10 @@ static class Program
     }
 
     static void Main(){
-        /*
-        string equation = "a * d(2+3(c+b))/5";
-        equation = equation.Replace(" ", "");
-        equation = ApplyImplicitMultiplication(equation);
-        List<string> rpnExpression = rpn(equation.Split("=")[0]);
-        List<Node> nodeTree = GenerateTree(rpnExpression);
-
-        nodeTree[nodeTree.Count - 1].PrintPretty("", true);
-        */
-        List<string> output = rpnFixed("-5");
+        List<string> output = rpnFixed("2*4*2*-1");
         List<Node> nodeTree = GenerateTree(output);
         ApplySimplificationRules(nodeTree);
         nodeTree[0].PrintPretty("", true);
-        //ApplySimplificationRules(nodeTree);
-        /*
-        foreach(Node node in nodeTree)
-        {
-            Console.Write("[" + nodeTree.IndexOf(node) + "] : " + node.value);
-            if(node.leftChild != null) Console.Write("  [" + nodeTree.IndexOf(node.leftChild)+ "]");
-            if(node.rightChild != null) Console.Write(" | [" + nodeTree.IndexOf(node.rightChild)+ "]");
-
-            Console.Write("\n");
-        }*/
     }
 
     static (List<Node> simplifiedTree, bool wasSimplified) ApplySimplificationRules(List<Node> allNodes)
@@ -168,11 +148,43 @@ static class Program
         return allNodes;
     }
 
+    static List<string> ApplyNegation(List<string> equationList)
+    {
+        List<string> newEquationList = new List<string>();
+        
+        for(int i = 0; i < equationList.Count; i++)
+        {
+            string currentToken = equationList[i];
+            bool negate = false;
+            
+            // Check if the current token is a negation or just a minus sign
+            if(i > 0)
+            {
+                TokenType previousTokenType = getTokenType(equationList[i - 1]);
+                if(currentToken == "-" && previousTokenType == TokenType.Operator) 
+                    negate = true;
+            } 
+            else if(currentToken == "-") 
+                negate = true;
+
+            if (negate)
+            {
+                newEquationList.Add("0");
+                newEquationList.Add("~");
+            }
+            else 
+                newEquationList.Add(currentToken);
+            
+        }
+
+        return newEquationList;
+    }
+
     static List<string> ApplyImplicitMultiplication(List<string> equationList)
     {
         List<string> newEquationList = new List<string>();
 
-        for(int i = 0; i < equationList.Count(); i++)
+        for(int i = 0; i < equationList.Count; i++)
         {
             newEquationList.Add(equationList[i]);
 
@@ -206,17 +218,6 @@ static class Program
         }
 
         return newEquationList;
-    }
-
-    static TokenType getTokenType(string tok)
-    {
-        TokenType tokenType = TokenType.Operand;
-
-        if (operatorCharacters.Contains(tok[0])) tokenType = TokenType.Operator;    
-        else if(tok == "(") tokenType = TokenType.Leftbracket;
-        else if(tok == ")") tokenType = TokenType.Rightbracket;
-
-        return tokenType;
     }
 
     static List<string> tokenize(string expression)
@@ -282,6 +283,7 @@ static class Program
     {   
         //expression = Regex.Replace(expression, @"\s", string.Empty);
         List<string> tokens = tokenize(expression);
+        tokens = ApplyNegation(tokens);
         tokens = ApplyImplicitMultiplication(tokens);
 
         List<string> output = new List<string>();
@@ -338,12 +340,32 @@ static class Program
         return output;
     }
 
+    static TokenType getTokenType(string tok)
+    {
+        TokenType tokenType = TokenType.Operand;
+
+        if (operatorCharacters.Contains(tok[0])) tokenType = TokenType.Operator;    
+        else if(tok == "(") tokenType = TokenType.Leftbracket;
+        else if(tok == ")") tokenType = TokenType.Rightbracket;
+
+        return tokenType;
+    }
+
     static int getPrecedence(string token)
     {
-        if(token == "+" || token == "-") return 1;
-        else if(token == "*" || token == "/") return 2;
-        else if(token == "@" || token == "^") return 3;
-        else return -1;
+        switch (token)
+        {
+            case "+": case "-":
+                return 1;
+            case "*": case "/":
+                return 2;
+            case "@": case "^":
+                return 3;
+            case "~":
+                return 4;
+            default:
+                return -1;
+        }
     }
 }
 
@@ -394,26 +416,23 @@ class Node
     {
         foreach(Node child in children) child.Associate();
 
-        if(value == "Add")
+        if(!(value == "Add" || value == "Multiply" || value == "Juxtapose")) return;
+
+        List<Node> newChildren = new List<Node>();
+        foreach(Node child in children)
         {
-            List<Node> newChildren = new List<Node>();
-            foreach(Node child in children)
+            if(value == "Add")
             {
-                if(child.value == "Add") newChildren.AddRange(child.children);
+                if(child.value == value) newChildren.AddRange(child.children);
                 else newChildren.Add(child);
             }
-
-            children = newChildren;
-        } else if(value == "Multiply" || value == "Juxtapose")
-        {
-            List<Node> newChildren = new List<Node>();
-            foreach(Node child in children)
+            else
             {
-                if(child.value == "Multiply" || child.value == "Juxtapose") newChildren.AddRange(child.children);
+                if(child.value == value) newChildren.AddRange(child.children);
                 else newChildren.Add(child);
             }
-
-            children = newChildren;
         }
+
+        children = newChildren;
     }
 }

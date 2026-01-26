@@ -1,0 +1,15 @@
+// takes in the instruction
+// determines which source the operand data should be taken from
+// if the source is a register file, set the index of the required register
+module control_unit(
+	input logic clk,
+	input logic reset,
+	input logic [39:0] instruction,
+	input logic [7:0] flags,
+	
+	output [2:0] rf_read_addr_a,
+	output [2:0] rf_read_addr_b,
+	output [1:0] alu_src_a_sel,
+	output [1:0] alu_src_b_sel
+);
+
