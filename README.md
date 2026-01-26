@@ -5,6 +5,10 @@ Click on the links to read more.
 
 *NB: to run directly downloaded and unzipped python projects please enter the .venv folder*
 
+## Compilers and Low-Level stuff
+### [z8 Compiler+Emulator (C)](/z8Compiler/)
+![](z8Compiler/Z8_Compiler_and_Emulator.gif)
+
 ## Graphics and Rendering  
 ### [Rasterizer (C#)](/Rasterizer/)
 ![](Rasterizer/Rasterizer_Video.gif)
@@ -22,7 +26,3 @@ Click on the links to read more.
 ![](RFMapper/RFHeatmap/RFHeatmap_Video.gif)
 ### [RF Position Solver (Python)](/RFMapper/PositionSolverPython/)
 ![](RFMapper/PositionSolverPython/PositionSolver_Video.gif)
-
-## Compilers and Low-Level stuff
-### [z8 Compiler+Emulator (C)](/z8Compiler/)
-![](z8Compiler/Z8_Compiler_and_Emulator.gif)
