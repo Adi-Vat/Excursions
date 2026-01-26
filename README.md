@@ -5,7 +5,7 @@ Click on the links to read more.
 
 *NB: to run directly downloaded and unzipped python projects please enter the .venv folder*
 
-## Compilers and Low-Level stuff
+## Compilers and Low-Level projects
 ### [z8 Compiler+Emulator (C)](/z8Compiler/)
 ![](z8Compiler/Z8_Compiler_and_Emulator.gif)
 
