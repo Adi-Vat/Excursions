@@ -24,7 +24,8 @@ The assembly file
     DEC y
     JNZ .loop
 ```
-Compiles to a hex file
+Compiles to a hex file  
+
 ```
 0200A60005
 0200A40001
@@ -46,7 +47,7 @@ And is executed with a result of
 13
 ```
 
-## Instruction Set
+## Instruction Set Architecture
 - `NOP` No operation
 - `LDD` Load directly into register `<REG>` from `<MEMORY/REG>`
 - `LDD_I`
@@ -76,6 +77,28 @@ And is executed with a result of
 - `SB` Set at `<MEMORY/REG>` bit number `<VAL>` to 1
 - `CB` Clear at `<MEMORY/REG>` bit number `<VAL>` to 0
 - `OUT` Prints value in `<MEMORY/REG>` to console (emulator only)
+
+A whole instruction is 40 bits long, split into nibbles.  
+The instruction breaks down as such:  
+'LDD y, 5' becomes
+```
+[0][1][2][3][4][5][6][7][8][9]  
+ 0  2  0  0  A  6  0  0  0  5
+```
+0-1: opcode (2 -> LDD_I)  
+2-5: operand A (A6 -> register y)  
+6-9: operand B  (5)
+
+## Memory Mapping
+The z8 processor can index up to 0xFFFF (65,535) bytes of memory
+0000 -> FFFF  
+0000 -> 0003 = BANK0  
+0004 -> 0009 = BANK1  
+00A0 -> 00A1 = LEDRs  
+00A2 -> 00A3 = INPUTs  
+00A4 -> 00A7 = REGs  
+00A8 = FLAGS  
+00A9 -> 00B8 = STACK  
 
 ## Unique features
 All immediate instruction variations are implicit, the user does not need to write them. Instead the compiler takes the context of the second operand to choose the operation type and +1 for an immmediate operation.
