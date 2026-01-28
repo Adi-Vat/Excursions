@@ -1,0 +1,49 @@
+import instruction_set ::*;
+
+module z8ProcessorCore(
+	input logic clk,
+	input logic reset
+	// Add external I/O for FPGA here
+);
+
+	logic [39:0] instruction;
+	logic [15:0] pc;
+	logic [1:0] rf_read_addr_a; // register to read
+	logic [1:0] rf_read_addr_b; // register to read
+	logic [1:0] rf_write_addr; // register to write to
+	logic [15:0] rf_writeback_data; // data to write back
+	logic [15:0] rf_read_data_a; // data being read from the register file
+	logic [15:0] rf_read_data_b;
+	bit rf_write_enable;
+	logic [1:0] rf_data_sel;
+	
+	logic [15:0] mem_read_data;
+	
+	control_unit cu(
+		.instruction(instruction),
+		.rf_read_addr_a(rf_read_addr_a),
+		.rf_read_addr_b(rf_read_addr_b),
+		.rf_write_addr(rf_write_addr),
+		.rf_write_enable(rf_write_enable),
+		.rf_data_sel(rf_data_sel)
+	);
+	
+	always_comb begin
+		case (rf_data_sel)
+			IMM: rf_writeback_data = instruction[15:0];
+			REG: rf_writeback_data = rf_read_addr_b;
+			MEM: rf_writeback_data = mem_read_data;
+		endcase
+	end
+	
+	register_file rf(
+		.read_addr_a(rf_read_addr_a),
+		.read_addr_b(rf_read_addr_b),
+		.write_addr(rf_write_addr),
+		.write_data(rf_writeback_data),
+		.write_enable(rf_write_enable),
+		.read_data_a(rf_read_data_a),
+		.read_data_b(rf_read_data_b)
+	);
+endmodule
+	

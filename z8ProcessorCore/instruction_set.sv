@@ -1,33 +1,65 @@
 package instruction_set;
-	typedef enum logi[7:0]
+	typedef enum logic[7:0]
 	{
 		NOP, // NO OPERATION
-		LDD, // LOAD DIRECLTY INTO REGISTER <REG> FROM <MEMORY/REG>
-		LDD_I, // LOAD DIRECTLY INTO REGISTER <REG> FROM >VALUE>
-		LDR, // LOAD INTO REGISTER <REG> DATA AT MEMORY LOCATION IN <MEMORY/REG>
-		STR, // STORE INTO <MEMORY> DATA FROM <REG>
-		STR_I, // STORE
-		ADC, // ADD WITH CARRY ACC AND <REG/VALUE> STORE INTO ACC
-		ADC_I,
-		SUB, // SUBTRACT ACC AND <REG/VALUE> STORE INTO ACC
-		SUB_I,
-		INC, // INCREMENT <REG>
-		DEC, // DECREMENT <REG>
-		ROL, // ROTATE LEFT <REG>
-		ROR, // ROTATE RIGHT <REG>
-		SLL, // SHIFT LEFT LOGICAL <REG>
-		SLA, // SHIFT LEFT ARITHMETIC <REG>
-		SRL, // SHIFT RIGHT LOGICAL <REG>
-		SRA, // SHIFT RIGHT ARITHMETIC <REG>
-		PSH, // PUSH <REG> TO STACK
-		POP, // POP STACK ONTO <REG>
-		JMP, // JUMP TO <VAL>
-		CMP, // COMPARE <REG> WITH ACC
-		CMP_I,
-		JZ, // JUMP TO <VAL> IF ZERO FLAG IS SET
-		JNZ, // JUMP TO <VAL> IF ZERO FLAG IS NOT SET
-		JN, // JUMP TO <VAL> IF NEGATIVE FLAG IS SET
-		SB, // SET AT <MEMORY/REG> BIT NUMBER <VAL> TO 1
-		CB // CLEAR AT <MEMORY/REG> BIT NUMBER <VAL> TO 0
-	} OPCODES;
+		LDM, // Load value from memory into register
+		LDR, // Load value from register into register
+		LDD, // Load value directly into register
+		STR, // Store value from register into memory address
+		STD, // Store direct value into memory address
+		ADR, // Add value from register to another register
+		ADD, // Add value to another register
+		SBR, // Subtract the source from the dest and store in the dest
+		SBD, // Subtract a value from the register and store in the register
+		ANR, // AND a register and a register store in the dest
+		AND, // AND a register and value store in the dest
+		ORR, // OR a reg and reg store in dest
+		ORD, // OR a reg and value store in dest
+		XOR, // XOR a reg and reg store in dest
+		XOD, // XOR a reg and value store in dest
+		CPR, // Compare reg and reg
+		CPD, // Compare reg and value
+		HALT // Stops program
+	} OPCODES_T;
+	
+	typedef enum logic [3:0]{
+		ALU_NOP,
+		ALU_ADD,
+		ALU_SUB,
+		ALU_AND,
+		ALU_OR,
+		ALU_XOR,
+		ALU_CMP
+	} ALU_OPS_T;
+	
+	typedef enum logic[1:0]{
+		VAL,
+		REG,
+		MEM
+	} DATA_SOURCE_T;
+	
+	typedef enum logic[3:0]{
+		NONE,
+		ALU
+	} FLAG_SOURCE_T;
+	
+	typedef enum logic [1:0]{
+		MEM_NOP,
+		MEM_READ,
+		MEM_WRITE
+	} MEM_OPS_T;
+	
+	typedef enum logic [1:0]{
+		FETCH,
+		DECODE,
+		EXECUTE,
+		WRITEBACK
+	} STATE_T;
+	
+	typedef struct packed{
+		logic overflow; // 3
+		logic carry; // 2
+		logic negative; // 1
+		logic zero; // 0
+	} FLAGS_T;
 endpackage

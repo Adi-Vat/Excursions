@@ -1,0 +1,27 @@
+module tb;
+	logic clk;
+	logic reset;
+	
+	z8ProcessorCore dut(
+		.clk(clk),
+		.reset(reset)
+	);
+	
+	initial begin
+		clk = 0;
+		forever #5 clk = ~clk;
+	end
+	
+	initial begin
+		reset = 1;
+		#20;
+		reset = 0;
+		#10;
+		dut.instruction = {8'h01, 16'h0000, 16'd1234};
+		#10;
+		
+		$display("R0 = %h", dut.rf.registers[0]);
+		
+		$finish;
+	end
+endmodule

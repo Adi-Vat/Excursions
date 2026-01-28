@@ -1,40 +1,229 @@
 import instruction_set ::*;
-// takes in the instruction
-// determines which source the operand data should be taken from
-// if the source is a register file, set the index of the required register
+
 module control_unit(
-	input bit clk,
-	input bit reset,
 	input logic [39:0] instruction,
-	input logic [7:0] flags,
+	input logic clk,
+	input bit reset,
+	input FLAGS_T flags_in,
+	input bit update_flags,
 	
+	output STATE_T current_state,
+	output bit rf_write_enable,
+	output logic [1:0] rf_write_addr,
 	output logic [1:0] rf_read_addr_a,
 	output logic [1:0] rf_read_addr_b,
-	output logic [1:0] rf_write_addr,
-	output bit rf_write_enable
-	output logic [1:0] alu_src_a_sel,
-	output logic [1:0] alu_src_b_sel
+		
+	output logic [15:0] mem_rw_addr,
+	output MEM_OPS_T mem_op,
+
+	output ALU_OPS_T alu_op,
+	output DATA_SOURCE_T alu_a_src_sel,
+	output DATA_SOURCE_T alu_b_src_sel
 );
 
-logic [7:0] opcode = instruction[39:32];
-logic [15:0] operand_a = instruction[31:16];
-logic [15:0] operand_b = instruction[15:0];
+OPCODES_T opcode;
+assign opcode = OPCODES_T'(instruction[39:32]);
+logic [15:0] dest;
+assign dest = instruction[31:16];
+logic [15:0] src;
+assign src = instruction[15:0];
+bit halted;
 
-always_comb begin
-	rf_read_addr_a = 2'b00;
-	rf_read_addr_b = 2'b00;
-	alu_src_a_sel = 2'b00;
-	alu_src_b_sel = 2'b00;
+FLAGS_T flags;
+STATE_T next_state;
+
+always_ff @(posedge clk) begin
+	if(reset) begin
+		current_state <= FETCH;
+	end else if(!halted) begin
+		current_state <= next_state;
+	end
 	
-	case (opcode)
-		LDD: begin
-			rf_read_addr_a = 
-			if(operand_b >= 16'h00A4 && operand_b <= 16'h00A7) begin
-				rf_read_addr_b = operand_b[1:0];
-				alu_src_b_sel = 2'b01;
-			end
+	if(update_flags) begin
+		flags <= flags_in;
+	end
+	
+	case (current_state)
+		FETCH: if(opcode == HALT) halted <= 1;
+		DECODE: begin
+			case (opcode)
+				// Load data from memory into register
+				// set reading address for memory
+				LDM: mem_rw_addr <= src;
+				// Load data from register into register
+				// set reading address from register
+				LDR: rf_read_addr_b <= src;
+				// Store data from register into memory
+				// set reading address from register
+				STR: begin
+					rf_read_addr_b <= src;
+					mem_rw_addr <= dest;
+				end
+				// Store value directly into memory
+				STD: mem_rw_addr <= dest;
+				// Add two registers and save the output in the dest
+				ADR, SBR, ANR, ORR, XOR, CPR: begin
+					rf_read_addr_a <= dest;
+					rf_read_addr_b <= src;
+				end
+				// Add a value to a register and store in that register
+				ADD, SBD, AND, ORD, XOD, CPD: begin
+					rf_read_addr_a <= dest;
+				end
+			endcase
 		end
+		
+		EXECUTE: begin
+			case (opcode)
+				// tell memory to read
+				LDM: mem_op <= MEM_READ;
+				// tell memory to write
+				STR, STD: mem_op <= MEM_WRITE;
+				ADR: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_ADD;
+				end
+				ADD: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_ADD;
+				end
+				SBR: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_SUB;
+				end
+				SBD: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_SUB;
+				end
+				ANR: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_AND;
+				end
+				AND: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_AND;
+				end
+				ORR: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_OR;
+				end
+				ORD: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_OR;
+				end
+				XOR: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_XOR;
+				end
+				XOD: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_XOR;
+				end
+				CPR: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_CMP;
+				end
+				CPD: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_CMP;
+				end
+			endcase
+		end
+		
+		WRITEBACK: begin
+			rf_read_addr_a <= 0;
+			rf_read_addr_b <= 0;
+			mem_rw_addr <= 0;
+			mem_op <= MEM_NOP;
+			alu_op <= ALU_NOP;
+			alu_a_src_sel <= DATA_SOURCE_T'(0);
+			alu_b_src_sel <= DATA_SOURCE_T'(0);
+			alu_b_src_sel <= DATA_SOURCE_T'(0);
+		end
+		
 	endcase
 end
 
+always_comb begin
+	rf_write_addr = 0;
+	rf_write_enable = 0;
 
+	case (current_state)
+		FETCH: next_state = DECODE;
+		DECODE: next_state = EXECUTE;
+		EXECUTE: next_state = WRITEBACK;
+		WRITEBACK: begin
+			case(opcode)
+				ADD, ADR, LDM, LDR, LDD, SBR, SBD, ANR, AND, ORR, ORD, XOR, XOD: begin
+					// write memory read result to correct location
+					rf_write_addr = dest;
+					// enable memory writing
+					rf_write_enable = 1;
+				end
+			endcase
+			next_state = FETCH;
+		end
+	endcase
+	
+	/*
+		LDM:
+		Load value from memory into register
+		decode location in memory
+		Execute read operation
+					
+		LDR: 
+		Load value from register into register
+		need the address of the register to read from
+		need the address of the register to write to
+		rf write enable
+	
+		LDD:
+		Load value directly into register
+		need the address of the register to write to
+		rf write enable
+		
+		STR:
+		Store value from register into memory
+		need the value at the register address
+		tell memory module to write stuff
+		
+		STD:
+		Store value directly into memory
+		tell memory module to write
+		
+		ADR, SBR:
+		Add (or subtract) the number in a register to another register
+		Use the RF to get the value at the src and dest
+		write the output of this operation to the dest
+		enable rf writing
+		dest <- [dest] +(-) [source]
+		read
+		alu_a = rf_addr(dest)
+		alu_b = rf_addr(source)
+		compute
+		alu_out = alu_a +(-) alu_b
+		writeback
+		rf_addr(dest) = alu_out
+		
+		ADD, SBD:
+		Add (or sub) the a value to a register
+		Need to specify the address of the destination register
+		tell the ALU MUX that value A data source is a register
+		tell the ALU MUX that value B data source is a direct value
+
+	*/
+end
+
+endmodule 

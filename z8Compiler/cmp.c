@@ -18,7 +18,8 @@ char instructions[instructionLength][instructionSize] = {
     "NOP",
     "LDD",
     "-",
-    "LDR",
+    "-"
+    "LDA",
     "STR",
     "-",
     "ADC",
@@ -218,6 +219,7 @@ int main ()
         
         if(operandAType == -1 || operandBType == -1) return 1;
 
+        // If the opcode is LDD, LDR etc and the operand is an immediate value, get the immediate form of the instruction
         if(operandBType == 1 && opcodeIndex != instructionLength - 1){
             if(strcmp(instructions[opcodeIndex + 1], "-") == 0){
                 opcodeIndex += 1;
@@ -349,14 +351,14 @@ int parseOperand(char operand[], int* value, int lineNumber){
         // Check if operandA is a register
         int registerIndex = indexOf(registers[0], operand, REGISTER_NUM, REGISTER_NAME_SIZE);
         
-        // Register -> Memory address
+        // Register -> Increment opcode if LDD/LDR
         // Memory address -> Memory address
         // Immediate value -> Increment opcode if LDD/LDR
 
         if(registerIndex != -1){ // Check if operand is a register
             // If it is, convert register to memory address
-            value1 = registerIndex + baseRegisterAddress;
-            //value1 = (registerIndex * WORD_SIZE) + baseRegisterAddress;
+            //value1 = registerIndex + baseRegisterAddress;
+            value1 = registerIndex;
             toReturn = 0;
         } else if(operand[0] == '*'){ // Check if operand is a memory address
             value1 = hexToInt(&operand[1], strlen(operand) - 1);
