@@ -5,6 +5,9 @@
 *.ghw
 sim
 *.out
+simulation/
+questa/
+work/
 
 # Backup files
 *.bak
