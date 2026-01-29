@@ -4,9 +4,12 @@ module control_unit(
 	input logic [39:0] instruction,
 	input logic clk,
 	input bit reset,
+	input logic [15:0] pc,
 	input FLAGS_T flags_in,
 	input bit update_flags,
+	input logic [15:0] rf_read_data_a,
 	
+	output logic [15:0] next_pc,
 	output STATE_T current_state,
 	output bit rf_write_enable,
 	output logic [1:0] rf_write_addr,
@@ -67,7 +70,7 @@ always_ff @(posedge clk) begin
 					rf_read_addr_b <= src;
 				end
 				// Add a value to a register and store in that register
-				ADD, SBD, AND, ORD, XOD, CPD: begin
+				ADD, SBD, AND, ORD, XOD, CPD, JPR, JZR, JNZR, JNR: begin
 					rf_read_addr_a <= dest;
 				end
 			endcase
@@ -159,6 +162,8 @@ end
 always_comb begin
 	rf_write_addr = 0;
 	rf_write_enable = 0;
+	if(reset) next_pc = 0;
+	else if(current_state == WRITEBACK) next_pc = pc + 1;
 
 	case (current_state)
 		FETCH: next_state = DECODE;
@@ -172,6 +177,14 @@ always_comb begin
 					// enable memory writing
 					rf_write_enable = 1;
 				end
+				JPR: next_pc = rf_read_data_a;
+				JPD: next_pc = dest;
+				JZR: if(flags.zero) next_pc = rf_read_data_a;
+				JZD: if(flags.zero) next_pc = dest;
+				JNZR: if(!flags.zero) next_pc = rf_read_data_a;
+				JNZD: if(!flags.zero) next_pc = dest;
+				JNR: if(flags.negative) next_pc = rf_read_data_a;
+				JND: if(flags.negative) next_pc = dest;
 			endcase
 			next_state = FETCH;
 		end

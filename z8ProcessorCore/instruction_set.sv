@@ -18,7 +18,15 @@ package instruction_set;
 		XOR, // XOR a reg and reg store in dest
 		XOD, // XOR a reg and value store in dest
 		CPR, // Compare reg and reg
-		CPD, // Compare reg and value
+		CPD, // Compare reg and value,
+		JPR, // Jump to line stored in reg
+		JPD, // Jump directly to line
+		JZR, // Jump to line stored in reg if zero flag is set
+		JZD, // Jump directly to line if zero flag is set
+		JNZR, // Jump to line stored in reg if zero flag is NOT set
+		JNZD, // Jump directly to line if zero flag is NOT set
+		JNR, // Jump to line stored in reg if negative flag is set
+		JND, // Jump directly to line if negative flag is set 
 		HALT // Stops program
 	} OPCODES_T;
 	

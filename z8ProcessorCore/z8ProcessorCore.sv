@@ -43,12 +43,7 @@ module z8ProcessorCore(
 		pc <= next_pc;
 	end
 	
-	always_comb begin
-		if(reset) next_pc = 0;
-		else begin
-			if(current_state == WRITEBACK) next_pc = pc + 1;
-		end
-	end
+
 	
 	// FLAG MUX
 	// Decides which module should set the flag in this instruction cycle
@@ -63,9 +58,12 @@ module z8ProcessorCore(
 		.instruction(instr_reg),
 		.clk(clk),
 		.reset(reset),
+		.pc(pc),
 		.flags_in(current_flags),
 		.update_flags(update_flags),
+		.rf_read_data_a(rf_read_data_a),
 		
+		.next_pc(next_pc),
 		.current_state(current_state),
 		.rf_read_addr_a(rf_read_addr_a),
 		.rf_read_addr_b(rf_read_addr_b),
