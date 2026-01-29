@@ -11,7 +11,7 @@ module memory_manager(
 	output logic [39:0] current_instruction
 );
 
-logic [15:0] data_mem [256];
+logic [15:0] data_mem [DATA_MEM_SIZE];
 logic [39:0] prog_mem [256];
 
 always_ff @(posedge clk) begin
@@ -19,7 +19,7 @@ always_ff @(posedge clk) begin
 		MEM_WRITE: data_mem[addr] <= write_data;
 	endcase
 	
-	if(reset) begin
+	if (reset) begin
 		for(int i = 0; i < 256; i++) data_mem[i] <= 0;
 	end
 end

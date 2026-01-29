@@ -1,4 +1,6 @@
 package instruction_set;
+	parameter DATA_MEM_SIZE = 256;
+
 	typedef enum logic[7:0]
 	{
 		NOP, // NO OPERATION
@@ -26,7 +28,12 @@ package instruction_set;
 		JNZR, // Jump to line stored in reg if zero flag is NOT set
 		JNZD, // Jump directly to line if zero flag is NOT set
 		JNR, // Jump to line stored in reg if negative flag is set
-		JND, // Jump directly to line if negative flag is set 
+		JND, // Jump directly to line if negative flag is set
+		INC, // Increment register
+		DEC, // Decrement register
+		PSHR, // Push register to stack
+		PSHD, // Push value to stack
+		POP, // Pop top value from stack into register
 		HALT // Stops program
 	} OPCODES_T;
 	

@@ -42,7 +42,6 @@ module z8ProcessorCore(
 	always_ff @(posedge clk) begin
 		pc <= next_pc;
 	end
-	
 
 	
 	// FLAG MUX
@@ -100,33 +99,29 @@ module z8ProcessorCore(
 		case(instr_reg[39:32])
 			// write data from memory
 			// data from memory already gotten by CU
-			LDM: begin
-				rf_write_data = mem_read_data;
-			end
+			LDM, POP: rf_write_data = mem_read_data;
 			// write data from register
 			// location of data from register is exposed by the CU
 			// and the data is found by the RF, and exposed
-			LDR: begin
-				rf_write_data = rf_read_data_b;
-			end
+			LDR: rf_write_data = rf_read_data_b;
 			// write absolute value from instruction
-			LDD: begin
-				rf_write_data = instr_reg[15:0];
-			end
+			LDD: rf_write_data = instr_reg[15:0];
 			// write memory location from RF out b
-			STR: begin
-				mem_write_data = rf_read_data_b;
-			end
+			STR: mem_write_data = rf_read_data_b;
 			// write memory location with value from instruction
-			STD: begin
-				mem_write_data = instr_reg[15:0];
-			end
+			STD: mem_write_data = instr_reg[15:0];
 			// write data from output of ALU
-			ADR, ADD, SBR, SBD, ANR, AND, ORR, ORD, XOR, XOD, CPR, CPD: begin
+			ADR, ADD, SBR, SBD, ANR, AND, ORR, ORD, XOR, XOD, CPR, CPD,
+			INC, DEC: begin
 				rf_write_data = alu_out;
 				flag_read_src_sel = ALU;
 				update_flags = 1;
 			end
+			// write the value of the destination register to memory
+			// the dest portion as PSHR only has 1 argument
+			PSHR: mem_write_data = rf_read_data_a;
+			// write the dest value to memory, as PSHD only has 1 argument
+			PSHD: mem_write_data = instr_reg[31:16];
 		endcase
 	end
 	

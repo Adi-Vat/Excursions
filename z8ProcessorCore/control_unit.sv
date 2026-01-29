@@ -35,9 +35,12 @@ bit halted;
 FLAGS_T flags;
 STATE_T next_state;
 
+logic [15:0] stack_ptr;
+
 always_ff @(posedge clk) begin
 	if(reset) begin
 		current_state <= FETCH;
+		stack_ptr <= DATA_MEM_SIZE - 1;
 	end else if(!halted) begin
 		current_state <= next_state;
 	end
@@ -70,8 +73,25 @@ always_ff @(posedge clk) begin
 					rf_read_addr_b <= src;
 				end
 				// Add a value to a register and store in that register
-				ADD, SBD, AND, ORD, XOD, CPD, JPR, JZR, JNZR, JNR: begin
+				ADD, SBD, AND, ORD, XOD, CPD, JPR, JZR, JNZR, JNR, INC, DEC: begin
 					rf_read_addr_a <= dest;
+				end
+				// Get value from register, write value to memory, dec stack pointer
+				PSHR: begin
+					rf_read_addr_a <= dest;
+					mem_rw_addr <= stack_ptr;
+					if(stack_ptr > 0) stack_ptr -= 1;
+					
+				end
+				// Dec stack pointer and set memory write address to the pointer
+				PSHD: begin
+					mem_rw_addr <= stack_ptr;
+					if(stack_ptr > 0) stack_ptr -= 1;
+				end
+				// Inc stack pointer, set memory read address to pointer, write back read value to register
+				POP: begin
+					if(stack_ptr < DATA_MEM_SIZE - 1) stack_ptr += 1;
+					mem_rw_addr <= stack_ptr;
 				end
 			endcase
 		end
@@ -79,9 +99,9 @@ always_ff @(posedge clk) begin
 		EXECUTE: begin
 			case (opcode)
 				// tell memory to read
-				LDM: mem_op <= MEM_READ;
+				LDM, POP: mem_op <= MEM_READ;
 				// tell memory to write
-				STR, STD: mem_op <= MEM_WRITE;
+				STR, STD, PSHR, PSHD: mem_op <= MEM_WRITE;
 				ADR: begin
 					alu_a_src_sel <= REG;
 					alu_b_src_sel <= REG;
@@ -142,6 +162,16 @@ always_ff @(posedge clk) begin
 					alu_b_src_sel <= VAL;
 					alu_op <= ALU_CMP;
 				end
+				INC: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_ADD;
+				end
+				DEC: begin
+					alu_a_src_sel <= REG;
+					alu_b_src_sel <= VAL;
+					alu_op <= ALU_SUB;
+				end
 			endcase
 		end
 		
@@ -171,7 +201,8 @@ always_comb begin
 		EXECUTE: next_state = WRITEBACK;
 		WRITEBACK: begin
 			case(opcode)
-				ADD, ADR, LDM, LDR, LDD, SBR, SBD, ANR, AND, ORR, ORD, XOR, XOD: begin
+				ADD, ADR, LDM, LDR, LDD, SBR, SBD, ANR, AND, ORR, ORD,
+				XOR, XOD, INC, DEC, POP: begin
 					// write memory read result to correct location
 					rf_write_addr = dest;
 					// enable memory writing
