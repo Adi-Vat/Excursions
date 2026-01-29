@@ -11,8 +11,8 @@ module memory_manager(
 	output logic [39:0] current_instruction
 );
 
-logic [15:0] data_mem [255];
-logic [39:0] prog_mem [255];
+logic [15:0] data_mem [256];
+logic [39:0] prog_mem [256];
 
 always_ff @(posedge clk) begin
 	case (op)
