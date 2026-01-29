@@ -1,0 +1,38 @@
+# Simulation outputs
+*.vvp
+*.vcd
+*.fst
+*.ghw
+sim
+*.out
+
+# Backup files
+*.bak
+*~
+*.swp
+*.swo
+
+# Compilation artifacts
+work/
+*.wlf
+*.vstf
+transcript
+modelsim.ini
+
+# Quartus/FPGA tools
+*.qsf
+*.qpf
+*.qws
+*.sof
+*.pof
+*.pin
+*.summary
+*.rpt
+*.jdi
+db/
+incremental_db/
+output_files/
+
+# OS files
+.DS_Store
+Thumbs.db
