@@ -11,6 +11,7 @@
 #define MAX_VARIABLES 256
 #define MAX_VALUE 65535
 #define COMMENT_CHAR ';'
+#define LABEL_CHAR ':'
 #define HEX_CHAR '$'
 #define BINARY_CHAR '%'
 
@@ -79,46 +80,41 @@ bool is_register_name(const char *name){
     return true;
 }
 
-char* remove_whitespace(const char* str){
-    if(!str) return "\0";
-    
-    static char str_trim[MAX_LINE_SIZE] = {0};
-    int str_len = strlen(str);
-    int char_start_index = 0;
-
-    // go forwards through the string until it reaches a non-space character
-    if(isspace(str[0])){
-        for(int i = 0; isspace((unsigned char)str[i]) && i < str_len; i++){
-            char_start_index = i;
-        }
-        char_start_index += 1;
+char *remove_whitespace(char* str){
+    if(!str) return '\0';
+    // >__is__
+    //  012345
+    int str_length = strlen(str);
+    int start_index = 0;
+    // remove leading whitespace
+    while(isspace((unsigned char)str[start_index]) && start_index < str_length){
+        start_index++;
     }
-    // go backwards through the string until it reaches a non-space character
-    int char_end_index = str_len - 1;
-    if(isspace(str[char_end_index])){
-        for(int i = str_len - 1; isspace((unsigned char)str[i]) && i >= 0; i--){
-            char_end_index = i;
-        }
+    //__>is__
+    //00 0123
+    str += start_index;
+    int end_index = strlen(str) - 1;
+    // remove trailing whitespace
+    while(isspace((unsigned char)str[end_index])){
+        end_index--;
     }
 
-    strncpy(str_trim, str + char_start_index, char_end_index - char_start_index);
-    return str_trim;
+    str[end_index + 1] = '\0';
+
+    return str;
 }
 
 char* remove_inline_comment(char* str){
-    if(!str) return "\0";
-
-    static char str_trim[MAX_LINE_SIZE] = {0};
-    int comment_start_index = 0;
-    // go forwards through the string until it reaches a comment character
-    for(int i = 0; (str[i] != COMMENT_CHAR) && str[i]; i++){
-        comment_start_index = i;
-    }
-    //comment_start_index++;
-    if(!isspace((unsigned char)str[comment_start_index])) comment_start_index++;
+    if(!str) return '\0';
     
-    strncpy(str_trim, str, comment_start_index);
-    return str_trim;
+    int str_length = strlen(str);
+    int end_index = 0;
+    while(str[end_index] != ';' && end_index < str_length){
+        end_index++;
+    }
+
+    str[end_index] = '\0';
+    return str;
 }
 
 int main(int argc, char *argv[])
@@ -168,6 +164,7 @@ int main(int argc, char *argv[])
     uint16_t instr_addr = 0;
     uint16_t line_num = 0;
     
+    char error_str[1024] = {0};
     char asm_line[MAX_LINE_SIZE] = {0};
     /* First pass
         If the label doesn't exist already, store it and its instruction index
@@ -178,47 +175,65 @@ int main(int argc, char *argv[])
         // skip empty line
         if(empty_line(asm_line)) continue;
         if(strlen(asm_line) > MAX_LINE_SIZE){
-            printf("[Line %d] Error: line exceeds %d character limit", line_num, MAX_LINE_SIZE);
-            return 1;
+            char e[MAX_LINE_SIZE];
+            snprintf(e, sizeof(e), "[Line %d] Error: line exceeds %d character limit\n", line_num, MAX_LINE_SIZE);
+            strcat(error_str, e);
+            continue;
         }
 
-        char asm_line_trim[MAX_LINE_SIZE] = {0};
-        strcpy(asm_line_trim, remove_inline_comment(asm_line));
-
-        char asm_line_whitespace[MAX_LINE_SIZE] = {0};
-        strcpy(asm_line_whitespace, remove_whitespace(asm_line_trim));
-
-        if(asm_line[0] == COMMENT_CHAR) continue;
-
-        printf("%s<\n", asm_line_whitespace);
-        bool is_label = (asm_line[strlen(asm_line)-1] == ':');
+        char* line_trim_comment = remove_inline_comment(asm_line);
+        char* line_trim = remove_whitespace(line_trim_comment);
+        bool is_label = (line_trim[strlen(line_trim)-1] == LABEL_CHAR);
 
         if(is_label){
+            int len = strlen(line_trim);
+            if(len < 2){
+                char e[MAX_LINE_SIZE];
+                snprintf(e, sizeof(e), "[Line %d] Error: invalid label name\n", line_num);
+                strcat(error_str, e);
+                continue;
+            }
+
+            if(len > MAX_LABEL_SIZE){
+                char e[MAX_LINE_SIZE];
+                snprintf(e, sizeof(e), "[Line %d] Error: label name exceeds %d characters\n", line_num, MAX_LABEL_SIZE);
+                strcat(error_str, e);
+                continue;
+            }
+
             if(labels_count >= MAX_LABELS){
-                printf("[Line %d] Error: maximum %d labels exceeded", line_num, MAX_LABELS);
-                return 1;
+                char e[MAX_LINE_SIZE];
+                snprintf(e, sizeof(e), "[Line %d] Error: maximum %d labels exceeded\n", line_num, MAX_LABEL_SIZE);
+                strcat(error_str, e);
+                continue;
             }
             
             // remove ':' from the end end the string
             char label[MAX_LABEL_SIZE] = {0};
-            strcpy(label, asm_line);
-            label[strlen(label)-1] = '\0';
-            //printf("%s\n", label);
+            memcpy(label, line_trim, len - 1);
+            label[len-1] = '\0';
+
             // Check if label has already been defined
             if(index_of_label(labels, MAX_LABELS, label) != -1){
-                printf("[Line %d] Error: the label '%s' is already defined", line_num, label);
-                return 1;
+                char e[MAX_LINE_SIZE];
+                snprintf(e, sizeof(e), "[Line %d] Error: the label '%s' is already defined\n", line_num, label);
+                strcat(error_str, e);
+                continue;
             }
 
             // Or if label is already being used as a variable
             if(index_of_label(variables, MAX_VARIABLES, label) != -1){
-                printf("[Line %d] Error: '%s' is already being used as a variable", line_num, label);
-                return 1;
+                char e[MAX_LINE_SIZE];
+                snprintf(e, sizeof(e), "[Line %d] Error: '%s' is already being used as a variable\n", line_num, label);
+                strcat(error_str, e);
+                continue;
             }
 
             if(is_register_name(label)){
-                printf("[Line %d] Error: label conflicts with protected register names'", line_num);
-                return 1;
+                char e[MAX_LINE_SIZE];
+                snprintf(e, sizeof(e), "[Line %d] Error: label conflicts with protected register names\n", line_num);
+                strcat(error_str, e);
+                continue;
             }
 
             // Store label
@@ -232,34 +247,43 @@ int main(int argc, char *argv[])
         // Directive is being stated
         char directive_type[16] = {0};
         
+        bool is_directive = sscanf(line_trim, ".%15[a-zA-Z0-9_]", directive_type) > 0;
         // if the number of items succesfully parsed is > 0, the line trying to be a directive
-        if(sscanf(asm_line, ".%15[a-zA-Z0-9_]", directive_type) > 0){
+        if(is_directive){
             // variable is being defined
             if(strcmp(directive_type, VAR_DIRECTIVE) == 0){
                 char var_name[MAX_LINE_SIZE] = {0};
                 char var_value[MAX_LINE_SIZE] = {0};
                 // parse variable
-                if(sscanf(asm_line, ".%*15[a-zA-Z0-9_] %127[a-zA-Z0-9_] %127s", var_name, var_value) != 2){
-                    printf("[Line %d] Error: incorrect usage of .var <name> <value>", line_num); 
-                    return 1;
+                if(sscanf(line_trim, ".%*15[a-zA-Z0-9_] %127[a-zA-Z0-9_] %127s", var_name, var_value) != 2){
+                    char e[MAX_LINE_SIZE];
+                    snprintf(e, sizeof(e), "[Line %d] Error: incorrect usage of .var <name> <value>\n", line_num);
+                    strcat(error_str, e);
+                    continue;
                 }
 
                 // check if variable is already defined
                 if(index_of_label(variables, MAX_VARIABLES, var_name) != -1){
-                    printf("[Line %d] Error: variable '%s' has already been declared", line_num, var_name);
-                    return 1;
+                    char e[MAX_LINE_SIZE];
+                    snprintf(e, sizeof(e), "[Line %d] Error: variable '%s' has already been declared\n", line_num, var_name);
+                    strcat(error_str, e);
+                    continue;
                 }
 
                 // check if variable is alread used as a label
                 if(index_of_label(labels, MAX_LABELS, var_name) != -1){
-                    printf("[Line %d] Error: '%s' is already being used as a label", line_num, var_name);
-                    return 1;
+                    char e[MAX_LINE_SIZE];
+                    snprintf(e, sizeof(e), "[Line %d] Error: '%s' is already being used as a label", line_num, var_name);
+                    strcat(error_str, e);
+                    continue;
                 }
 
                 // Check if variable name is valid (no R{num})
                 if(is_register_name(var_name)){
-                    printf("[Line %d] Error: variable name conflicts with protected register names", line_num);
-                    return 1;
+                    char e[MAX_LINE_SIZE];
+                    snprintf(e, sizeof(e), "[Line %d] Error: variable name conflicts with protected register names", line_num);
+                    strcat(error_str, e);
+                    continue;
                 }
 
                 char var_value_trim[MAX_LINE_SIZE] = {0};
@@ -285,29 +309,30 @@ int main(int argc, char *argv[])
 
                 long int var_num = strtol(var_value_trim, &end_ptr, base);
 
-                char error[256] = {0};
+                char e[MAX_LINE_SIZE];
                 bool is_error = false;
                 // Check validity of number
                 if(end_ptr == var_name){
                     is_error = true;
-                    sprintf(error, "[Line %d] Error: variable not defined", line_num);
+                    snprintf(e, sizeof(e), "[Line %d] Error: variable not defined", line_num);
                 } else if(*end_ptr != '\0'){
                     is_error = true;
-                    sprintf(error, "[Line %d] Error: invalid number", line_num);
+                    snprintf(e, sizeof(e), "[Line %d] Error: invalid number", line_num);
                 } else if(var_num > MAX_VALUE/2 || var_num < -(MAX_VALUE/2 + 1)){
                     is_error = true;
-                    sprintf(error, "[Line %d] Error: value exceeds range [%d, %d]", line_num, -(MAX_VALUE/2 + 1), (MAX_VALUE/2));
+                    snprintf(e, sizeof(e), "[Line %d] Error: value exceeds range [%d, %d]", line_num, -(MAX_VALUE/2 + 1), (MAX_VALUE/2));
                 }
                 
                 if(is_error){
-                    printf(error);
-                    return 1;
+                    strcat(error_str, e);
+                    continue;
                 }
 
                 // add variable to array
                 strcpy(variables[vars_count].name, var_name);
                 variables[vars_count].value = (uint16_t)var_num;
                 vars_count++;
+                printf("%s<\n", var_name);
             }
         }
 
@@ -319,9 +344,12 @@ int main(int argc, char *argv[])
         Decide opcode based on operands (addressing mode)
         Replace labels with their instruction index
         Replace variables with their locations in memory
+        Replace variable decleration with LDM <address>, 
     */
     rewind(asm_file_ptr);
 
+    printf(error_str);
+    
     //while()
     fclose(asm_file_ptr);
     return 0;
