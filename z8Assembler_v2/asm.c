@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
                         
                         // if it's a label, store its absolute address
                         if(this_label_addr > -1){
-                            this_op_val = this_label_addr;
+                            this_op_val = labels[this_label_addr].value;
                             break;
                         }
 
@@ -419,15 +419,20 @@ int main(int argc, char *argv[])
     snprintf(main_section[instr_addr], MACHINE_CODE_INSTR_LEN + 1, "%02x%04x%04x", opcode_map[OP_HALT][0], 0, 0);
     instr_addr++;
 
-    for(int i = 0; i < num_vars; i++) printf("%s\n", data_section[i]);
+    if(error_str[0]){
+        printf(error_str);  
+        fclose(asm_file_ptr);
+        return 1;
+    }
 
-    for(int i = 0; i < MACHINE_CODE_INSTR_LEN; i++) printf("-");
-    printf("\n");
+    // Write to hex file
+    FILE *hex_file_ptr;
 
-    for(int i = 0; i < instr_addr; i++) printf("%s\n", main_section[i]);
-
-    printf(error_str);
+    hex_file_ptr = fopen(out_hex_file_name, "w");
     
-    fclose(asm_file_ptr);
+    for(int i = 0; i < num_vars; i++) fprintf(hex_file_ptr, "%s\n", data_section[i]);
+    for(int i = 0; i < instr_addr; i++)  fprintf(hex_file_ptr, "%s\n", main_section[i]);
+    
+    fclose(hex_file_ptr);
     return 0;
 }

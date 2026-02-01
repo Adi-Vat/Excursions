@@ -80,17 +80,17 @@ always_ff @(posedge clk) begin
 				PSHR: begin
 					rf_read_addr_a <= dest;
 					mem_rw_addr <= stack_ptr;
-					if(stack_ptr > 0) stack_ptr -= 1;
+					if(stack_ptr > 0) stack_ptr <= stack_ptr - 1;
 					
 				end
 				// Dec stack pointer and set memory write address to the pointer
 				PSHD: begin
 					mem_rw_addr <= stack_ptr;
-					if(stack_ptr > 0) stack_ptr -= 1;
+					if(stack_ptr > 0) stack_ptr <= stack_ptr - 1;
 				end
 				// Inc stack pointer, set memory read address to pointer, write back read value to register
 				POP: begin
-					if(stack_ptr < DATA_MEM_SIZE - 1) stack_ptr += 1;
+					if(stack_ptr < DATA_MEM_SIZE - 1) stack_ptr <= stack_ptr + 1;
 					mem_rw_addr <= stack_ptr;
 				end
 			endcase
@@ -164,13 +164,11 @@ always_ff @(posedge clk) begin
 				end
 				INC: begin
 					alu_a_src_sel <= REG;
-					alu_b_src_sel <= VAL;
-					alu_op <= ALU_ADD;
+					alu_op <= ALU_INC;
 				end
 				DEC: begin
 					alu_a_src_sel <= REG;
-					alu_b_src_sel <= VAL;
-					alu_op <= ALU_SUB;
+					alu_op <= ALU_DEC;
 				end
 			endcase
 		end
@@ -194,6 +192,7 @@ always_comb begin
 	rf_write_enable = 0;
 	if(reset) next_pc = 0;
 	else if(current_state == WRITEBACK) next_pc = pc + 1;
+	else next_pc = pc;
 
 	case (current_state)
 		FETCH: next_state = DECODE;

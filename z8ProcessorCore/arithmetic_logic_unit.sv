@@ -18,6 +18,8 @@ always_comb begin
 	case(op)
 		ALU_ADD: temp_out = in_a + in_b;
 		ALU_SUB, ALU_CMP: temp_out = in_a - in_b;
+		ALU_INC: temp_out = in_a + 1;
+		ALU_DEC: temp_out = in_a - 1;
 		ALU_AND: temp_out = in_a & in_b;
 		ALU_OR: temp_out = in_a | in_b;
 		ALU_XOR: temp_out = in_a ^ in_b;

@@ -22,12 +22,13 @@ module tb;
 		#20;
 		reset = 0;
 		
+		/*
 		dut.mem.prog_mem[0] = {LDD, 16'h0, 16'h01}; // LDD R0, 1
 		dut.mem.prog_mem[1] = {PSHR, 16'h0, 16'h0}; // PUSH R0
 		dut.mem.prog_mem[2] = {PSHD, 16'h2, 16'h0}; // PUSH 2
 		dut.mem.prog_mem[3] = {POP, 16'h1, 16'h0}; // POP R1
 		dut.mem.prog_mem[4] = {HALT, 16'h0000, 16'h0000}; // HALT
-		
+		*/
 		while(!dut.cu.halted) repeat(1) @(posedge clk);
 		
 		for(int i = 0; i < 4; i++) $display("R%0d = %4h", i, dut.rf.registers[i]);

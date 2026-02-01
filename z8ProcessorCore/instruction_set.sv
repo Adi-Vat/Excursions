@@ -34,13 +34,15 @@ package instruction_set;
 		PSHR, // 0x1C Push register to stack
 		PSHD, // 0x1D Push value to stack
 		POP, // 0x1E Pop top value from stack into register
-		HALT = 0xFE // 0xFE Stops program
+		HALT = 8'hfe // 0xFE Stops program
 	} OPCODES_T;
 	
 	typedef enum logic [3:0]{
 		ALU_NOP,
 		ALU_ADD,
 		ALU_SUB,
+		ALU_INC,
+		ALU_DEC,
 		ALU_AND,
 		ALU_OR,
 		ALU_XOR,
