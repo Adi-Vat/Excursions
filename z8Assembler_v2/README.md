@@ -27,4 +27,9 @@ Hex `$<value>`
 Binary `&<value>`  
 
 ## How to use
-To run the assembler use 
+To assemble a program, run `z8 <input_file> [-o <output_file>]`  
+
+Arguments:  
+    `<input_file>`  Assembly source file  
+    `-o <output_file>`   Output file (optional, default: `<input_file>.hex`)  
+

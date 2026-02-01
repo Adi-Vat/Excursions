@@ -25,11 +25,28 @@ int main(int argc, char *argv[])
             return 1;
         }
         else{
-            strcpy(out_hex_file_name, argv[3]);
+            snprintf(out_hex_file_name, sizeof(out_hex_file_name), "hex_out/%s", argv[3]);
         }
     }
     else{
-        strcpy(out_hex_file_name, DEFAULT_HEX_FILE_NAME);
+        char in_file_name[MAX_LINE_SIZE] = {0};
+        snprintf(in_file_name, sizeof(in_file_name), argv[1]);
+        char *dot = strrchr(in_file_name, '.');
+        if (dot != NULL) {
+            *dot = '\0';
+        }
+        
+        int in_file_ptr;
+
+        int len = strlen(in_file_name);
+        for(int i = len; i >= 0; i--){
+            if(in_file_name[i] == '\\' || in_file_name[i] == '/'){
+                in_file_ptr = i;
+                break;
+            }   
+        }
+
+        snprintf(out_hex_file_name, sizeof(out_hex_file_name), "hex_out/%s.hex", in_file_name + in_file_ptr);
     }
     
     // open assembly file
