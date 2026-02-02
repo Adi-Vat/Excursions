@@ -4,6 +4,8 @@ An assembler for my own assembly language, z8.
 Converts an assembly file to a hex file.
 The hex file can then be run by my [z8 Processor Core](/z8ProcessorCore/)  
 
+![](z8Assembler_v2_video.gif)
+
 ## Syntax
 ### Instructions
 Operations are written as `OPCODE <dest>, <src>`  
