@@ -1,7 +1,7 @@
 LD R0, 5    ; Loop counter
 LD R1, 1    ; Previous Fibonacci number
 LD R2, 1    ; Current Fibonacci number
-LD R3, 0    ; Temporary storag
+LD R3, 0    ; Temporary storage
 
 loop:
     LD R3, R2   ; Save current value
