@@ -27,9 +27,13 @@ Hex `$<value>`
 Binary `&<value>`  
 
 ## How to use
+### Assemble a source file
 To assemble a program, run `z8 <input_file> [-o <output_file>]`  
 
 Arguments:  
     `<input_file>`  Assembly source file  
     `-o <output_file>`   Output file (optional, default: `<input_file>.hex`)  
 
+### Compile the assembler
+You need some C compiler. I use MinGW-w64, and compiler using  
+`gcc asm.c shared.c -o z8.exe`
