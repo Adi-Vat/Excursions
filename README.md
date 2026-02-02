@@ -6,7 +6,6 @@ Click on the links to read more.
 *NB: to run directly downloaded and unzipped python projects please enter the .venv folder*
 
 ## Compilers and Low-Level projects
-
 [z8 Processor Core (SystemVerilog)](/z8ProcessorCore/) | [z8 Assembler v2 (C)](/z8Assembler_v2)
 :----:|:----:
 ![](z8ProcessorCore/z8ProcessorCoreVideo.mp4) | ![](z8Assembler_v2/z8Assembler_v2Video.mp4)
