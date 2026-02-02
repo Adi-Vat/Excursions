@@ -296,22 +296,22 @@ int main(int argc, char *argv[])
             // extract opcode
             sscanf(line_trim, "%32s", opcode);
             
-            Operation_Mapping op_map = find_operation(opcode);
+            Operation_Mapping this_op_map = find_operation(opcode);
 
-            if(op_map.op == OP_INVALID){
+            if(this_op_map.op == OP_INVALID){
                 add_error(ERR_INVALID_OPCODE, line_num, error_str, sizeof(error_str), &error_pos);
                 continue;
             }
 
             // number of args given against args expected
-            if(op_map.args != num_tokens - 1){
+            if(this_op_map.args != num_tokens - 1){
                 add_error(ERR_UNEXPECTED_OPERANDS, line_num, error_str, sizeof(error_str), &error_pos);
                 continue;
             }
 
-            if(op_map.args == 0) hex_opcode = opcode_map[op_map.op][0];
+            if(this_op_map.args == 0) hex_opcode = opcode_map[this_op_map.op][0];
 
-            for(int i = 0; i < op_map.args; i++){
+            for(int i = 0; i < this_op_map.args; i++){
                 bool is_op_a = i == 0;
                 char this_operand[32];
                 // extract first argument
@@ -322,20 +322,20 @@ int main(int argc, char *argv[])
                 Addr_Mode this_op_addr_mode = get_addr_mode(this_operand);
                 
                 // check addressing mode matches what's expected for operand A
-                if(is_op_a){
-                    if(op_map.dest_addr_mode != this_op_addr_mode){
+                if(is_op_a && this_op_map.op != OP_PUSH){
+                    if(this_op_map.dest_addr_mode != this_op_addr_mode){
                         add_error(ERR_BAD_ADDR_MODE, line_num, error_str, sizeof(error_str), &error_pos);
                         continue;
                     }
-                    hex_opcode = opcode_map[op_map.op][op_map.dest_addr_mode];
+                    hex_opcode = opcode_map[this_op_map.op][this_op_map.dest_addr_mode];
                     
                 } else{
                     // if it's operand B, decompose the opode based on address mode
-                    hex_opcode = opcode_map[op_map.op][this_op_addr_mode];
+                    hex_opcode = opcode_map[this_op_map.op][this_op_addr_mode];
                 }
 
                 // check invalid opcode on FINAL pass
-                if(i == op_map.args - 1 && hex_opcode == 0xFF){
+                if(i == this_op_map.args - 1 && hex_opcode == 0xFF){
                     add_error(ERR_BAD_ADDR_MODE, line_num, error_str, sizeof(error_str), &error_pos);
                     continue;
                 }

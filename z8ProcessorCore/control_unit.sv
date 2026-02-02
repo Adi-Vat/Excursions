@@ -90,8 +90,12 @@ always_ff @(posedge clk) begin
 				end
 				// Inc stack pointer, set memory read address to pointer, write back read value to register
 				POP: begin
-					if(stack_ptr < DATA_MEM_SIZE - 1) stack_ptr <= stack_ptr + 1;
-					mem_rw_addr <= stack_ptr;
+					if(stack_ptr < DATA_MEM_SIZE - 1) begin
+						stack_ptr <= stack_ptr + 1;
+						mem_rw_addr <= stack_ptr + 1;
+					end else begin
+						mem_rw_addr <= stack_ptr;
+					end
 				end
 			endcase
 		end

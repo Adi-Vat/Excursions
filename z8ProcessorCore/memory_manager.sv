@@ -12,7 +12,7 @@ module memory_manager(
 );
 
 logic [15:0] data_mem [DATA_MEM_SIZE];
-logic [39:0] prog_mem [255];
+logic [39:0] prog_mem [0:255];
 
 always_ff @(posedge clk) begin
 	case (op)
@@ -20,7 +20,7 @@ always_ff @(posedge clk) begin
 	endcase
 	
 	if (reset) begin
-		$readmemh("C:/Users/Adi/Documents/Excursions/z8ProcessorCore/out.hex", prog_mem);	
+		$readmemh("programs/stack.hex", prog_mem);	
 		for(int i = 0; i < 256; i++) data_mem[i] <= 0;
 	end
 end
