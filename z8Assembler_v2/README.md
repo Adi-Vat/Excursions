@@ -35,5 +35,5 @@ Arguments:
     `-o <output_file>`   Output file (optional, default: `<input_file>.hex`)  
 
 ### Compile the assembler
-You need some C compiler. I use MinGW-w64, and compiler using  
+You need a C compiler. I use MinGW-w64 and compile with   
 `gcc asm.c shared.c -o z8.exe`
