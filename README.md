@@ -9,23 +9,23 @@ Click on the links to read more.
 
 [z8 Processor Core (SystemVerilog)](/z8ProcessorCore/) | [z8 Assembler v2 (C)](/z8Assembler_v2)
 :----:|:----:
-![](z8ProcessorCore/z8ProcessorCoreVideo.gif) | ![](z8Assembler_v2/z8Assembler_v2_video.gif)
+![](z8ProcessorCore/z8ProcessorCoreVideo.mp4) | ![](z8Assembler_v2/z8Assembler_v2Video.mp4)
 | | [z8 Compiler+Emulator (Deprecated) (C)](/z8Compiler/)
 
 ## Graphics and Rendering  
 
 [Rasterizer (C#)](/Rasterizer/) | [ASCII Graph Viewer (C)](/ASCIIGraphViewer/)
 :----:|:----:
-![](Rasterizer/Rasterizer_Video.gif) | ![](ASCIIGraphViewer/GraphViewer.gif)
+![](Rasterizer/RasterizerVideo.mp4) | ![](ASCIIGraphViewer/AsciiGraphViewerVideo.mp4)
 
 ## Physics Simulations
 
 [Waves 2D (Python)](/Waves2DPython/) | [Waves (C#)](/Waves/)
 :----:|:----:
-![](Waves2DPython/Waves2D_video.gif) | ![](Waves/wave.gif)
+![](Waves2DPython/Waves2DVideo.mp4) | ![](Waves/WavesVideo.mp4)
 
 
 ## Signal Processing
 [RF Signal Mapper (C#)](RFMapper/RFHeatmap/) | [RF Position Solver (Python)](/RFMapper/PositionSolverPython/)
 :----:|:----:
-![](RFMapper/RFHeatmap/RFHeatmap_Video.gif) | ![](RFMapper/PositionSolverPython/PositionSolver_Video.gif)
+![](RFMapper/RFHeatmap/RFHeatmapVideo.mp4) | ![](RFMapper/PositionSolverPython/PositionSolverVideo.mp4)
