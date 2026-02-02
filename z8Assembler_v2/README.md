@@ -110,3 +110,8 @@ When writing code, the parent instruction is used. `0xFF` is an invalid opcode.
 | PUSH | 0xFF | 0x1C | 0x1D |  
 | POP | 0x1E | 0x1E | 0x1E |  
 | HALT | 0xFE | 0xFE | 0xFE |  
+
+Each instruction is 5 bytes  
+- Byte 0: Opcpde
+- Bytes 1-2: Destination
+- Bytes 3-4: Source
