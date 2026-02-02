@@ -36,7 +36,9 @@ Arguments:
 
 ### Compile the assembler
 You need a C compiler. I use MinGW-w64 and compile with   
-`gcc asm.c shared.c -o z8.exe`
+```bash
+gcc asm.c shared.c -o z8.exe
+```
 
 ### Examples
 Included in `/examples/` is `fibonacci.s` which calculates the fibonacci sequence for $F_7$  

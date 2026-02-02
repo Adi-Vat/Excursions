@@ -7,8 +7,8 @@ Click on the links to read more.
 
 ## Compilers and Low-Level projects
 ### [z8 Processor Core [WIP] (SystemVerilog)](/z8ProcessorCore/)
-
-### [z8 Compiler+Emulator (C)](/z8Compiler/)
+### [z8 Assembler v2 (C)](/z8Assembler_v2)
+### [z8 Compiler+Emulator (Deprecated) (C)](/z8Compiler/)
 ![](z8Compiler/Z8_Compiler_and_Emulator.gif)
 
 ## Graphics and Rendering  
