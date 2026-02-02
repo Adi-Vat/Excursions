@@ -8,8 +8,8 @@ module z8ProcessorCore(
 
 	logic [39:0] instruction;
 	logic [39:0] instr_reg;
-	logic [15:0] pc;
-	logic [15:0] next_pc;
+	logic [WORD_SIZE-1:0] pc;
+	logic [WORD_SIZE-1:0] next_pc;
 	STATE_T current_state;
 	FLAGS_T current_flags;
 	FLAG_SOURCE_T flag_read_src_sel;
@@ -19,19 +19,19 @@ module z8ProcessorCore(
 	logic [1:0] rf_read_addr_a;
 	logic [1:0] rf_read_addr_b;
 	logic [1:0] rf_write_addr;
-	logic [15:0] rf_read_data_a;
-	logic [15:0] rf_read_data_b;
-	logic [15:0] rf_write_data;
+	logic [WORD_SIZE-1:0] rf_read_data_a;
+	logic [WORD_SIZE-1:0] rf_read_data_b;
+	logic [WORD_SIZE-1:0] rf_write_data;
 	
 	MEM_OPS_T mem_op;
-	logic [15:0] mem_addr;
-	logic [15:0] mem_read_data;
-	logic [15:0] mem_write_data;
+	logic [WORD_SIZE-1:0] mem_addr;
+	logic [WORD_SIZE-1:0] mem_read_data;
+	logic [WORD_SIZE-1:0] mem_write_data;
 	
 	ALU_OPS_T alu_op;
-	logic [15:0] alu_in_data_a;
-	logic [15:0] alu_in_data_b;
-	logic [15:0] alu_out;
+	logic [WORD_SIZE-1:0] alu_in_data_a;
+	logic [WORD_SIZE-1:0] alu_in_data_b;
+	logic [WORD_SIZE-1:0] alu_out;
 	DATA_SOURCE_T alu_a_src_sel;
 	DATA_SOURCE_T alu_b_src_sel;
 	
@@ -105,11 +105,11 @@ module z8ProcessorCore(
 			// and the data is found by the RF, and exposed
 			LDR: rf_write_data = rf_read_data_b;
 			// write absolute value from instruction
-			LDD: rf_write_data = instr_reg[15:0];
+			LDD: rf_write_data = instr_reg[WORD_SIZE-1:0];
 			// write memory location from RF out b
 			STR: mem_write_data = rf_read_data_b;
 			// write memory location with value from instruction
-			STD: mem_write_data = instr_reg[15:0];
+			STD: mem_write_data = instr_reg[WORD_SIZE-1:0];
 			// write data from output of ALU
 			ADR, ADD, SBR, SBD, ANR, AND, ORR, ORD, XOR, XOD, CPR, CPD,
 			INC, DEC: begin
@@ -148,7 +148,7 @@ module z8ProcessorCore(
 		// for alu in b
 		case (alu_b_src_sel)
 			REG: alu_in_data_b = rf_read_data_b;
-			VAL: alu_in_data_b = instr_reg[15:0];
+			VAL: alu_in_data_b = instr_reg[WORD_SIZE-1:0];
 			MEM: alu_in_data_b = mem_read_data;
 		endcase
 	end

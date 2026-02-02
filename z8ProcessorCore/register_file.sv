@@ -7,19 +7,19 @@ module register_file(
 	// rf address of data to write
 	input logic [1:0] write_addr,
 	// actual data to be written
-	input logic [15:0] write_data,
+	input logic [WORD_SIZE-1:0] write_data,
 	input logic write_enable,
 	// output of datas to be read
-	output logic [15:0] read_data_a,
-	output logic [15:0] read_data_b
+	output logic [WORD_SIZE-1:0] read_data_a,
+	output logic [WORD_SIZE-1:0] read_data_b
 );
 
-logic [15:0] registers [3:0];
+logic [WORD_SIZE-1:0] registers [3:0];
 
 always_ff @(posedge clk) begin
 	if (reset) begin
 		for(int i = 0; i < 4; i++)
-			registers[i] <= 16'h0000;
+			registers[i] <= 16'h0;
 	end else if (write_enable) begin
 		registers[write_addr] <= write_data;
 	end

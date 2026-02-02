@@ -1,5 +1,6 @@
 package instruction_set;
 	parameter DATA_MEM_SIZE = 256;
+	parameter WORD_SIZE = 8;
 
 	typedef enum logic[7:0]
 	{

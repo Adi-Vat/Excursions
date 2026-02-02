@@ -3,15 +3,15 @@ import instruction_set ::*;
 module memory_manager(
 	input bit clk,
 	input bit reset,
-	input logic [15:0] pc,
+	input logic [WORD_SIZE-1:0] pc,
 	input logic [1:0] op,
-	input logic [15:0] addr,
-	input logic [15:0] write_data,
-	output logic [15:0] read_data,
+	input logic [WORD_SIZE-1:0] addr,
+	input logic [WORD_SIZE-1:0] write_data,
+	output logic [WORD_SIZE-1:0] read_data,
 	output logic [39:0] current_instruction
 );
 
-logic [15:0] data_mem [DATA_MEM_SIZE];
+logic [WORD_SIZE-1:0] data_mem [DATA_MEM_SIZE];
 logic [39:0] prog_mem [0:255];
 
 always_ff @(posedge clk) begin

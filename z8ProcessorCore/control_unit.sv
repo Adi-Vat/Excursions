@@ -4,19 +4,19 @@ module control_unit(
 	input logic [39:0] instruction,
 	input logic clk,
 	input bit reset,
-	input logic [15:0] pc,
+	input logic [WORD_SIZE-1:0] pc,
 	input FLAGS_T flags_in,
 	input bit update_flags,
-	input logic [15:0] rf_read_data_a,
+	input logic [WORD_SIZE-1:0] rf_read_data_a,
 	
-	output logic [15:0] next_pc,
+	output logic [WORD_SIZE-1:0] next_pc,
 	output STATE_T current_state,
 	output bit rf_write_enable,
 	output logic [1:0] rf_write_addr,
 	output logic [1:0] rf_read_addr_a,
 	output logic [1:0] rf_read_addr_b,
 		
-	output logic [15:0] mem_rw_addr,
+	output logic [WORD_SIZE-1:0] mem_rw_addr,
 	output MEM_OPS_T mem_op,
 
 	output ALU_OPS_T alu_op,
@@ -26,16 +26,16 @@ module control_unit(
 
 OPCODES_T opcode;
 assign opcode = OPCODES_T'(instruction[39:32]);
-logic [15:0] dest;
+logic [WORD_SIZE-1:0] dest;
 assign dest = instruction[31:16];
-logic [15:0] src;
-assign src = instruction[15:0];
+logic [WORD_SIZE-1:0] src;
+assign src = instruction[WORD_SIZE-1:0];
 bit halted;
 
 FLAGS_T flags;
 STATE_T next_state;
 
-logic [15:0] stack_ptr;
+logic [WORD_SIZE-1:0] stack_ptr;
 
 always_ff @(posedge clk) begin
 	if(reset) begin
