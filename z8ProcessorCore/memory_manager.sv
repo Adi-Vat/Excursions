@@ -20,7 +20,7 @@ always_ff @(posedge clk) begin
 	endcase
 	
 	if (reset) begin
-		$readmemh("programs/stack.hex", prog_mem);	
+		$readmemh("C:/Users/Adi/Documents/Excursions/z8ProcessorCore/programs/fibonacci.hex", prog_mem);	
 		for(int i = 0; i < 256; i++) data_mem[i] <= 0;
 	end
 end
