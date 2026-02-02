@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "shared.h"
 
-const char DEFAULT_HEX_FILE_NAME[] = "out.hex";
+const char DEFAULT_HEX_FILE_NAME[] = "out.hex"; 
 const char VAR_DIRECTIVE[] = "var";
 const char PROTECTED_CHARS[] = {COMMENT_CHAR, LABEL_CHAR, HEX_CHAR, BINARY_CHAR, MEM_CHAR, '\0'};
 
