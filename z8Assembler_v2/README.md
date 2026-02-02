@@ -56,7 +56,7 @@ loop:
 
 ; Result: R2 = 13 (0x0D)
 ```
-After execution, `R2` will contain 0x0D, the 7th Fibonacci number.  
+After execution, `R2` will contain `0x0D`, the 7th Fibonacci number.  
 
 This example demonstrates:  
 - Arithmetic operations (ADD)  
@@ -79,4 +79,9 @@ fe00000000 # HALT
 ```
 (without the comments)
 
-If assembly was unsucessful, an output file will not be created, and all reached errors are output.
+If assembly was unsucessful, an output file will not be created, and all reached errors are output, e.g.,
+```
+[Line 2] Error: cannot directly access protected memory 0x0000 - 0x0100
+[Line 2] Error: value is out of range [-32768, 32767]
+[Line 3] Error: trying to access an undeclared variable/label
+```
