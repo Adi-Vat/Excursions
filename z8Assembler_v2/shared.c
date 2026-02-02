@@ -11,23 +11,23 @@ const char VAR_DIRECTIVE[] = "var";
 const char PROTECTED_CHARS[] = {COMMENT_CHAR, LABEL_CHAR, HEX_CHAR, BINARY_CHAR, MEM_CHAR, '\0'};
 
 Operation_Mapping operations[] = {
-    {"NOP", OP_NOP, 0, ADDR_INVALID},
-    {"LD", OP_LOAD, 2, ADDR_REG},
-    {"STR", OP_STORE, 2, ADDR_MEM},
-    {"ADD", OP_ADD, 2, ADDR_REG},
-    {"SUB", OP_SUB, 2, ADDR_REG},
-    {"AND", OP_AND, 2, ADDR_REG},
-    {"OR", OP_OR, 2, ADDR_REG},
-    {"XOR", OP_XOR, 2, ADDR_REG},
-    {"CMP", OP_CMP, 2, ADDR_REG},
-    {"JMP", OP_JMP, 1, ADDR_DIR},
-    {"JZ", OP_JZ, 1, ADDR_DIR},
-    {"JNZ", OP_JNZ, 1, ADDR_DIR},
-    {"INC", OP_INC, 1, ADDR_REG},
-    {"DEC", OP_DEC, 1, ADDR_REG},
-    {"PSH", OP_PUSH, 1, ADDR_MEM},
-    {"POP", OP_POP, 1, ADDR_REG},
-    {"HALT", OP_HALT, 0, ADDR_INVALID}
+    {"nop", OP_NOP, 0, ADDR_INVALID},
+    {"ld", OP_LOAD, 2, ADDR_REG},
+    {"str", OP_STORE, 2, ADDR_MEM},
+    {"add", OP_ADD, 2, ADDR_REG},
+    {"sub", OP_SUB, 2, ADDR_REG},
+    {"and", OP_AND, 2, ADDR_REG},
+    {"or", OP_OR, 2, ADDR_REG},
+    {"xor", OP_XOR, 2, ADDR_REG},
+    {"cmp", OP_CMP, 2, ADDR_REG},
+    {"jmp", OP_JMP, 1, ADDR_DIR},
+    {"jz", OP_JZ, 1, ADDR_DIR},
+    {"jnz", OP_JNZ, 1, ADDR_DIR},
+    {"inc", OP_INC, 1, ADDR_REG},
+    {"dec", OP_DEC, 1, ADDR_REG},
+    {"psh", OP_PUSH, 1, ADDR_MEM},
+    {"pop", OP_POP, 1, ADDR_REG},
+    {"halt", OP_HALT, 0, ADDR_INVALID}
 };
 
 uint8_t opcode_map[OPERATION_COUNT][ADDR_MODE_COUNT] = {
@@ -103,7 +103,7 @@ int first_char_in_str(char search_char, char* string){
 }
 
 bool is_register_name(const char *name){
-    if(!name || name[0] != 'R')
+    if(!name || name[0] != 'r')
         return false;
 
     if(!isdigit((unsigned char)name[1]))

@@ -88,6 +88,10 @@ int main(int argc, char *argv[])
            add_error(ERR_CHAR_LIM_EXCEED, line_num, error_str, sizeof(error_str), &error_pos);
            continue;
         }
+
+        // convert to lowercase
+        for(int i = 0; asm_line[i]; i++)
+            asm_line[i] = tolower(asm_line[i]);
         
         remove_inline_comment(asm_line);
         char* line_trim = remove_whitespace(asm_line);
@@ -212,6 +216,11 @@ int main(int argc, char *argv[])
 
         // skip useless lines
         if(empty_line(asm_line)) continue;
+
+        // convert to lowercase
+        for(int i = 0; asm_line[i]; i++)
+            asm_line[i] = tolower(asm_line[i]);
+
         remove_inline_comment(asm_line);
         char* line_trim = remove_whitespace(asm_line);
         // skip comment lines
