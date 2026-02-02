@@ -89,7 +89,7 @@ If assembly was unsucessful, an output file will not be created, and all reached
 ```
 
 ## Implementation details
-It is a two-pass assembler.  
+It is a case insensistive two-pass assembler.  
 ### First Pass
 Collect labels/variables and store them in a lookup table
 
@@ -218,3 +218,42 @@ Subtracts src from dest and stores the result in dest.
 &rarr; `0x0E XOR` (xor register)  
 &rarr; `0x0F XOD` (xor direct)  
 Performs the logical xor ^ operator on two values.
+
+## Improvements on v1
+This is a complete re-write of the v1 assembler.  
+
+### Architecture + Design
+**Proper addressing modes** - Added MEM, REG, DIR addressing modes with context-sensitive opcocde decomposition  
+**Opcode management system** - Stores opcodes and their values in a 2D array `opcode_map[operation][addressing_mode]` for easy lookup and editing  
+**Structured data types** - Created `Operation_Mapping` struct to store operation metadata effectively, removing the need for messy 2-array index based lookup  
+
+### Error Handling
+**Comprehensive error system** - Added Error_Code to handle 20+ specific errors with an enum  
+**Error accumulation** - All errors collected during compilation and output together to improve debugging  
+**Detailed error messages** -Specific and detailed error messages added using `add_error()`  
+**Improved validation** - Name validation checks for protected characters, register conflicts, char limits, etc.  
+
+### Features Added
+**Variables** - Allowed for variable decleration with `.var` directive  
+**Labels** - Proper labelling system with `<name>:` rather than v1's `.<name.>`  
+**Protected memory** - Protects variable memory from direct access  
+**Case Insensitivity** - Allowed for any variation of upper-lowercase instructions  
+**Command-line interface** - Improved CLI by passing all arguments with executable, and adding optional `-o` flag for output file  
+**Automatic output file** - If no `-o` flag provided, the output file is made to be the same name as the input file  
+**Inline comments** - Allowed for inline comment support  
+
+### Code Quality
+**Modularisation** - Seperated utility functions to `shared.c` for reusability and cleanliness  
+**Impoved parsing** - Used `sscanf` instead of `strtok` for safe parsing  
+**Proper memory management** - Fixed allocation (no dynamic memories), more robust cleanup  
+**Whitespace handling** - `remove_whitespace()` and `remove_inline_comment()` safely remove unwanted strings  
+**Consistent naming** - `snake_case` and descriptive variable names used throughout the program  
+**Constants defined** - Used `#define` for magic processor based numbers like `MAX_LABELS`, `VAR_START_ADDR`  
+
+### Removed Issues
+**No hardcoded register** - Registers are now indices and not hardcoded register addresses  
+**Eliminated string allocation bugs** - v1 had dynamic reallocation issues, this was removed in v2  
+
+### Output format
+**Organised output** - Data section first, then code section  
+**Automatic HALT** - Appends HALT instruction automatically
