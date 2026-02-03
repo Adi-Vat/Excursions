@@ -8,23 +8,23 @@ Click on the links to read more.
 ## Compilers and Low-Level projects
 [z8 Processor Core (SystemVerilog)](/z8ProcessorCore/) | [z8 Assembler v2 (C)](/z8Assembler_v2)
 :----:|:----:
-![](z8ProcessorCore/z8ProcessorCoreVideo.mp4) | ![](z8Assembler_v2/z8Assembler_v2Video.mp4)
+[![Watch the video](z8ProcessorCore/z8ProcessorCoreThumbnail.png)](https://youtu.be/vuQimqax7PA) | [![](z8Assembler_v2/z8Assembler_v2Thumbnail.png)](https://youtu.be/_1obpcsb0C4)
 | | [z8 Compiler+Emulator (Deprecated) (C)](/z8Compiler/)
 
 ## Graphics and Rendering  
 
 [Rasterizer (C#)](/Rasterizer/) | [ASCII Graph Viewer (C)](/ASCIIGraphViewer/)
 :----:|:----:
-![](Rasterizer/RasterizerVideo.mp4) | ![](ASCIIGraphViewer/AsciiGraphViewerVideo.mp4)
+[![](Rasterizer/RasterizerThumbnail.png)](https://youtu.be/TQdE5FCPVOk) | [![](ASCIIGraphViewer/ASCIIGraphViewerThumbnail.png)](https://youtu.be/gAi159Roucc)
 
 ## Physics Simulations
 
 [Waves 2D (Python)](/Waves2DPython/) | [Waves (C#)](/Waves/)
 :----:|:----:
-![](Waves2DPython/Waves2DVideo.mp4) | ![](Waves/WavesVideo.mp4)
+[![](Waves2DPython/Waves2DPythonThumbnail.png)](https://youtu.be/KjhDpEiBqeQ) | [![](Waves/WavesThumbnail.png)](https://youtu.be/JeCnEvR4Vik)
 
 
 ## Signal Processing
 [RF Signal Mapper (C#)](RFMapper/RFHeatmap/) | [RF Position Solver (Python)](/RFMapper/PositionSolverPython/)
 :----:|:----:
-![](RFMapper/RFHeatmap/RFHeatmapVideo.mp4) | ![](RFMapper/PositionSolverPython/PositionSolverVideo.mp4)
+[![](RFMapper/RFHeatmap/RFHeatmapThumbnail.png)](https://youtu.be/xnZvbTD-17g) | [![](RFMapper/PositionSolverPython/PositionSolverThumbnail.png)](https://youtu.be/QzmqsqSG8GQ)
