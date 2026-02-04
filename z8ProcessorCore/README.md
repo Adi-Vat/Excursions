@@ -38,8 +38,8 @@ The z8 processor uses a Harvard-style architecture with seperate data and progra
 Variables are not directly seen by the processor, instead the assembler computes addresses and prevents collisions. They live in data memory.  
 The architecture is setup so that as little (ideally none) of the data is handled by the CU, which instead deals exclusively with addresses and control signals.
 
-### Control Unit
-Coordinates other modules to perform a task. Primarily driven by clock updates. It takes in the current instruction and state, switches to find the correct set of output values, and applies them to the right wires.  
+### Fetch-Decode-Execute-Writeback
+The Control Unit coordinates other modules to perform a task. Primarily driven by clock updates. It takes in the current instruction and state, switches to find the correct set of output values, and applies them to the right wires.  
 For example, `ADR` (Add register).  
 #### Fetch
 The `program_counter` points to the next instruction. The `Memory Manager` combinatorially outputs the `current_instruction`, which goes straight to the `Control Unit`.
