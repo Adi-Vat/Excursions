@@ -130,7 +130,7 @@
           <mxGeometry relative="1" width="100" as="geometry">
             <mxPoint as="offset" />
             <mxPoint x="160" y="160" as="sourcePoint" />
-            <mxPoint x="160" y="780" as="targetPoint" />
+            <mxPoint x="160" y="730" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="DTDKYFTmwUj7VhTwA9j3-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Register File" vertex="1">
@@ -142,10 +142,10 @@
             <mxPoint x="469" y="220" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="DTDKYFTmwUj7VhTwA9j3-18" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=5.1923076923076925;endSize=3.465384615384615;endWidth=8.232248520710058;" value="RF Data">
+        <mxCell id="DTDKYFTmwUj7VhTwA9j3-18" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=5.1923076923076925;endSize=3.465384615384615;endWidth=8.232248520710058;startArrow=classic;startFill=1;startSize=3.465384615384615;startWidth=8.232248520710058;" value="RF Data">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="350" y="250.42000000000002" as="sourcePoint" />
-            <mxPoint x="170" y="250" as="targetPoint" />
+            <mxPoint x="349" y="230.08" as="sourcePoint" />
+            <mxPoint x="169" y="229.66" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="DTDKYFTmwUj7VhTwA9j3-19" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="RF Write">
@@ -164,9 +164,9 @@
             <mxPoint x="580" y="630" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="DTDKYFTmwUj7VhTwA9j3-21" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=5.1923076923076925;endSize=3.465384615384615;endWidth=8.232248520710058;" value="ALU Out">
+        <mxCell id="DTDKYFTmwUj7VhTwA9j3-21" edge="1" parent="1" source="DTDKYFTmwUj7VhTwA9j3-1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=5.1923076923076925;endSize=3.465384615384615;endWidth=8.232248520710058;exitX=-0.006;exitY=0.467;exitDx=0;exitDy=0;exitPerimeter=0;" value="ALU Out">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="330" y="599.76" as="sourcePoint" />
+            <mxPoint x="270" y="600" as="sourcePoint" />
             <mxPoint x="170" y="600" as="targetPoint" />
           </mxGeometry>
         </mxCell>
