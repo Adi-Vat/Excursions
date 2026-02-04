@@ -11,3 +11,6 @@ I built it from scratch to learn more about computer architecture, assemblers, a
 4 general purpose registers indexed R0-R3
 256 byte data memory, stack starts at 0xFF and grows downwards  
 31 opcodes total, with 18 individual instructions  
+
+## Architecture
+![](BlockDiagram.png)
