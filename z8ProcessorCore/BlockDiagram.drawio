@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.6">
   <diagram name="Page-1" id="Hjh8uN4N27n1sSEK3cFC">
-    <mxGraphModel dx="827" dy="524" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="683" dy="433" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="light-dark(#FFFFFF,#141414)" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -154,7 +154,7 @@
             <mxPoint x="469" y="240" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="DTDKYFTmwUj7VhTwA9j3-20" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=5.1923076923076925;endSize=3.465384615384615;endWidth=8.232248520710058;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="DTDKYFTmwUj7VhTwA9j3-4" value="Mem Data">
+        <mxCell id="DTDKYFTmwUj7VhTwA9j3-20" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=5.1923076923076925;endSize=3.465384615384615;endWidth=8.232248520710058;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="DTDKYFTmwUj7VhTwA9j3-4" value="Mem/RF/Instruction Data">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <Array as="points">
               <mxPoint x="540" y="540" />
