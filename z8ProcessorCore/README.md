@@ -29,6 +29,10 @@ N.B because of the location Modelsim runs the testbench from, relative addressin
 31 opcodes total, with 18 individual instructions  
 
 ## Architecture
-![](BlockDiagram.png)  
+
+|Block diagram|Fetch-Decode-Execute-Writeback cycle|
+|:---:|:---:|
+| ![](BlockDiagram.png) | ![](fde_cycle.gif) |
+
 The z8 processor uses a Harvard-style architecture with seperate data and program memory.   
 The architecture is setup so that as little (ideally none) of the data is handled by the CU, which instead deals exclusively with addresses and control signals.
