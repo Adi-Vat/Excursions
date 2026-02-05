@@ -24,7 +24,7 @@ N.B because of the location Modelsim runs the testbench from, relative addressin
 ## Specifications
 8-bit data width  
 40-bit instructions (5-byte format)  
-4 general purpose registers indexed R0-R3
+4 general purpose registers indexed R0-R3  
 256 byte data memory, stack starts at 0xFF and grows downwards  
 31 opcodes total, with 18 individual instructions  
 
