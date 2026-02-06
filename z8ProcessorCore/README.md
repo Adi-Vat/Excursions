@@ -48,4 +48,4 @@ The `Control Unit` sets `rf_read_addr_a` to the address given by the destination
 #### Execute
 The `Control Unit` sets three control signals, `alu_op <= ALU_ADD` to tell the ALU to perform an adding operation on the two inputs,   and `alu_a_src_sel <= REG` and `alu_b_src_sel <= REG` to tell the ALU that the data coming in is from the `Register File` so read the data out from the `Register File`.  The ALU is combinatorial and outputs the result of the operation immediately.
 #### Writeback
-The `Control Unit` sets `rf_write_enable` to high, which tells the `Register File` to the data it gets to the selected register. The `Control Unit` also sets `rf_write_addr` to the destination portion of the instruction, to tell the `Register File` to write to that register.
+The `Control Unit` sets `rf_write_enable` to high, which tells the `Register File` to write the data it gets from `rf_write_data` to the selected register. The `Control Unit` also sets `rf_write_addr` to the destination portion of the instruction, to tell the `Register File` to write to that register.
