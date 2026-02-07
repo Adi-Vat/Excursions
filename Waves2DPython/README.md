@@ -5,7 +5,7 @@ The Laplacian is simply generalised to 2 dimensions, and 4 instead of 2 neighbou
 ## Features
 There is a perfect reflection wall to the left of the screen with a 4 unit wide gap.
 
-![](Waves2D_video.gif)
+[![](Waves2DPythonThumbnail.png)](https://youtu.be/KjhDpEiBqeQ)
 
 ## To Do
 - Add user defined sources with their own values
