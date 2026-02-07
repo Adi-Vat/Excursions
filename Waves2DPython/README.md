@@ -3,7 +3,7 @@ This is an extension of the 1D wave program, written in python.
 The Laplacian is simply generalised to 2 dimensions, and 4 instead of 2 neighbours are used.  
 
 ## Features
-There is a perfect reflection wall to the left of the screen with a 4 unit wide gap.
+There is a perfectly reflective wall to the left of the screen with a 4 unit wide gap.
 
 [![](Waves2DPythonThumbnail.png)](https://youtu.be/KjhDpEiBqeQ)
 
