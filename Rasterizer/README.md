@@ -7,4 +7,10 @@ Implements
 - Fragment shader with Z-Buffering
 - Basic Lighting
 
-![](Rasterizer_Video.gif)
+[![](RasterizerThumbnail.png)](https://youtu.be/TQdE5FCPVOk)
+
+## Possible improvements
+To improve this, I could add:
+- Loading from .obj files
+- UV wrapping with textures
+- Reflections/raytraced light
