@@ -6,8 +6,6 @@ made in System Verilog, but that's not included here.
 As an example, I've written a Fibonacci sequence algorithm, and compiled it into byte code.
 Then I run the byte code in the emulator.  
 
-![](Z8_Compiler_and_Emulator.gif)
-
 ## Example code pipeline
 The assembly file
 ```
