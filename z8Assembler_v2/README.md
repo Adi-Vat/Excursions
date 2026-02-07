@@ -4,7 +4,7 @@ An assembler for my own assembly language, z8.
 Converts an assembly file to a hex file.
 The hex file can then be run by my [z8 Processor Core](/z8ProcessorCore/)  
 
-![](z8Assembler_v2_video.gif)
+[![Watch the video](z8ProcessorCore/z8ProcessorCoreThumbnail.png)](https://youtu.be/vuQimqax7PA) | [![](z8Assembler_v2/z8Assembler_v2Thumbnail.png)]
 
 ## Syntax
 ### Instructions
