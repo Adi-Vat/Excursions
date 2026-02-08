@@ -25,9 +25,9 @@ module control_unit(
 );
 
 OPCODES_T opcode;
-assign opcode = OPCODES_T'(instruction[39:32]);
+assign opcode = OPCODES_T'(instruction[OPCODE_MSB:OPCODE_LSB]);
 logic [WORD_SIZE-1:0] dest;
-assign dest = instruction[31:16];
+assign dest = instruction[OPERAND_A_MSB:OPERAND_A_LSB];
 logic [WORD_SIZE-1:0] src;
 assign src = instruction[WORD_SIZE-1:0];
 bit halted;

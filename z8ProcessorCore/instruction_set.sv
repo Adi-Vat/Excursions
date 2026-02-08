@@ -1,6 +1,43 @@
 package instruction_set;
 	parameter DATA_MEM_SIZE = 256;
+	parameter PROG_MEM_SIZE = 256;
 	parameter WORD_SIZE = 8;
+	parameter INSTRUCTION_SIZE = 40;
+	parameter OPCODE_MSB = 39;
+	parameter OPCODE_LSB = 32;
+	parameter OPERAND_A_MSB = 31;
+	parameter OPERAND_A_LSB = 16;
+	parameter OPERAND_B_MSB = 15;
+	parameter OPERAND_B_LSB = 0;
+	
+	parameter BANK_0_START = 8'h00;
+	parameter BANK_0_END = BANK_0_START + 8'h02;
+	parameter BANK_1_START = BANK_0_END + 8'h01;
+	parameter BANK_1_END = BANK_1_START + 8'h03;
+	parameter CONTROL_FLAGS_ADDR = 8'h00;
+	
+	typedef enum logic [7:0]{
+		BANK_SEL = 8'b0
+	} CF_BITS;
+	
+	typedef enum logic[6:0]{
+		DHEX0 = ~(7'b0111111),
+		DHEX1 = ~(7'b0000110),
+		DHEX2 = ~(7'b1011011),
+		DHEX3 = ~(7'b1001111),
+		DHEX4 = ~(7'b1100110),
+		DHEX5 = ~(7'b1101101),
+		DHEX6 = ~(7'b1111101),
+		DHEX7 = ~(7'b0000111),
+		DHEX8 = ~(7'b1111111),
+		DHEX9 = ~(7'b1100111),
+		DHEXA = ~(7'b1110111),
+		DHEXB = ~(7'b1111100),
+		DHEXC = ~(7'b0111001),
+		DHEXD = ~(7'b1011110),
+		DHEXE = ~(7'b1111001),
+		DHEXF = ~(7'b1110001)
+	} HEX_DIGITS;
 
 	typedef enum logic[7:0]
 	{
@@ -39,15 +76,15 @@ package instruction_set;
 	} OPCODES_T;
 	
 	typedef enum logic [3:0]{
-		ALU_NOP,
-		ALU_ADD,
-		ALU_SUB,
-		ALU_INC,
-		ALU_DEC,
-		ALU_AND,
-		ALU_OR,
-		ALU_XOR,
-		ALU_CMP
+		ALU_NOP, // 0 
+		ALU_ADD, // 1
+		ALU_SUB, // 2
+		ALU_INC, // 3
+		ALU_DEC, // 4
+		ALU_AND, // 5
+		ALU_OR, // 6
+		ALU_XOR, // 7
+		ALU_CMP // 8
 	} ALU_OPS_T;
 	
 	typedef enum logic[1:0]{

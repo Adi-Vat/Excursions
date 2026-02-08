@@ -2,12 +2,21 @@ import instruction_set ::*;
 
 module z8ProcessorCore(
 	input logic clk,
-	input logic reset
+	input logic reset,
 	// Add external I/O for FPGA here
+	input logic[9:0] SW,
+	input logic[3:0] KEY,
+	output logic [9:0] LEDR,
+	output logic [6:0] HEX0,
+	output logic [6:0] HEX1,
+	output logic [6:0] HEX2,
+	output logic [6:0] HEX3,
+	output logic [6:0] HEX4,
+	output logic [6:0] HEX5
 );
-
-	logic [39:0] instruction;
-	logic [39:0] instr_reg;
+	
+	logic [INSTRUCTION_SIZE-1:0] instruction;
+	logic [INSTRUCTION_SIZE-1:0] instr_reg;
 	logic [WORD_SIZE-1:0] pc;
 	logic [WORD_SIZE-1:0] next_pc;
 	STATE_T current_state;
@@ -39,6 +48,19 @@ module z8ProcessorCore(
 	
 	assign instr_reg = instruction;
 	
+	logic [6:0][5:0] hex_out;
+	
+	assign HEX0 = hex_out[0];
+	assign HEX1 = hex_out[1];
+	assign HEX2 = hex_out[2];
+	assign HEX3 = hex_out[3];
+	assign HEX4 = hex_out[4];
+	assign HEX5 = hex_out[5];
+	
+	logic [WORD_SIZE-1:0][2:0] bank_0;
+	logic [WORD_SIZE-1:0][3:0] bank_1;
+	bit bank_sel;
+	
 	always_ff @(posedge clk) begin
 		pc <= next_pc;
 	end
@@ -52,6 +74,13 @@ module z8ProcessorCore(
 				current_flags = alu_flags;
 		endcase
 	end
+	
+	input_output_manager io(
+		.bank_0_in(bank_0),
+		.bank_1_in(bank_1),
+		.bank_sel(bank_sel),
+		.hex_out(hex_out)
+	);
 	
 	control_unit cu(
 		.instruction(instr_reg),
@@ -84,7 +113,10 @@ module z8ProcessorCore(
 		.addr(mem_addr),
 		.write_data(mem_write_data),
 		.read_data(mem_read_data),
-		.current_instruction(instruction)
+		.current_instruction(instruction),
+		.bank_0(bank_0),
+		.bank_1(bank_1),
+		.bank_sel(bank_sel)
 	);
 	
 	
@@ -96,7 +128,7 @@ module z8ProcessorCore(
 		update_flags = 0;
 		flag_read_src_sel = NONE;
 		
-		case(instr_reg[39:32])
+		case(instr_reg[OPCODE_MSB:OPCODE_LSB])
 			// write data from memory
 			// data from memory already gotten by CU
 			LDM, POP: rf_write_data = mem_read_data;
@@ -104,12 +136,12 @@ module z8ProcessorCore(
 			// location of data from register is exposed by the CU
 			// and the data is found by the RF, and exposed
 			LDR: rf_write_data = rf_read_data_b;
-			// write absolute value from instruction
-			LDD: rf_write_data = instr_reg[WORD_SIZE-1:0];
+			// write absolute value from instruction (source)
+			LDD: rf_write_data = instr_reg[OPERAND_B_MSB:OPERAND_B_LSB];
 			// write memory location from RF out b
 			STR: mem_write_data = rf_read_data_b;
-			// write memory location with value from instruction
-			STD: mem_write_data = instr_reg[WORD_SIZE-1:0];
+			// write memory location with value from instruction (source)
+			STD: mem_write_data = instr_reg[OPERAND_B_MSB:OPERAND_B_LSB];
 			// write data from output of ALU
 			ADR, ADD, SBR, SBD, ANR, AND, ORR, ORD, XOR, XOD, CPR, CPD,
 			INC, DEC: begin
@@ -121,7 +153,7 @@ module z8ProcessorCore(
 			// the dest portion as PSHR only has 1 argument
 			PSHR: mem_write_data = rf_read_data_a;
 			// write the dest value to memory, as PSHD only has 1 argument
-			PSHD: mem_write_data = instr_reg[31:16];
+			PSHD: mem_write_data = instr_reg[OPERAND_A_MSB:OPERAND_A_LSB];
 		endcase
 	end
 	
@@ -148,7 +180,7 @@ module z8ProcessorCore(
 		// for alu in b
 		case (alu_b_src_sel)
 			REG: alu_in_data_b = rf_read_data_b;
-			VAL: alu_in_data_b = instr_reg[WORD_SIZE-1:0];
+			VAL: alu_in_data_b = instr_reg[OPERAND_B_MSB:OPERAND_B_LSB];
 			MEM: alu_in_data_b = mem_read_data;
 		endcase
 	end

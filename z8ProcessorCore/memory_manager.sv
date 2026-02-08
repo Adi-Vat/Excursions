@@ -8,11 +8,14 @@ module memory_manager(
 	input logic [WORD_SIZE-1:0] addr,
 	input logic [WORD_SIZE-1:0] write_data,
 	output logic [WORD_SIZE-1:0] read_data,
-	output logic [39:0] current_instruction
+	output logic [INSTRUCTION_SIZE-1:0] current_instruction,
+	output logic [WORD_SIZE-1:0] bank_0,
+	output logic [WORD_SIZE-1:0] bank_1,
+	output bit bank_sel
 );
 
-logic [WORD_SIZE-1:0] data_mem [DATA_MEM_SIZE];
-logic [39:0] prog_mem [0:255];
+logic [DATA_MEM_SIZE-1:0][WORD_SIZE-1:0] data_mem;
+logic [INSTRUCTION_SIZE-1:0] prog_mem [0:255];
 
 always_ff @(posedge clk) begin
 	case (op)
@@ -33,6 +36,9 @@ always_comb begin
 	endcase
 	
 	current_instruction = prog_mem[pc];
+	bank_0 = data_mem[BANK_0_END:BANK_0_START];
+	bank_1 = data_mem[BANK_1_END:BANK_1_START];
+	bank_sel = data_mem[CONTROL_FLAGS_ADDR][CF_BITS'(BANK_SEL)];
 end
 
 endmodule

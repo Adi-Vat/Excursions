@@ -1,0 +1,159 @@
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #080; font-weight: bold">import</span><span style="color: #BBB"> </span><span style="color: #0E84B5; font-weight: bold">numpy</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">as</span><span style="color: #BBB"> </span><span style="color: #0E84B5; font-weight: bold">np</span>
+<span style="color: #080; font-weight: bold">import</span><span style="color: #BBB"> </span><span style="color: #0E84B5; font-weight: bold">math</span>
+<span style="color: #080; font-weight: bold">import</span><span style="color: #BBB"> </span><span style="color: #0E84B5; font-weight: bold">cv2</span>
+<span style="color: #888"># av853</span>
+SCREEN_W, SCREEN_H <span style="color: #333">=</span> <span style="color: #00D; font-weight: bold">800</span>, <span style="color: #00D; font-weight: bold">600</span>
+img <span style="color: #333">=</span> cv2<span style="color: #333">.</span>imread(<span style="background-color: #FFF0F0">&quot;Foyer_Floor2.png&quot;</span>)
+<span style="color: #888"># resizing the background image to fit the screen</span>
+h, w <span style="color: #333">=</span> img<span style="color: #333">.</span>shape[:<span style="color: #00D; font-weight: bold">2</span>]
+scale <span style="color: #333">=</span> <span style="color: #007020">min</span>(SCREEN_W <span style="color: #333">/</span> w, SCREEN_H <span style="color: #333">/</span> h)
+new_w, new_h <span style="color: #333">=</span> <span style="color: #007020">int</span>(w <span style="color: #333">*</span> scale), <span style="color: #007020">int</span>(h <span style="color: #333">*</span> scale)
+img_resized <span style="color: #333">=</span> cv2<span style="color: #333">.</span>resize(img, (new_w, new_h), interpolation<span style="color: #333">=</span>cv2<span style="color: #333">.</span>INTER_AREA)
+
+<span style="color: #888"># transmitter locations (m)</span>
+<span style="color: #888"># transmitter 1 865.5</span>
+x1, y1, d1 <span style="color: #333">=</span> <span style="color: #60E; font-weight: bold">2.81</span>, <span style="color: #60E; font-weight: bold">0.74</span>, <span style="color: #00D; font-weight: bold">0</span>
+<span style="color: #888"># transmitter 2 868.0</span>
+x2, y2, d2 <span style="color: #333">=</span> <span style="color: #60E; font-weight: bold">8.77</span>, <span style="color: #60E; font-weight: bold">0.79</span>, <span style="color: #00D; font-weight: bold">0</span>
+<span style="color: #888"># transmitter 3 870.5</span>
+x3, y3, d3 <span style="color: #333">=</span> <span style="color: #60E; font-weight: bold">3.93</span>, <span style="color: #60E; font-weight: bold">10.97</span>, <span style="color: #00D; font-weight: bold">0</span>
+<span style="color: #888"># transmitter 4 872.5</span>
+x4, y4, d4 <span style="color: #333">=</span> <span style="color: #60E; font-weight: bold">8.77</span>, <span style="color: #60E; font-weight: bold">10.04</span>, <span style="color: #00D; font-weight: bold">0</span>
+
+<span style="color: #888"># power levels (dbm)</span>
+<span style="color: #888"># point 1</span>
+p1, p2, p3, p4 <span style="color: #333">=</span> <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">58</span>, <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">61</span>, <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">48</span>, <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">54</span>
+<span style="color: #888"># point 2</span>
+<span style="color: #888">#p1, p2, p3, p4 = -57, -68, -48, -53</span>
+<span style="color: #888"># point 4</span>
+<span style="color: #888">#p1, p2, p3, p4 = -60, -57, -63, -60</span>
+
+originX <span style="color: #333">=</span> <span style="color: #00D; font-weight: bold">0</span>
+originY <span style="color: #333">=</span> <span style="color: #00D; font-weight: bold">0</span>
+
+<span style="color: #888"># coefficients of power-distance log graph</span>
+m <span style="color: #333">=</span> <span style="color: #333">-</span><span style="color: #60E; font-weight: bold">17.476</span>
+c <span style="color: #333">=</span> <span style="color: #333">-</span><span style="color: #60E; font-weight: bold">43.004</span>
+
+<span style="color: #888"># calculated position of the reciever</span>
+pos <span style="color: #333">=</span> (<span style="color: #00D; font-weight: bold">0</span>,<span style="color: #00D; font-weight: bold">0</span>)
+
+<span style="color: #080; font-weight: bold">def</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">get_distance_from_rssi</span>(rssi):
+    <span style="color: #888"># rssi = m * log(10)(dist) - c </span>
+    <span style="color: #888"># [rearranged to] dist = 10^(rssi-c)/m</span>
+    exponent <span style="color: #333">=</span> (rssi <span style="color: #333">-</span> c)<span style="color: #333">/</span>m
+    dist <span style="color: #333">=</span> <span style="color: #00D; font-weight: bold">10</span><span style="color: #333">**</span>exponent
+    <span style="color: #080; font-weight: bold">return</span> dist
+
+<span style="color: #080; font-weight: bold">def</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">getPosition</span>(A, b):
+    W <span style="color: #333">=</span> np<span style="color: #333">.</span>diag(<span style="color: #00D; font-weight: bold">1</span> <span style="color: #333">/</span> dists[<span style="color: #00D; font-weight: bold">1</span>:]<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span>)  <span style="color: #888"># weights for eqns 2–4</span>
+    Aw <span style="color: #333">=</span> W <span style="color: #333">@</span> A <span style="color: #888"># matrix magic lol vvvv</span>
+    bw <span style="color: #333">=</span> W <span style="color: #333">@</span> b <span style="color: #888"># multiplies the original distance matrices with a weighting to reduce anomalous values</span>
+
+    <span style="color: #888"># equivilent to pos = (Aw^T Aw)^-1 Aw^T b</span>
+    pos <span style="color: #333">=</span> np<span style="color: #333">.</span>linalg<span style="color: #333">.</span>lstsq(Aw, bw, rcond<span style="color: #333">=</span><span style="color: #080; font-weight: bold">None</span>)[<span style="color: #00D; font-weight: bold">0</span>]
+    <span style="color: #080; font-weight: bold">return</span> pos
+
+<span style="color: #080; font-weight: bold">def</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">applymatrix</span>():
+    <span style="color: #080; font-weight: bold">global</span> pos
+
+    <span style="color: #888"># Subtracting equation 1 from equations 2, 3, 4</span>
+    A <span style="color: #333">=</span> np<span style="color: #333">.</span>array([
+        [<span style="color: #00D; font-weight: bold">2</span><span style="color: #333">*</span>(x2<span style="color: #333">-</span>x1), <span style="color: #00D; font-weight: bold">2</span><span style="color: #333">*</span>(y2<span style="color: #333">-</span>y1)],
+        [<span style="color: #00D; font-weight: bold">2</span><span style="color: #333">*</span>(x3<span style="color: #333">-</span>x1), <span style="color: #00D; font-weight: bold">2</span><span style="color: #333">*</span>(y3<span style="color: #333">-</span>y1)],
+        [<span style="color: #00D; font-weight: bold">2</span><span style="color: #333">*</span>(x4<span style="color: #333">-</span>x1), <span style="color: #00D; font-weight: bold">2</span><span style="color: #333">*</span>(y4<span style="color: #333">-</span>y1)]
+    ])
+    
+    b <span style="color: #333">=</span> np<span style="color: #333">.</span>array([
+        x2<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> x1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">+</span> y2<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> y1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">+</span> d1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> d2<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span>,
+        x3<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> x1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">+</span> y3<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> y1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">+</span> d1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> d3<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span>,
+        x4<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> x1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">+</span> y4<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> y1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">+</span> d1<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span> <span style="color: #333">-</span> d4<span style="color: #333">**</span><span style="color: #00D; font-weight: bold">2</span>
+    ])
+    
+    pos <span style="color: #333">=</span> getPosition(A, b)
+    <span style="color: #007020">print</span>(<span style="background-color: #FFF0F0">f&quot;</span><span style="color: #666; font-weight: bold; background-color: #FFF0F0">\n</span><span style="background-color: #FFF0F0">Position: x=</span><span style="background-color: #EEE">{</span>pos[<span style="color: #00D; font-weight: bold">0</span>]<span style="background-color: #EEE">:</span><span style="background-color: #FFF0F0">.2f</span><span style="background-color: #EEE">}</span><span style="background-color: #FFF0F0">, y=</span><span style="background-color: #EEE">{</span>pos[<span style="color: #00D; font-weight: bold">1</span>]<span style="background-color: #EEE">:</span><span style="background-color: #FFF0F0">.2f</span><span style="background-color: #EEE">}</span><span style="background-color: #FFF0F0">&quot;</span>)
+
+<span style="color: #888"># could be shortened by using arrays instead</span>
+<span style="color: #888"># or my own class of &quot;transmitter&quot; that has x,y coordinates and power level</span>
+d1 <span style="color: #333">=</span> get_distance_from_rssi(p1)
+d2 <span style="color: #333">=</span> get_distance_from_rssi(p2)
+d3 <span style="color: #333">=</span> get_distance_from_rssi(p3)
+d4 <span style="color: #333">=</span> get_distance_from_rssi(p4)
+dists <span style="color: #333">=</span> np<span style="color: #333">.</span>array([d1, d2, d3, d4])
+med <span style="color: #333">=</span> np<span style="color: #333">.</span>median(dists)
+
+<span style="color: #888"># fun little vector trick :)</span>
+mask <span style="color: #333">=</span> dists <span style="color: #333">&lt;</span> <span style="color: #60E; font-weight: bold">2.0</span> <span style="color: #333">*</span> med   <span style="color: #888"># reject absurd ranges</span>
+
+<span style="color: #007020">print</span>(d1, <span style="background-color: #FFF0F0">&quot; &quot;</span>, d2, <span style="background-color: #FFF0F0">&quot; &quot;</span>, d3, <span style="background-color: #FFF0F0">&quot; &quot;</span>,d4)
+
+applymatrix()
+
+<span style="color: #888"># set up a bunch of these variables</span>
+drawingLine <span style="color: #333">=</span> <span style="color: #080; font-weight: bold">False</span>
+lineStartPoint <span style="color: #333">=</span> (<span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>,<span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>)
+lineEndPoint <span style="color: #333">=</span> (<span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>, <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>)
+mousePos <span style="color: #333">=</span> (<span style="color: #00D; font-weight: bold">0</span>,<span style="color: #00D; font-weight: bold">0</span>)
+pixelsToM <span style="color: #333">=</span> <span style="color: #00D; font-weight: bold">0</span>
+
+
+<span style="color: #888"># called when the mouse does something</span>
+<span style="color: #080; font-weight: bold">def</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">mouse_callback</span>(event, x, y, flags, param):
+    <span style="color: #080; font-weight: bold">global</span> originX, originY, drawingLine, lineStartPoint, lineEndPoint, mousePos, pixelsToM
+    mousePos <span style="color: #333">=</span> (x,y)
+
+    <span style="color: #888"># set the origin position with the LMB</span>
+    <span style="color: #080; font-weight: bold">if</span> event <span style="color: #333">==</span> cv2<span style="color: #333">.</span>EVENT_LBUTTONDOWN:
+        x_orig <span style="color: #333">=</span> <span style="color: #007020">int</span>(x <span style="color: #333">/</span> scale)
+        y_orig <span style="color: #333">=</span> <span style="color: #007020">int</span>(y <span style="color: #333">/</span> scale)
+        <span style="color: #007020">print</span>(<span style="background-color: #FFF0F0">f&quot;Scaled: (</span><span style="background-color: #EEE">{</span>x<span style="background-color: #EEE">}</span><span style="background-color: #FFF0F0">,</span><span style="background-color: #EEE">{</span>y<span style="background-color: #EEE">}</span><span style="background-color: #FFF0F0">) → Original: (</span><span style="background-color: #EEE">{</span>x_orig<span style="background-color: #EEE">}</span><span style="background-color: #FFF0F0">,</span><span style="background-color: #EEE">{</span>y_orig<span style="background-color: #EEE">}</span><span style="background-color: #FFF0F0">)&quot;</span>)
+        originX <span style="color: #333">=</span> x
+        originY <span style="color: #333">=</span> y
+    <span style="color: #888"># start drawing the reference line with the RMB going down</span>
+    <span style="color: #080; font-weight: bold">if</span> event <span style="color: #333">==</span> cv2<span style="color: #333">.</span>EVENT_RBUTTONDOWN:
+        drawingLine <span style="color: #333">=</span> <span style="color: #080; font-weight: bold">True</span>
+        lineStartPoint <span style="color: #333">=</span> (x, y)
+    <span style="color: #888"># end drawing the reference line with th RMB coming up</span>
+    <span style="color: #080; font-weight: bold">if</span> event <span style="color: #333">==</span> cv2<span style="color: #333">.</span>EVENT_RBUTTONUP:
+        drawingLine <span style="color: #333">=</span> <span style="color: #080; font-weight: bold">False</span>
+        lineEndPoint <span style="color: #333">=</span> (x,y)
+        <span style="color: #888"># get pixel distance that the line covers</span>
+        d <span style="color: #333">=</span> math<span style="color: #333">.</span>dist(lineStartPoint, lineEndPoint)
+        <span style="color: #888"># convert to m knowing that the distance is always 10.97m (lazy but whatever)</span>
+        pixelsToM <span style="color: #333">=</span> d<span style="color: #333">/</span><span style="color: #60E; font-weight: bold">10.97</span>
+
+cv2<span style="color: #333">.</span>namedWindow(<span style="background-color: #FFF0F0">&quot;Position Solver&quot;</span>)
+cv2<span style="color: #333">.</span>setMouseCallback(<span style="background-color: #FFF0F0">&quot;Position Solver&quot;</span>, mouse_callback)
+
+<span style="color: #080; font-weight: bold">while</span> <span style="color: #080; font-weight: bold">True</span>:
+    frame <span style="color: #333">=</span> img_resized<span style="color: #333">.</span>copy()
+    <span style="color: #888"># draw origin position</span>
+    cv2<span style="color: #333">.</span>circle(frame, (originX, originY), <span style="color: #00D; font-weight: bold">5</span>, (<span style="color: #00D; font-weight: bold">0</span>, <span style="color: #00D; font-weight: bold">0</span>, <span style="color: #00D; font-weight: bold">255</span>), <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>)
+    
+    <span style="color: #888"># draw the 10.97m reference line</span>
+    cv2<span style="color: #333">.</span>circle(frame, lineStartPoint, <span style="color: #00D; font-weight: bold">5</span>, (<span style="color: #00D; font-weight: bold">255</span>, <span style="color: #00D; font-weight: bold">0</span>, <span style="color: #00D; font-weight: bold">0</span>), <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>)
+    cv2<span style="color: #333">.</span>circle(frame, lineEndPoint, <span style="color: #00D; font-weight: bold">5</span>, (<span style="color: #00D; font-weight: bold">255</span>, <span style="color: #00D; font-weight: bold">0</span>, <span style="color: #00D; font-weight: bold">0</span>), <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>)
+    cv2<span style="color: #333">.</span>line(frame, lineStartPoint, lineEndPoint, (<span style="color: #00D; font-weight: bold">125</span>, <span style="color: #00D; font-weight: bold">0</span>, <span style="color: #00D; font-weight: bold">125</span>), <span style="color: #00D; font-weight: bold">2</span>)
+
+    <span style="color: #888"># correct the estimated position with the origin centre</span>
+    correctedPosX <span style="color: #333">=</span> <span style="color: #007020">int</span>(<span style="color: #007020">round</span>((pos[<span style="color: #00D; font-weight: bold">0</span>] <span style="color: #333">*</span> pixelsToM))) <span style="color: #333">+</span> originX
+    correctedPosY <span style="color: #333">=</span> originY <span style="color: #333">-</span> <span style="color: #007020">int</span>(<span style="color: #007020">round</span>((pos[<span style="color: #00D; font-weight: bold">1</span>] <span style="color: #333">*</span> pixelsToM)))
+
+    <span style="color: #888"># draw the estimated position</span>
+    cv2<span style="color: #333">.</span>circle(frame, (correctedPosX, correctedPosY), <span style="color: #00D; font-weight: bold">5</span>, (<span style="color: #00D; font-weight: bold">0</span>, <span style="color: #00D; font-weight: bold">0</span>, <span style="color: #00D; font-weight: bold">0</span>), <span style="color: #333">-</span><span style="color: #00D; font-weight: bold">1</span>)
+    
+    <span style="color: #080; font-weight: bold">if</span> drawingLine : lineEndPoint <span style="color: #333">=</span> mousePos
+    
+    <span style="color: #888"># show final drawn frame</span>
+    cv2<span style="color: #333">.</span>imshow(<span style="background-color: #FFF0F0">&quot;Position Solver&quot;</span>, frame)
+    
+    key <span style="color: #333">=</span> cv2<span style="color: #333">.</span>waitKey(<span style="color: #00D; font-weight: bold">20</span>) <span style="color: #333">&amp;</span> <span style="color: #058; font-weight: bold">0xFF</span>
+    <span style="color: #888"># break if esc key pressed</span>
+    <span style="color: #080; font-weight: bold">if</span> cv2<span style="color: #333">.</span>waitKey(<span style="color: #00D; font-weight: bold">20</span>) <span style="color: #333">==</span> <span style="color: #00D; font-weight: bold">27</span>:
+        <span style="color: #080; font-weight: bold">break</span>
+    <span style="color: #888"># break if close window button is pressed</span>
+    <span style="color: #080; font-weight: bold">if</span> cv2<span style="color: #333">.</span>getWindowProperty(<span style="background-color: #FFF0F0">&#39;Position Solver&#39;</span>, cv2<span style="color: #333">.</span>WND_PROP_VISIBLE) <span style="color: #333">&lt;</span> <span style="color: #00D; font-weight: bold">1</span>:
+        <span style="color: #080; font-weight: bold">break</span>
+
+cv2<span style="color: #333">.</span>destroyAllWindows()
+</pre></div>
