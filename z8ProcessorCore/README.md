@@ -24,11 +24,28 @@ N.B because of the location Modelsim runs the testbench from, relative addressin
 ## Specifications
 8-bit data width  
 40-bit instructions (5-byte format)  
-4 general purpose registers indexed R0-R3
+4 general purpose registers indexed R0-R3  
 256 byte data memory, stack starts at 0xFF and grows downwards  
 31 opcodes total, with 18 individual instructions  
 
 ## Architecture
-![](BlockDiagram.png)  
+
+|Block diagram|Fetch-Decode-Execute-Writeback cycle|
+|:---:|:---:|
+| ![](BlockDiagram.png) | ![](fde_cycle.gif) |
+
 The z8 processor uses a Harvard-style architecture with seperate data and program memory.   
+Variables are not directly seen by the processor, instead the assembler computes addresses and prevents collisions. They live in data memory.  
 The architecture is setup so that as little (ideally none) of the data is handled by the CU, which instead deals exclusively with addresses and control signals.
+
+### Fetch-Decode-Execute-Writeback
+The Control Unit coordinates other modules to perform a task. Primarily driven by clock updates. It takes in the current instruction and state, switches to find the correct set of output values, and applies them to the right wires.  
+For example, `ADR` (Add register).  
+#### Fetch
+The `program_counter` points to the next instruction. The `Memory Manager` combinatorially outputs the `current_instruction`, which goes straight to the `Control Unit`.
+#### Decode 
+The `Control Unit` sets `rf_read_addr_a` to the address given by the destination portion of the instruction (the register to add to), and sets `rf_read_addr_b` to the address given by the source (the register to add from). The `Register File` is combinatorial, and immediately takes these addresses in and spits out the data in these registers to `rf_read_data_a` and `rd_read_data_b`.   
+#### Execute
+The `Control Unit` sets three control signals, `alu_op <= ALU_ADD` to tell the ALU to perform an adding operation on the two inputs,   and `alu_a_src_sel <= REG` and `alu_b_src_sel <= REG` to tell the ALU that the data coming in is from the `Register File` so read the data out from the `Register File`.  The ALU is combinatorial and outputs the result of the operation immediately.
+#### Writeback
+The `Control Unit` sets `rf_write_enable` to high, which tells the `Register File` to write the data it gets from `rf_write_data` to the selected register. The `Control Unit` also sets `rf_write_addr` to the destination portion of the instruction, to tell the `Register File` to write to that register.

@@ -4,7 +4,7 @@ It implements the general wave equation.
 
 $\frac{\partial^2 u}{\partial^2 t} = c^2 \nabla^2 u$  
 
-![](wave.gif)
+[![](WavesThumbnail.png)](https://youtu.be/JeCnEvR4Vik)
 
 I approximate $\frac{d^2 f(x)}{dx^2}$ with $\frac{f(x+2\Delta x) - 2f(x + \Delta x) + f(x)}{\Delta x^2}$  
 

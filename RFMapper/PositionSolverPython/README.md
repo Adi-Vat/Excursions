@@ -3,7 +3,7 @@ This program finds the relative position of an RF receiver in a room with 4 tran
 It uses the recorded power levels from each transmitter and applies a log equation (values experimentally derived) to find the approximate
 distance of the transmitter.
 
-![](PositionSolver_Video.gif)
+ [![](PositionSolverThumbnail.png)](https://youtu.be/QzmqsqSG8GQ)
 
 To find our relative position, we must solve the equation  
 $(x-x_0)^2 + (y-y_0)^2 = d^2$  
