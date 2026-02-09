@@ -358,9 +358,75 @@ int main(int argc, char *argv[])
                         // If the first char isn't a radix prefix OR a number, 
                         // then they're trying to access a variable that doesn't exist
                         char first_char = (this_operand + this_op_ptr)[0];
-                        if(!(is_protected_char(first_char) || isdigit(first_char))){
+                        if(!(is_protected_char(first_char) || isdigit(first_char) || is_bank_name(this_operand + this_op_ptr))){
                             add_error(ERR_NAME_UNDECLARED, line_num, error_str, sizeof(error_str), &error_pos);
                             continue;
+                        }
+                        
+                        // Check they're not trying to access an output bank
+                        if(is_bank_name(this_operand + this_op_ptr)){
+                            char second_char = (this_operand + this_op_ptr + 1)[0];
+                            // Bank access is done with b<bank number><row>
+                            // Check if a valid bank is being acccessed
+                            bool valid_bank = second_char == '0' || second_char == '1';
+                            if(!valid_bank){
+                                add_error(ERR_BANK_CONFLICT, line_num, error_str, sizeof(error_str), &error_pos);
+                                continue;
+                            }
+
+                            // now we know it's a bank being accessed, try and convert the bank index to a byte index
+                            // third character stores the byte being accessed
+                            long int byte_to_access = 0;
+                            Error_Code e =  str_to_num(this_operand + this_op_ptr + 2, &byte_to_access);
+                            if(e != ERR_NONE){
+                                add_error(e, line_num, error_str, sizeof(error_str), &error_pos);
+                                continue;
+                            }
+
+                            // bank 0 access, easy mapping
+                            if(second_char == '0'){
+                                if(byte_to_access < 0 || byte_to_access >= BANK_0_SIZE){
+                                    // trying to access an invalid byte from the bank
+                                    add_error(ERR_INVALID_BANK0_ADDR, line_num, error_str, sizeof(error_str), &error_pos);
+                                    continue;
+                                }
+
+                                if(this_op_map.op == OP_CB || this_op_map.op == OP_SB){
+                                    if(hex_operand_a < 0 || hex_operand_a > WORD_SIZE-1){
+                                        add_error(ERR_BIT_OUT_OF_RANGE, line_num, error_str, sizeof(error_str), &error_pos);
+                                        continue;
+                                    }
+                                }
+                                
+                                this_op_val = BANK_0_START + byte_to_access;
+                            } else{
+                                // If they're trying to acesss bank 1 with an instruction other than SB or CB;
+                                // tell them NO! for now. Because how are you meant to assign an 8 bit number to a 12 bit space?
+                                if(this_op_map.op != OP_CB && this_op_map.op != OP_SB || is_op_a){
+                                    add_error(ERR_UNSAFE_BANK1_OP, line_num, error_str, sizeof(error_str), &error_pos);
+                                    continue;
+                                }
+
+                                if(byte_to_access < 0 || byte_to_access >= 2){
+                                    // trying to access an invalid row from the bank
+                                    add_error(ERR_INVALID_BANK1_ADDR, line_num, error_str, sizeof(error_str), &error_pos);
+                                    continue;
+                                }
+
+                                // Convert from user facing 2 row access to internal 4 row
+                                // get bit trying to be accessed, 0-11 (incl.)
+                                if(hex_operand_a < 0 || hex_operand_a > 11){
+                                    add_error(ERR_BIT_OUT_OF_RANGE, line_num, error_str, sizeof(error_str), &error_pos);
+                                    continue;
+                                }
+                                // Convert from 2x12 access to 4x6 access
+                                int converted_column = hex_operand_a % 6;
+                                int converted_row = (byte_to_access << 1) + (hex_operand_a/6);
+                                hex_operand_a = converted_column;
+                                this_op_val = converted_row + BANK_1_START;
+                            }
+
+                            break;
                         }
 
                         // If it's a memory address, check that it's not a protected address or an invalid address
@@ -377,7 +443,7 @@ int main(int argc, char *argv[])
                             add_error(ERR_PROT_MEM_ACCESSED, line_num, error_str, sizeof(error_str), &error_pos);
                             continue;
                         }
-
+                        
                         this_op_val = (int)str_to_num_out;
                     break;
                     }

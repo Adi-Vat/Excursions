@@ -8,24 +8,31 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define WORD_SIZE 8
 #define MAX_LINE_SIZE 256
 #define MAX_ERRORS 128
 #define MAX_LABELS 16
 #define MAX_NAME_SIZE 32
 #define MAX_VARIABLES 16
-#define VAR_START_ADDR 0
-#define MAX_VALUE 65535
+#define VAR_START_ADDR 0x01
+#define MAX_VALUE 255
 #define OPERATION_COUNT 20
 #define ADDR_MODE_COUNT 3
 #define MACHINE_CODE_INSTR_LEN 10
 #define OPCODE_LEN 2
 #define OPERAND_LEN 4
 #define NUM_REGISTERS 4
+#define BANK_0_START 0xD9
+#define BANK_0_SIZE 3
+#define BANK_1_START 0xDC
+#define BANK_1_SIZE 4
 #define COMMENT_CHAR ';'
 #define LABEL_CHAR ':'
 #define HEX_CHAR '$'
 #define BINARY_CHAR '&'
 #define MEM_CHAR '@'
+#define REG_CHAR 'r'
+#define BANK_CHAR 'b'
 
 extern const char DEFAULT_HEX_FILE_NAME[];
 extern const char VAR_DIRECTIVE[];
@@ -102,7 +109,18 @@ typedef enum{
     // Protected memory accessed
     ERR_PROT_MEM_ACCESSED,
     // Invalid register accessed
-    ERR_INVALID_REGISTER
+    ERR_INVALID_REGISTER,
+    // Invalid output bank accessed
+    ERR_INVALID_BANK,
+    // Name conflicts with bank name
+    ERR_BANK_CONFLICT,
+    // Invalid bank address being accessed
+    ERR_INVALID_BANK0_ADDR,
+    ERR_INVALID_BANK1_ADDR,
+    // Unsafe operation applied to bank 1
+    ERR_UNSAFE_BANK1_OP,
+    // Out of range bit trying to be accessed with SB or CB
+    ERR_BIT_OUT_OF_RANGE
 } Error_Code;
 
 typedef struct{
@@ -125,6 +143,7 @@ int index_of_str(char** array, int array_len, char* item);
 int index_of_label(Label array[], int array_len, char* item_key);
 int first_char_in_str(char search_char, char* string);
 bool is_register_name(const char *name);
+bool is_bank_name(const char *name);
 char* remove_whitespace(char* str);
 char* remove_inline_comment(char* str);
 Operation_Mapping find_operation(const char* search_name);

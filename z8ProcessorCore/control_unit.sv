@@ -40,7 +40,7 @@ logic [WORD_SIZE-1:0] stack_ptr;
 always_ff @(posedge clk) begin
 	if(reset) begin
 		current_state <= FETCH;
-		stack_ptr <= DATA_MEM_SIZE - 1;
+		stack_ptr <= STACK_START;
 	end else if(!halted) begin
 		current_state <= next_state;
 	end
@@ -93,17 +93,17 @@ always_ff @(posedge clk) begin
 				PSHR: begin
 					rf_read_addr_a <= dest;
 					mem_rw_addr <= stack_ptr;
-					if(stack_ptr > 0) stack_ptr <= stack_ptr - 1;
+					if(stack_ptr > STACK_END) stack_ptr <= stack_ptr - 1;
 					
 				end
 				// Dec stack pointer and set memory write address to the pointer
 				PSHD: begin
 					mem_rw_addr <= stack_ptr;
-					if(stack_ptr > 0) stack_ptr <= stack_ptr - 1;
+					if(stack_ptr > STACK_END) stack_ptr <= stack_ptr - 1;
 				end
 				// Inc stack pointer, set memory read address to pointer, write back read value to register
 				POP: begin
-					if(stack_ptr < DATA_MEM_SIZE - 1) begin
+					if(stack_ptr < STACK_START) begin
 						stack_ptr <= stack_ptr + 1;
 						mem_rw_addr <= stack_ptr + 1;
 					end else begin

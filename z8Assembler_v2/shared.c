@@ -107,7 +107,7 @@ int first_char_in_str(char search_char, char* string){
 }
 
 bool is_register_name(const char *name){
-    if(!name || name[0] != 'r')
+    if(!name || name[0] != REG_CHAR)
         return false;
 
     if(!isdigit((unsigned char)name[1]))
@@ -118,6 +118,21 @@ bool is_register_name(const char *name){
             return false;
     }
     
+    return true;
+}
+
+bool is_bank_name(const char *name){
+    if(!name || name[0] != BANK_CHAR)
+        return false;
+
+    if(!isdigit((unsigned char)name[1]))
+        return false;
+    
+    for(int i = 1; name[i]; i++){
+        if(!isdigit((unsigned char)name[1]))
+            return false;
+    }
+
     return true;
 }
 
@@ -226,6 +241,8 @@ Error_Code valid_name(char* name, int line_num, Label* labels, Label* variables)
 
     if(is_register_name(name)) return ERR_REG_CONFLICT;
 
+    if(is_bank_name(name)) return ERR_BANK_CONFLICT;
+
     return ERR_NONE;
 }
 
@@ -250,7 +267,7 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
             snprintf(error_message, sizeof(error_message), "name cannot start with digit or %s", PROTECTED_CHARS);
         break;
         case ERR_REG_CONFLICT:
-            snprintf(error_message, sizeof(error_message), "name conflicts with register notation R{num}");
+            snprintf(error_message, sizeof(error_message), "name conflicts with register notation %s{num}", REG_CHAR);
         break;
         case ERR_NAME_EXISTS:
             snprintf(error_message, sizeof(error_message), "name already declared as variable or label");
@@ -293,6 +310,24 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
         break;
         case ERR_INVALID_REGISTER:
             snprintf(error_message, sizeof(error_message), "attempted to access invalid register, use R0-R%d", NUM_REGISTERS-1);
+        break;
+        case ERR_INVALID_BANK:
+            snprintf(error_message, sizeof(error_message), "attempted to access an invalid output bank, valid banks are: 0, 1");
+        break;
+        case ERR_BANK_CONFLICT:
+            snprintf(error_message, sizeof(error_message), "name conflicts with output bank notation %s{num}", BANK_CHAR);
+        break;
+        case ERR_INVALID_BANK0_ADDR:
+            snprintf(error_message, sizeof(error_message), "trying to access invalid BANK 0 row, valid rows are %d-%d", 0, BANK_0_SIZE - 1);            
+        break;
+        case ERR_INVALID_BANK1_ADDR:
+            snprintf(error_message, sizeof(error_message), "trying to access invalid BANK 1 row, valid rows are 0-1");            
+        break;
+        case ERR_UNSAFE_BANK1_OP:
+            snprintf(error_message, sizeof(error_message), "BANK 1 can only be operated on with SB (set bit) and CB (clear bit)");
+        break;
+        case ERR_BIT_OUT_OF_RANGE:
+            snprintf(error_message, sizeof(error_message), "bit out of range, must be 0-%d for normal access and 0-11 for BANK 1", (WORD_SIZE - 1));
         break;
     }
 

@@ -10,7 +10,9 @@ package instruction_set;
 	parameter OPERAND_B_MSB = 15;
 	parameter OPERAND_B_LSB = 0;
 	
-	parameter BANK_0_START = 8'h00;
+	parameter STACK_START = 8'hFF;
+	parameter STACK_END = 8'hF0;
+	parameter BANK_0_START = 8'hD9;
 	parameter BANK_0_END = BANK_0_START + 8'h02;
 	parameter BANK_1_START = BANK_0_END + 8'h01;
 	parameter BANK_1_END = BANK_1_START + 8'h03;
