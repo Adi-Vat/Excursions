@@ -122,6 +122,8 @@ When writing code, the parent instruction is used. `0xFF` is an invalid opcode.
 | DEC | 0xFF | 0x1B | 0xFF |  
 | PSH | 0xFF | 0x1C | 0x1D |  
 | POP | 0x1E | 0x1E | 0x1E |  
+| SB | 0x1F | 0x20 | 0xFF |  
+| CB | 0x21 | 0x22 | 0xFF |  
 | HALT | 0xFE | 0xFE | 0xFE |  
 
 Each instruction is 5 bytes  
@@ -142,6 +144,11 @@ Adds two numbers and stores the result in the src.
 &rarr; `0x0A ANR` (and register)  
 &rarr; `0x0B AND` (and direct)  
 Performs the logical and & operator on two numbers and stores the result in the src.
+
+#### CB imm, mem/reg
+&rarr; `0x21 CBIM` (clear bit in memory)  
+&rarr; `0x22 CBIR` (clear bit in register)  
+Sets a bit at index **dest** to 0.
 
 #### CMP reg, reg/imm
 &rarr; `0x10 CPR` (compare register)  
@@ -207,6 +214,11 @@ Pops value at the top of the stack to a register, lowers the stack (stack_ptr--)
 &rarr; `0x1C PSHR` (push register)  
 &rarr; `0x1D PSHD` (push direct)  
 Pushes a value onto the stack, raises the stack (stack_ptr++).
+
+#### SB imm, mem/reg
+&rarr; `0x1F SBIM` (set bit in memory)  
+&rarr; `0x20 SBIR` (set bit in register)  
+Sets a bit at index **dest** to 1.
 
 #### STR mem, reg/imm
 &rarr; `0x04 STR` (store register)  
