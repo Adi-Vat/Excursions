@@ -15,7 +15,7 @@
 #define MAX_VARIABLES 16
 #define VAR_START_ADDR 0
 #define MAX_VALUE 65535
-#define OPERATION_COUNT 18
+#define OPERATION_COUNT 20
 #define ADDR_MODE_COUNT 3
 #define MACHINE_CODE_INSTR_LEN 10
 #define OPCODE_LEN 2
@@ -49,6 +49,8 @@ typedef enum{
     OP_DEC,
     OP_PUSH,
     OP_POP,
+    OP_SB,
+    OP_CB,
     OP_HALT,
     OP_INVALID
 } Operation;

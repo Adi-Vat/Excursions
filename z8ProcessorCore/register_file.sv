@@ -1,3 +1,5 @@
+import instruction_set ::*;
+
 module register_file(
 	input logic clk,
 	input logic reset,
@@ -14,7 +16,7 @@ module register_file(
 	output logic [WORD_SIZE-1:0] read_data_b
 );
 
-logic [WORD_SIZE-1:0] registers [3:0];
+logic [WORD_SIZE-1:0] registers [0:3];
 
 always_ff @(posedge clk) begin
 	if (reset) begin

@@ -72,6 +72,10 @@ package instruction_set;
 		PSHR, // 0x1C Push register to stack
 		PSHD, // 0x1D Push value to stack
 		POP, // 0x1E Pop top value from stack into register
+		SBIM, // 0x1F Set bit of word in memory (to 1)
+		SBIR, // 0x20 Set bit of word in register (to 1)
+		CBIM, // 0x21 Clear bit of word in memory (to 0)
+		CBIR, // 0x22 Clear bit of word in register (to 0)
 		HALT = 8'hfe // 0xFE Stops program
 	} OPCODES_T;
 	
@@ -84,7 +88,9 @@ package instruction_set;
 		ALU_AND, // 5
 		ALU_OR, // 6
 		ALU_XOR, // 7
-		ALU_CMP // 8
+		ALU_CMP, // 8
+		ALU_SB, // 9
+		ALU_CB // 10
 	} ALU_OPS_T;
 	
 	typedef enum logic[1:0]{

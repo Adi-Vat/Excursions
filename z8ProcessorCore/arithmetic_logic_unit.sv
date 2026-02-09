@@ -26,6 +26,14 @@ always_comb begin
 		ALU_AND: temp_out = in_a & in_b;
 		ALU_OR: temp_out = in_a | in_b;
 		ALU_XOR: temp_out = in_a ^ in_b;
+		ALU_SB: begin
+			temp_out = in_b;
+			temp_out[in_a] = 1;
+		end
+		ALU_CB: begin
+			temp_out = in_b;
+			temp_out[in_a] = 0;
+		end
 	endcase
 	
 	

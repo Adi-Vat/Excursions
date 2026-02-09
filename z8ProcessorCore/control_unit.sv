@@ -29,7 +29,7 @@ assign opcode = OPCODES_T'(instruction[OPCODE_MSB:OPCODE_LSB]);
 logic [WORD_SIZE-1:0] dest;
 assign dest = instruction[OPERAND_A_MSB:OPERAND_A_LSB];
 logic [WORD_SIZE-1:0] src;
-assign src = instruction[WORD_SIZE-1:0];
+assign src = instruction[OPERAND_B_MSB:OPERAND_B_LSB];
 bit halted;
 
 FLAGS_T flags;
@@ -50,7 +50,20 @@ always_ff @(posedge clk) begin
 	end
 	
 	case (current_state)
-		FETCH: if(opcode == HALT) halted <= 1;
+		FETCH: begin 
+			if(opcode == HALT) halted <= 1;
+			else begin
+				case (opcode)
+					SBIM, CBIM: begin
+						mem_rw_addr <= src;
+						mem_op <= MEM_READ;
+					end
+					SBIR, CBIR: begin
+						rf_read_addr_b <= src;
+					end
+				endcase
+			end
+		end
 		DECODE: begin
 			case (opcode)
 				// Load data from memory into register
@@ -97,6 +110,31 @@ always_ff @(posedge clk) begin
 						mem_rw_addr <= stack_ptr;
 					end
 				end
+				// Get the byte to change
+				SBIM: begin
+					// tell the ALU to take in the index of the bit to change
+					// and the memory location to change at
+					alu_a_src_sel <= VAL;
+					alu_b_src_sel <= MEM;
+					// tell the ALU to set bits
+					alu_op <= ALU_SB;
+				end
+				CBIM: begin
+					alu_a_src_sel <= VAL;
+					alu_b_src_sel <= MEM;
+					// tell the ALU to set bits
+					alu_op <= ALU_CB;
+				end
+				SBIR: begin
+					alu_a_src_sel <= VAL;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_SB;
+				end
+				CBIR: begin
+					alu_a_src_sel <= VAL;
+					alu_b_src_sel <= REG;
+					alu_op <= ALU_CB;
+				end
 			endcase
 		end
 		
@@ -105,7 +143,7 @@ always_ff @(posedge clk) begin
 				// tell memory to read
 				LDM, POP: mem_op <= MEM_READ;
 				// tell memory to write
-				STR, STD, PSHR, PSHD: mem_op <= MEM_WRITE;
+				STR, STD, PSHR, PSHD, SBIM, CBIM: mem_op <= MEM_WRITE;
 				ADR: begin
 					alu_a_src_sel <= REG;
 					alu_b_src_sel <= REG;
@@ -187,7 +225,6 @@ always_ff @(posedge clk) begin
 			alu_b_src_sel <= DATA_SOURCE_T'(0);
 			alu_b_src_sel <= DATA_SOURCE_T'(0);
 		end
-		
 	endcase
 end
 
@@ -219,6 +256,10 @@ always_comb begin
 				JNZD: if(!flags.zero) next_pc = dest;
 				JNR: if(flags.negative) next_pc = rf_read_data_a;
 				JND: if(flags.negative) next_pc = dest;
+				SBIR, CBIR: begin
+					rf_write_addr = src;
+					rf_write_enable = 1;
+				end
 			endcase
 			next_state = FETCH;
 		end

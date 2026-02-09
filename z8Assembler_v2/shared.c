@@ -27,6 +27,8 @@ Operation_Mapping operations[] = {
     {"dec", OP_DEC, 1, ADDR_REG},
     {"psh", OP_PUSH, 1, ADDR_MEM},
     {"pop", OP_POP, 1, ADDR_REG},
+    {"sb", OP_SB, 2, ADDR_DIR},
+    {"cb", OP_CB, 2, ADDR_DIR},
     {"halt", OP_HALT, 0, ADDR_INVALID}
 };
 
@@ -49,6 +51,8 @@ uint8_t opcode_map[OPERATION_COUNT][ADDR_MODE_COUNT] = {
     [OP_DEC] = {0xFF, 0x1B, 0xFF},
     [OP_PUSH] = {0xFF, 0x1C, 0x1D},
     [OP_POP] = {0x1E, 0x1E, 0x1E},
+    [OP_SB] = {0x1F, 0x20, 0xFF},
+    [OP_CB] = {0x21, 0x22, 0xFF},
     [OP_HALT] = {0xFE, 0xFE, 0xFE}
 };
 
@@ -301,5 +305,4 @@ Addr_Mode get_addr_mode(const char* arg){
     if(is_register_name(arg)) return ADDR_REG;
     else if(arg[0] == MEM_CHAR) return ADDR_MEM;
     else return ADDR_DIR;
-    
 }

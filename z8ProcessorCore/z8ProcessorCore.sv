@@ -154,6 +154,17 @@ module z8ProcessorCore(
 			PSHR: mem_write_data = rf_read_data_a;
 			// write the dest value to memory, as PSHD only has 1 argument
 			PSHD: mem_write_data = instr_reg[OPERAND_A_MSB:OPERAND_A_LSB];
+			// write the new alu out value to memory
+			SBIM, CBIM: begin
+				mem_write_data = alu_out;
+				flag_read_src_sel = ALU;
+				update_flags = 1;
+			end
+			SBIR, CBIR: begin
+				rf_write_data = alu_out;
+				flag_read_src_sel = ALU;
+				update_flags = 1;
+			end
 		endcase
 	end
 	
@@ -176,6 +187,7 @@ module z8ProcessorCore(
 		// correctly get data for alu in a
 		case (alu_a_src_sel)
 			REG: alu_in_data_a = rf_read_data_a;
+			VAL: alu_in_data_a = instr_reg[OPERAND_A_MSB:OPERAND_A_LSB];
 		endcase
 		// for alu in b
 		case (alu_b_src_sel)

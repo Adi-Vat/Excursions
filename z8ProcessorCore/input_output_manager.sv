@@ -8,6 +8,7 @@ module input_output_manager(
 );
 
 logic [1:0][11:0] bank_1_temp;
+int newI;
 
 always_comb begin
 	for (int i = 0; i < 5; i++) hex_out[i] = 0;
