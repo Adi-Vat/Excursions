@@ -28,6 +28,30 @@ Hex `$<value>`
 
 Binary `&<value>`  
 
+## Input/Output
+### Output
+Output is tailored for the `5CSEMA5F31C6` FPGA on the `DE1-SoC` board.  
+
+To output to the 10 LEDs, address memory directly with `@$D7` and `@$D8`  
+With the first 5 bits of `0xD7` controlling the first 5 LEDs, and the first 5 bits of `0xD8` controlling the last 5 LEDs.  
+
+To output to the 6, seven segment displays, address memory with `@b<row><column>`.  
+
+More information about the 7 segment ouput can be found in [z8 Processor Core](/z8ProcessorCore/):  
+`Bit 0` in the `control_flags` word (`0x00`) sets which **bank** is being read from.  
+
+**Bank 0** is 3 words and corresponds directly to the 3 sets of 2 seven segment displays.  
+
+**Bank 1** is physically 4 words but addressed as two, 12 bit segments:  
+It can **only** be operated on with `SB` or `CB`.   
+It corresponds to the 24 vertical slats of the 7 segment displays, with `b10` referring to the top row of vertical slats, and `b11` referring to the bottom row of vertical slats.  
+
+### Input
+Input works in a similar way, with words `0xD5` and `0xD6` storing SW/KEY values. These addresses are protected against manual overwriting, and can only be operated on with `LDM`. 
+There are 10 switches and 4 keys,  
+`0xD4`'s `bits 0-4` refer to the first 5 switches, and `bits 5-7` refer to the first 2 keys  
+`0xD5`'s `bits 0-4` refer to the last 5 switches, and `bits 5-7` refer to the last 2 keys.  
+
 ## How to use
 ### Assemble a source file
 To assemble a program, run `z8 <input_file> [-o <output_file>]`  
