@@ -87,6 +87,7 @@ This example demonstrates:
 
 It compiles to
 ```bash
+0500010000 # define variable final_output
 0300000005 # LD R0, 5
 0300010001 # LD R1, 1
 0300020001 # LD R2, 1
@@ -96,6 +97,7 @@ It compiles to
 0200010003 # LD R1, R3
 1B00000000 # DEC R0
 1700040000 # JNZ loop
+0400010002 # STR @final_output, R2
 fe00000000 # HALT
 ```
 (without the comments)
@@ -114,8 +116,9 @@ R0: 00
 R1: 08
 R2: 0D
 R3: 08
- |00:00| |01:0D| |02:00| ...
- ... |FD:00| |FE:00|>|FF:00|
+ |00:00| |01:0D| |02:00| 
+ ...
+ |FD:00| |FE:00|>|FF:00|
 Overflow: 0
 Carry: 0
 Negative: 0
