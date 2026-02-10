@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
                         }
 
                         // make sure it's accessable
-                        if(register_index < 0 || register_index >= NUM_REGISTERS){
+                        if(register_index < 0 || register_index >= REGISTERS_COUNT){
                             add_error(ERR_INVALID_REGISTER, line_num, error_str, sizeof(error_str), &error_pos);
                             continue;
                         }

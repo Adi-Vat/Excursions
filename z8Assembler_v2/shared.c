@@ -178,7 +178,7 @@ Operation_Mapping find_operation(const char* search_name){
             return operations[i];
     }
 
-    Operation_Mapping invalid_struct = {"INVALID", OP_INVALID, 0};
+    Operation_Mapping invalid_struct = {"INVALID", OP_INVALID, 0, ADDR_INVALID};
     return invalid_struct;
 }
 
@@ -205,8 +205,6 @@ Error_Code str_to_num(const char* str, long int* val_out){
 
     *val_out = strtol(str, &end_ptr, base);
 
-    bool is_error = false;
-
     // Check validity of number
     if(end_ptr == str) return ERR_BAD_RADIX_PREFIX;
     else if(*end_ptr != '\0') return ERR_VAL_INVALID;
@@ -216,7 +214,7 @@ Error_Code str_to_num(const char* str, long int* val_out){
 }
 
 // Check if a name already exists in labels or variables
-Error_Code unique_name(char* name, int line_num, Label *labels, Label *variables){
+Error_Code unique_name(char* name, Label *labels, Label *variables){
     int possible_var_index = index_of_label(variables, MAX_VARIABLES, name);
     int possible_label_index = index_of_label(labels, MAX_LABELS, name);
 
@@ -232,7 +230,7 @@ Error_Code unique_name(char* name, int line_num, Label *labels, Label *variables
 // too many labels already
 // number of characters exceeds limit
 // conflicts with a register
-Error_Code valid_name(char* name, int line_num, Label* labels, Label* variables){
+Error_Code valid_name(char* name){
     if(isspace(name[0]) || strlen(name) <= 0) return ERR_WHITESPACE;
 
     if(isdigit(name[0]) || is_protected_char(name[0])) return ERR_PROT_CHAR;
@@ -253,7 +251,8 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
     char error_message[MAX_LINE_SIZE - 32] = "";
     
     switch(error_code){
-        // Character limit exceeded
+        case ERR_NONE:
+        break;
         case ERR_CHAR_LIM_EXCEED:
             snprintf(error_message, sizeof(error_message), "line exceeds %d char limit", MAX_LINE_SIZE);
         break;
@@ -267,7 +266,7 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
             snprintf(error_message, sizeof(error_message), "name cannot start with digit or %s", PROTECTED_CHARS);
         break;
         case ERR_REG_CONFLICT:
-            snprintf(error_message, sizeof(error_message), "name conflicts with register notation %s{num}", REG_CHAR);
+            snprintf(error_message, sizeof(error_message), "name conflicts with register notation %c{num}", REG_CHAR);
         break;
         case ERR_NAME_EXISTS:
             snprintf(error_message, sizeof(error_message), "name already declared as variable or label");
@@ -309,13 +308,13 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
             snprintf(error_message, sizeof(error_message), "invalid radix prefix used");
         break;
         case ERR_INVALID_REGISTER:
-            snprintf(error_message, sizeof(error_message), "attempted to access invalid register, use R0-R%d", NUM_REGISTERS-1);
+            snprintf(error_message, sizeof(error_message), "attempted to access invalid register, use R0-R%d", REGISTERS_COUNT-1);
         break;
         case ERR_INVALID_BANK:
             snprintf(error_message, sizeof(error_message), "attempted to access an invalid output bank, valid banks are: 0, 1");
         break;
         case ERR_BANK_CONFLICT:
-            snprintf(error_message, sizeof(error_message), "name conflicts with output bank notation %s{num}", BANK_CHAR);
+            snprintf(error_message, sizeof(error_message), "name conflicts with output bank notation %c{num}", BANK_CHAR);
         break;
         case ERR_INVALID_BANK0_ADDR:
             snprintf(error_message, sizeof(error_message), "trying to access invalid BANK 0 row, valid rows are %d-%d", 0, BANK_0_SIZE - 1);            

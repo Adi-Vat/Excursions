@@ -21,7 +21,7 @@
 #define MACHINE_CODE_INSTR_LEN 10
 #define OPCODE_LEN 2
 #define OPERAND_LEN 4
-#define NUM_REGISTERS 4
+#define REGISTERS_COUNT 4
 #define BANK_0_START 0xD9
 #define BANK_0_SIZE 3
 #define BANK_1_START 0xDC
@@ -135,6 +135,45 @@ typedef struct{
     Addr_Mode dest_addr_mode;
 } Operation_Mapping;
 
+typedef enum{
+    EMU_NOP, // 0x00 NO OPERATION
+    EMU_LDM, // 0x01 Load value from memory into register
+    EMU_LDR, // 0x02 Load value from register into register
+    EMU_LDD, // 0x03 Load value directly into register
+    EMU_STR, // 0x04 Store value from register into memory address
+    EMU_STD, // 0x05 Store direct value into memory address
+    EMU_ADR, // 0x06 Add value from register to another register
+    EMU_ADD, // 0x07 Add value to another register
+    EMU_SBR, // 0x08 Subtract the source from the dest and store in the dest
+    EMU_SBD, // 0x09 Subtract a value from the register and store in the register
+    EMU_ANR, // 0x0A AND a register and a register store in the dest
+    EMU_AND, // 0x0B AND a register and value store in the dest
+    EMU_ORR, // 0x0C OR a reg and reg store in dest
+    EMU_ORD, // 0x0D OR a reg and value store in dest
+    EMU_XOR, // 0x0E XOR a reg and reg store in dest
+    EMU_XOD, // 0x0F XOR a reg and value store in dest
+    EMU_CPR, // 0x10 Compare reg and reg
+    EMU_CPD, // 0x11 Compare reg and value,
+    EMU_JPR, // 0x12 Jump to line stored in reg
+    EMU_JPD, // 0x13 Jump directly to line
+    EMU_JZR, // 0x14 Jump to line stored in reg if zero flag is set
+    EMU_JZD, // 0x15 Jump directly to line if zero flag is set
+    EMU_JNZR, // 0x16 Jump to line stored in reg if zero flag is NOT set
+    EMU_JNZD, // 0x17 Jump directly to line if zero flag is NOT set
+    EMU_JNR, // 0x18 Jump to line stored in reg if negative flag is set
+    EMU_JND, // 0x19 Jump directly to line if negative flag is set
+    EMU_INC, // 0x1A Increment register
+    EMU_DEC, // 0x1B Decrement register
+    EMU_PSHR, // 0x1C Push register to stack
+    EMU_PSHD, // 0x1D Push value to stack
+    EMU_POP, // 0x1E Pop top value from stack into register
+    EMU_SBIM, // 0x1F Set bit of word in memory (to 1)
+    EMU_SBIR, // 0x20 Set bit of word in register (to 1)
+    EMU_CBIM, // 0x21 Clear bit of word in memory (to 0)
+    EMU_CBIR, // 0x22 Clear bit of word in register (to 0)
+    EMU_HALT = 0xFE // 0xFE Stops program
+} Emulator_Operations;
+
 extern uint8_t opcode_map[OPERATION_COUNT][ADDR_MODE_COUNT];
 
 bool is_protected_char(char c);
@@ -148,8 +187,8 @@ char* remove_whitespace(char* str);
 char* remove_inline_comment(char* str);
 Operation_Mapping find_operation(const char* search_name);
 Error_Code str_to_num(const char* str, long int* val_out);
-Error_Code unique_name(char* name, int line_num, Label *labels, Label *variables);
-Error_Code valid_name(char* name, int line_num, Label* labels, Label* variables);
+Error_Code unique_name(char* name, Label *labels, Label *variables);
+Error_Code valid_name(char* name);
 void add_error(Error_Code error_code, int line_num, char* error_string, size_t size, int* error_pos);
 Addr_Mode get_addr_mode(const char* arg);
 
