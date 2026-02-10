@@ -1,7 +1,7 @@
 # Z8 Assembler+Emulator (v2)
 ## Overview
 An assembler for my own assembly language, z8. And an accompanying emulator.  
-Converts an assembly file to a hex file.
+Converts an assembly file to a hex file.  
 The hex file can then be run by my [z8 Processor Core](/z8ProcessorCore/), or can be emulated by the z8 Emulator (in this project).    
 
 [![](z8Assembler_v2Thumbnail.png)](https://youtu.be/_1obpcsb0C4)
