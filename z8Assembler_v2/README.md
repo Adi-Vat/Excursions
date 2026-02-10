@@ -258,7 +258,7 @@ Sets a bit at index **dest** to 1.
 #### STR mem, reg/imm
 &rarr; `0x04 STR` (store register)  
 &rarr; `0x05 STD` (store direct)  
-Stores a value into memory. Can't store directly into variable space [0x00] -> [0x10].
+Stores a value into memory. Can't store directly into variable space [0x01] -> [0x20].
 
 #### SUB reg, reg/imm
 &rarr; `0x08 SBR` (subtract register)  
