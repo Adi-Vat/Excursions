@@ -1,8 +1,8 @@
-# Z8 Assembler (v2)
+# Z8 Assembler+Emulator (v2)
 ## Overview
-An assembler for my own assembly language, z8.  
+An assembler for my own assembly language, z8. And an accompanying emulator.  
 Converts an assembly file to a hex file.
-The hex file can then be run by my [z8 Processor Core](/z8ProcessorCore/)  
+The hex file can then be run by my [z8 Processor Core](/z8ProcessorCore/), or can be emulated by the z8 Emulator (in this project).    
 
 [![](z8Assembler_v2Thumbnail.png)](https://youtu.be/_1obpcsb0C4)
 
@@ -40,6 +40,17 @@ Arguments:
 You need a C compiler. I use MinGW-w64 and compile with   
 ```bash
 gcc asm.c shared.c -o z8.exe
+```
+
+### Emulate a hex file
+To emulate an assembled hex file, run `emu <input_file>`  
+Arguments:
+    `<input_file>` HEX file
+
+### Compile the emulator
+You need the same thing as for the assembler, a C compiler. Then run  
+```bash
+gcc emu.c shared.c -o emu.exe
 ```
 
 ### Examples
@@ -92,6 +103,22 @@ If assembly was unsucessful, an output file will not be created, and all reached
 [Line 3] Error: trying to access an undeclared variable/label
 ```
 
+You can then test your progam without an FPGA or ModelSim by using the emulator;  
+Fibonacci output:  
+```
+R0: 00
+R1: 08
+R2: 0D
+R3: 08
+ |00:00| |01:0D| |02:00| ...
+ ... |FD:00| |FE:00|>|FF:00|
+Overflow: 0
+Carry: 0
+Negative: 0
+Zero: 1
+Stack Pointer: FF
+```
+
 ## Implementation details
 It is a case insensistive two-pass assembler.  
 ### First Pass
@@ -130,6 +157,8 @@ Each instruction is 5 bytes
 - Byte 0: Opcpde
 - Bytes 1-2: Destination
 - Bytes 3-4: Source
+
+*N.B. the control flags live at 0x00, more info in [z8 Processor Core](/z8ProcessorCore/)*
 
 Example:  
 `ADD R2, 5 -> 06 0002 0005`
@@ -273,3 +302,6 @@ This is a complete re-write of the v1 assembler.
 ### Output format
 **Organised output** - Data section first, then code section  
 **Automatic HALT** - Appends HALT instruction automatically
+
+## Notes on the emulator
+The emulator is a very simple non-pipelined glorified switch statement. Not much to talk about.
