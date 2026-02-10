@@ -254,10 +254,17 @@ int main(int argc, char *argv[]){
     for(int y = 0; y < 16; y++){
         for(int x = 0; x < 16; x++){
             int address = y * 16 + x;
-            printf("|%02X:%02X| ", address, data_mem[address]);
+            char stack_ptr_char = ' ';
+            if(address == stack_ptr) stack_ptr_char = '>'; 
+            printf("%c|%02X:%02X|", stack_ptr_char, address, data_mem[address]);
         }
         printf("\n");
     }
+    printf("Overflow: %d\n", flags.overflow);
+    printf("Carry: %d\n", flags.carry);
+    printf("Negative: %d\n", flags.negative);
+    printf("Zero: %d\n", flags.zero);
+    printf("Stack Pointer: %02X", stack_ptr);
 
     return 0; 
 }
