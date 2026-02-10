@@ -6,6 +6,10 @@ The hex file can then be run by my [z8 Processor Core](/z8ProcessorCore/), or ca
 
 [![](z8Assembler_v2Thumbnail.png)](https://youtu.be/_1obpcsb0C4)
 
+## Quickstart
+Assemble: `z8 examples/fibonacci.s`  
+Run: `emu hex_out/fibonacci.hex`
+
 ## Syntax
 ### Instructions
 Operations are written as `OPCODE <dest>, <src>`  
@@ -27,30 +31,6 @@ Denary `<value>`
 Hex `$<value>`  
 
 Binary `&<value>`  
-
-## Input/Output
-### Output
-Output is tailored for the `5CSEMA5F31C6` FPGA on the `DE1-SoC` board.  
-
-To output to the 10 LEDs, address memory directly with `@$D7` and `@$D8`  
-With the first 5 bits of `0xD7` controlling the first 5 LEDs, and the first 5 bits of `0xD8` controlling the last 5 LEDs.  
-
-To output to the 6, seven segment displays, address memory with `@b<row><column>`.  
-
-More information about the 7 segment ouput can be found in [z8 Processor Core](/z8ProcessorCore/):  
-`Bit 0` in the `control_flags` word (`0x00`) sets which **bank** is being read from.  
-
-**Bank 0** is 3 words and corresponds directly to the 3 sets of 2 seven segment displays.  
-
-**Bank 1** is physically 4 words but addressed as two, 12 bit segments:  
-It can **only** be operated on with `SB` or `CB`.   
-It corresponds to the 24 vertical slats of the 7 segment displays, with `b10` referring to the top row of vertical slats, and `b11` referring to the bottom row of vertical slats.  
-
-### Input
-Input works in a similar way, with words `0xD5` and `0xD6` storing SW/KEY values. These addresses are protected against manual overwriting, and can only be operated on with `LDM`. 
-There are 10 switches and 4 keys,  
-`0xD4`'s `bits 0-4` refer to the first 5 switches, and `bits 5-7` refer to the first 2 keys  
-`0xD5`'s `bits 0-4` refer to the last 5 switches, and `bits 5-7` refer to the last 2 keys.  
 
 ## How to use
 ### Assemble a source file
@@ -178,7 +158,7 @@ When writing code, the parent instruction is used. `0xFF` is an invalid opcode.
 | HALT | 0xFE | 0xFE | 0xFE |  
 
 Each instruction is 5 bytes  
-- Byte 0: Opcpde
+- Byte 0: Opcode
 - Bytes 1-2: Destination
 - Bytes 3-4: Source
 
@@ -217,7 +197,7 @@ Decrements the value in a register and stores it back in the same register.
 Stops the program from executing any further.
 
 #### INC reg
-&rarr; `0x1A INC` (incerment register)  
+&rarr; `0x1A INC` (increment register)  
 Increments the value in a register and stores it back in the same register.
 
 #### JMP reg/imm
@@ -327,5 +307,30 @@ This is a complete re-write of the v1 assembler.
 **Organised output** - Data section first, then code section  
 **Automatic HALT** - Appends HALT instruction automatically
 
+## Input/Output
+### Output
+Output is tailored for the `5CSEMA5F31C6` FPGA on the `DE1-SoC` board.  
+
+To output to the 10 LEDs, address memory directly with `@$D7` and `@$D8`  
+With the first 5 bits of `0xD7` controlling the first 5 LEDs, and the first 5 bits of `0xD8` controlling the last 5 LEDs.  
+
+To output to the 6, seven segment displays, address memory with `@b<row><column>`.  
+
+More information about the 7 segment ouput can be found in [z8 Processor Core](/z8ProcessorCore/):  
+`Bit 0` in the `control_flags` word (`0x00`) sets which **bank** is being read from.  
+
+**Bank 0** is 3 words and corresponds directly to the 3 sets of 2 seven segment displays.  
+
+**Bank 1** is physically 4 words but addressed as two, 12 bit segments:  
+It can **only** be operated on with `SB` or `CB`.   
+It corresponds to the 24 vertical slats of the 7 segment displays, with `b10` referring to the top row of vertical slats, and `b11` referring to the bottom row of vertical slats.  
+
+### Input
+Input works in a similar way, with words `0xD5` and `0xD6` storing SW/KEY values. These addresses are protected against manual overwriting, and can only be operated on with `LDM`. 
+There are 10 switches and 4 keys,  
+`0xD4`'s `bits 0-4` refer to the first 5 switches, and `bits 5-7` refer to the first 2 keys  
+`0xD5`'s `bits 0-4` refer to the last 5 switches, and `bits 5-7` refer to the last 2 keys.  
+
 ## Notes on the emulator
-The emulator is a very simple non-pipelined glorified switch statement. Not much to talk about.
+The emulator breaks reads the .hex file line by line, breaks down the instruction and identifies the opcode, then in one cycle decodes, executes, and writes-back.  
+It outputs the register values, a memory dump, and the flag state at the end of the program.
