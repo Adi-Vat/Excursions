@@ -126,10 +126,10 @@ Stack Pointer: FF
 ## Implementation details
 It is a case insensistive two-pass assembler.  
 ### First Pass
-Collect labels/variables and store them in a lookup table
+Collects labels/variables and stores them in a lookup table
 
 ### Second Pass
-Parse instructions into machine code, replacing labels/variables with their absolute addresses
+Parses instructions into machine code, replacing labels/variables with their absolute addresses.  
 The assembler decides addressing mode of an instruction from context. Each instruction maps onto multiple opcodes.  
 When writing code, the parent instruction is used. `0xFF` is an invalid opcode.
 
@@ -241,12 +241,14 @@ Performs the logical or | operator on two values.
 
 #### POP reg
 &rarr; `0x1E POP` (pop register)   
-Pops value at the top of the stack to a register, lowers the stack (stack_ptr--), leaves value behind.  
+Pops value at the top of the stack to a register, lowers the stack (stack_ptr++), leaves value behind.  
 
 #### PSH reg/imm
 &rarr; `0x1C PSHR` (push register)  
 &rarr; `0x1D PSHD` (push direct)  
-Pushes a value onto the stack, raises the stack (stack_ptr++).
+Pushes a value onto the stack, raises the stack (stack_ptr--).
+
+*Maybe you ask, why are the stack pointer's operations seemingly reversed? Well in this processor, the stack grows downwards from `0xFF` instead of growing upwards!*
 
 #### SB imm, mem/reg
 &rarr; `0x1F SBIM` (set bit in memory)  
