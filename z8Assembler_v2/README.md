@@ -334,5 +334,5 @@ There are 10 switches and 4 keys,
 `0xD5`'s `bits 0-4` refer to the last 5 switches, and `bits 5-7` refer to the last 2 keys.  
 
 ## Notes on the emulator
-The emulator breaks reads the .hex file line by line, breaks down the instruction and identifies the opcode, then in one cycle decodes, executes, and writes-back.  
+The emulator reads the .hex file line by line, breaks down the instruction and identifies the opcode, then in one cycle decodes, executes, and writes-back.  
 It outputs the register values, a memory dump, and the flag state at the end of the program.
