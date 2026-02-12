@@ -208,7 +208,7 @@ Error_Code str_to_num(const char* str, long int* val_out){
     // Check validity of number
     if(end_ptr == str) return ERR_BAD_RADIX_PREFIX;
     else if(*end_ptr != '\0') return ERR_VAL_INVALID;
-    else if(*val_out > MAX_VALUE/2 || *val_out < -(MAX_VALUE/2 + 1)) return ERR_VAL_RANGE_EXCEED;
+    else if(*val_out > MAX_VALUE || *val_out < -(MAX_VALUE/2 + 1)) return ERR_VAL_RANGE_EXCEED;
 
     return ERR_NONE;
 }
@@ -287,7 +287,7 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
             snprintf(error_message, sizeof(error_message), "invalid value given");
         break;
         case ERR_VAL_RANGE_EXCEED:
-            snprintf(error_message, sizeof(error_message), "value is out of range [%d, %d]", -(MAX_VALUE/2 + 1), (MAX_VALUE/2));
+            snprintf(error_message, sizeof(error_message), "value is out of range [%d, %d]", 0, MAX_VALUE);
         break;
         case ERR_NAME_UNDECLARED:
             snprintf(error_message, sizeof(error_message), "trying to access an undeclared variable/label");
@@ -302,7 +302,7 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
             snprintf(error_message, sizeof(error_message), "wrong addressing mode used");
         break;
         case ERR_PROT_MEM_ACCESSED:
-            snprintf(error_message, sizeof(error_message), "cannot directly access protected memory 0x%04X - 0x%04X", VAR_START_ADDR, VAR_START_ADDR + MAX_VARIABLES);
+            snprintf(error_message, sizeof(error_message), "cannot directly access protected memory $%02X-$%02X (variables) or $%02X-$%02X (output banks, stack)", VAR_START_ADDR, VAR_START_ADDR + MAX_VARIABLES - 1, BANK_0_START, STACK_START);
         break;
         case ERR_BAD_RADIX_PREFIX:
             snprintf(error_message, sizeof(error_message), "invalid radix prefix used");
@@ -327,6 +327,9 @@ void add_error(Error_Code error_code, int line_num, char* error_string, size_t s
         break;
         case ERR_BIT_OUT_OF_RANGE:
             snprintf(error_message, sizeof(error_message), "bit out of range, must be 0-%d for normal access and 0-11 for BANK 1", (WORD_SIZE - 1));
+        break;
+        case ERR_INPUT_OVERWRITE:
+            snprintf(error_message, sizeof(error_message), "cannot overwrite input section $%02X-$%02X", INPUT_START, INPUT_START + INPUT_SIZE - 1);
         break;
     }
 

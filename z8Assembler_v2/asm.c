@@ -108,13 +108,13 @@ int main(int argc, char *argv[])
             
             bool valid_label = true;
             
-            Error_Code err = valid_name(label, line_num, labels, variables);
+            Error_Code err = valid_name(label);
             if(err != ERR_NONE){
                 add_error(err, line_num, error_str, sizeof(error_str), &error_pos);
                 valid_label = false;
             }
             
-            err = unique_name(label, line_num, labels, variables);
+            err = unique_name(label, labels, variables);
             if(err != ERR_NONE){
                 add_error(err, line_num, error_str, sizeof(error_str), &error_pos);
                 valid_label = false;
@@ -154,13 +154,13 @@ int main(int argc, char *argv[])
 
                 bool valid_var = true;
                 
-                Error_Code err = valid_name(var_name, line_num, labels, variables);
+                Error_Code err = valid_name(var_name);
                 if(err != ERR_NONE){
                     add_error(err, line_num, error_str, sizeof(error_str), &error_pos);
                     valid_var = false;
                 }
                 
-                err = unique_name(var_name, line_num, labels, variables);
+                err = unique_name(var_name, labels, variables);
                 if(err != ERR_NONE){
                     add_error(err, line_num, error_str, sizeof(error_str), &error_pos);
                     valid_var = false;
@@ -442,6 +442,18 @@ int main(int argc, char *argv[])
                         if(str_to_num_out >= VAR_START_ADDR && str_to_num_out < VAR_START_ADDR+MAX_VARIABLES){
                             add_error(ERR_PROT_MEM_ACCESSED, line_num, error_str, sizeof(error_str), &error_pos);
                             continue;
+                        }
+                        else if(str_to_num_out >= BANK_0_START && str_to_num_out <= STACK_START){
+                            add_error(ERR_PROT_MEM_ACCESSED, line_num, error_str, sizeof(error_str), &error_pos);
+                            continue;
+                        }
+
+                        // prevent overwriting of inputs
+                        if(this_op_map.op != OP_LOAD){
+                            if(str_to_num_out >= INPUT_START && str_to_num_out < INPUT_START + INPUT_SIZE){
+                                add_error(ERR_INPUT_OVERWRITE, line_num, error_str, sizeof(error_str), &error_pos);
+                                continue;
+                            }
                         }
                         
                         this_op_val = (int)str_to_num_out;

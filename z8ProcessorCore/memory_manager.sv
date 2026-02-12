@@ -9,13 +9,16 @@ module memory_manager(
 	input logic [WORD_SIZE-1:0] write_data,
 	output logic [WORD_SIZE-1:0] read_data,
 	output logic [INSTRUCTION_SIZE-1:0] current_instruction,
-	output logic [WORD_SIZE-1:0] bank_0,
-	output logic [WORD_SIZE-1:0] bank_1,
+	output logic [0:2][WORD_SIZE-1:0] bank_0,
+	output logic [0:3][WORD_SIZE-1:0] bank_1,
 	output bit bank_sel
 );
 
 logic [0:DATA_MEM_SIZE-1][WORD_SIZE-1:0] data_mem;
 logic [INSTRUCTION_SIZE-1:0] prog_mem [0:255];
+assign bank_0 = data_mem[BANK_0_START:BANK_0_END];
+assign bank_1 = data_mem[BANK_1_START:BANK_1_END];
+assign bank_sel = data_mem[CONTROL_FLAGS_ADDR][CF_BITS'(BANK_SEL)];
 
 always_ff @(posedge clk) begin
 	case (op)
@@ -23,7 +26,7 @@ always_ff @(posedge clk) begin
 	endcase
 	
 	if (reset) begin
-		$readmemh("C:/Users/Adi/Documents/Excursions/z8ProcessorCore/programs/set_bits.hex", prog_mem);	
+		$readmemh("C:/Users/Adi/Documents/Excursions/z8ProcessorCore/programs/bits.hex", prog_mem);	
 		for(int i = 0; i < DATA_MEM_SIZE; i++) data_mem[i] <= 0;
 	end
 end
@@ -36,9 +39,9 @@ always_comb begin
 	endcase
 	
 	current_instruction = prog_mem[pc];
-	bank_0 = data_mem[BANK_0_START:BANK_0_END];
-	bank_1 = data_mem[BANK_1_START:BANK_1_END];
-	bank_sel = data_mem[CONTROL_FLAGS_ADDR][CF_BITS'(BANK_SEL)];
+	
+	
+	
 end
 
 endmodule

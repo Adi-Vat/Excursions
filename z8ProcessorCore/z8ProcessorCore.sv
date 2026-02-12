@@ -14,7 +14,7 @@ module z8ProcessorCore(
 	output logic [6:0] HEX4,
 	output logic [6:0] HEX5
 );
-	
+	assign LEDR = SW;
 	logic [INSTRUCTION_SIZE-1:0] instruction;
 	logic [INSTRUCTION_SIZE-1:0] instr_reg;
 	logic [WORD_SIZE-1:0] pc;
@@ -48,7 +48,7 @@ module z8ProcessorCore(
 	
 	assign instr_reg = instruction;
 	
-	logic [6:0][5:0] hex_out;
+	logic [5:0][6:0] hex_out;
 	
 	assign HEX0 = hex_out[0];
 	assign HEX1 = hex_out[1];
@@ -57,8 +57,8 @@ module z8ProcessorCore(
 	assign HEX4 = hex_out[4];
 	assign HEX5 = hex_out[5];
 	
-	logic [WORD_SIZE-1:0][2:0] bank_0;
-	logic [WORD_SIZE-1:0][3:0] bank_1;
+	logic [0:2][WORD_SIZE-1:0] bank_0;
+	logic [0:3][WORD_SIZE-1:0] bank_1;
 	bit bank_sel;
 	
 	always_ff @(posedge clk) begin
@@ -74,13 +74,6 @@ module z8ProcessorCore(
 				current_flags = alu_flags;
 		endcase
 	end
-	
-	input_output_manager io(
-		.bank_0_in(bank_0),
-		.bank_1_in(bank_1),
-		.bank_sel(bank_sel),
-		.hex_out(hex_out)
-	);
 	
 	control_unit cu(
 		.instruction(instr_reg),
@@ -117,6 +110,13 @@ module z8ProcessorCore(
 		.bank_0(bank_0),
 		.bank_1(bank_1),
 		.bank_sel(bank_sel)
+	);
+	
+	input_output_manager io(
+		.bank_0_in(bank_0),
+		.bank_1_in(bank_1),
+		.bank_sel(bank_sel),
+		.hex_out(hex_out)
 	);
 	
 	

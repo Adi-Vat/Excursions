@@ -26,6 +26,10 @@
 #define BANK_0_SIZE 3
 #define BANK_1_START 0xDC
 #define BANK_1_SIZE 4
+#define INPUT_START 0xD5
+#define INPUT_SIZE 2
+#define STACK_START 0xFF
+#define STACK_END 0xF0
 #define COMMENT_CHAR ';'
 #define LABEL_CHAR ':'
 #define HEX_CHAR '$'
@@ -120,7 +124,9 @@ typedef enum{
     // Unsafe operation applied to bank 1
     ERR_UNSAFE_BANK1_OP,
     // Out of range bit trying to be accessed with SB or CB
-    ERR_BIT_OUT_OF_RANGE
+    ERR_BIT_OUT_OF_RANGE,
+    // Input section being overwritten
+    ERR_INPUT_OVERWRITE
 } Error_Code;
 
 typedef struct{

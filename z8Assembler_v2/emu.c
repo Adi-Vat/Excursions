@@ -7,11 +7,21 @@
 #include "shared.h"
 
 #define DATA_MEM_SIZE 256
-#define STACK_START 0xFF
-#define STACK_END 0xF0
 
 int data_mem[DATA_MEM_SIZE];
 int regs[REGISTERS_COUNT];
+
+typedef struct{
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+    int g;
+} Seven_Seg;
+
+Seven_Seg seven_seg_displays[6];
 
 typedef struct{
     bool zero;
@@ -260,12 +270,59 @@ int main(int argc, char *argv[]){
         }
         printf("\n");
     }
+    
     printf("Overflow: %d\n", flags.overflow);
     printf("Carry: %d\n", flags.carry);
     printf("Negative: %d\n", flags.negative);
     printf("Zero: %d\n", flags.zero);
     printf("Stack Pointer: %02X", stack_ptr);
+    printf("\n");
 
+    // check bank
+    int bit_mask = 1;
+    if(data_mem[0] & bit_mask == 1){
+        // bank 1 being displayed form
+        
+    }
+
+    for(int i = 0; i < 6; i++){
+        char out_char = '-';
+        if(seven_seg_displays[i].a == 1) out_char = '=';
+        printf(" %c%c ", out_char, out_char);
+        if(i%2 == 1) printf(" ");
+    }
+    printf("\n");
+    for(int i = 0; i < 6; i++){
+        char out_char_1 = '|';
+        char out_char_2 = '|';
+        if(seven_seg_displays[i].f == 1) out_char_1 = '#';
+        if(seven_seg_displays[i].b == 1) out_char_2 = '#';
+        printf("%c  %c", out_char_1, out_char_2);
+        if(i%2 == 1) printf(" ");
+    }
+    printf("\n");
+    for(int i = 0; i < 6; i++){
+        char out_char = '-';
+        if(seven_seg_displays[i].g == 1) out_char = '=';
+        printf(" %c%c ", out_char, out_char);
+        if(i%2 == 1) printf(" ");
+    }
+    printf("\n");
+    for(int i = 0; i < 6; i++){
+        char out_char_1 = '|';
+        char out_char_2 = '|';
+        if(seven_seg_displays[i].c == 1) out_char_1 = '#';
+        if(seven_seg_displays[i].e == 1) out_char_2 = '#';
+        printf("%c  %c", out_char_1, out_char_2);
+        if(i%2 == 1) printf(" ");
+    }
+    printf("\n");
+    for(int i = 0; i < 6; i++){
+        char out_char = '-';
+        if(seven_seg_displays[i].d == 1) out_char = '=';
+        printf(" %c%c ", out_char, out_char);
+        if(i%2 == 1) printf(" ");
+    }
     return 0; 
 }
 

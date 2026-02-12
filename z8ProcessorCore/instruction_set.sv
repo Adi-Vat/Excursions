@@ -1,4 +1,4 @@
-package instruction_set;
+	 package instruction_set;
 	parameter DATA_MEM_SIZE = 256;
 	parameter PROG_MEM_SIZE = 256;
 	parameter WORD_SIZE = 8;
