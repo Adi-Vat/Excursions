@@ -16,7 +16,13 @@ public class Program
         Raylib.InitWindow(screenWidth, screenHeight, "Haptic Simulation");
         Raylib.SetTargetFPS(60);
         walls.Add(new Wall(new Vector2(0, 20)));
-        walls[0].vertices = [new Vector2(-100, 0), new Vector2(100, 0)];
+        walls[0].vertices = new Vertex[10];
+        for(int i = 0; i < 10; i++)
+        {
+            walls[0].vertices[i] = new Vertex(new Vector2(walls[0].position.X + (i-5) * 50, walls[0].position.Y));
+            //walls[0].vertices[i].position = new Vector2(walls[0].position.X + (i-5) * 50, walls[0].position.Y);
+            //walls[0].vertices[i].velocity = Vector2.Zero;
+        }
     }
 
     public static void Main()
@@ -36,14 +42,14 @@ public class Program
             {
                 for(int i = 0; i < wall.vertices.Count(); i++)
                 {
-                    int posX = (int)(wall.vertices[i].X + offsetX + wall.position.X);
-                    int posY = (int)(wall.vertices[i].Y + offsetY + wall.position.Y);
+                    int posX = (int)(wall.vertices[i].position.X + offsetX + wall.position.X);
+                    int posY = (int)(wall.vertices[i].position.Y + offsetY + wall.position.Y);
                     Raylib.DrawCircle(posX, posY, 5f, Color.DarkGray);
 
                     if(i < wall.vertices.Count() - 1)
                     {
-                        int nextPosX = (int)(wall.vertices[i+1].X + offsetX + wall.position.X);
-                        int nextPosY = (int)(wall.vertices[i+1].Y + offsetY + wall.position.Y);
+                        int nextPosX = (int)(wall.vertices[i+1].position.X + offsetX + wall.position.X);
+                        int nextPosY = (int)(wall.vertices[i+1].position.Y + offsetY + wall.position.Y);
 
                         Raylib.DrawLine(posX, posY, nextPosX, nextPosY, Color.DarkGray);
                     }
@@ -83,10 +89,21 @@ public class Ball
     }
 }
 
+public class Vertex
+{
+    public Vector2 position;
+    public Vector2 velocity = Vector2.Zero;
+
+    public Vertex(Vector2 _position)
+    {
+        position = _position;
+    }
+}
+
 public class Wall
 {
     public Vector2 position;
-    public Vector2[] vertices = new Vector2[0];
+    public Vertex[] vertices = new Vertex[10];
 
     public Wall(Vector2 _position)
     {

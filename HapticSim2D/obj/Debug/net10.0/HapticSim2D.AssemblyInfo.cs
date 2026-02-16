@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HapticSim2D")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b8c4990d7856c0308268ad9a3f0eddb4668132d8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ddc7bd552e0ff43bd1ec1bf9b19dd44f273f7b2")]
 [assembly: System.Reflection.AssemblyProductAttribute("HapticSim2D")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HapticSim2D")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

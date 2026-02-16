@@ -17,50 +17,45 @@ public class Physics
         
         foreach(Wall wall in walls)
         {
-            float maxLeft = wall.vertices[0].X;
-            float maxRight = wall.vertices[0].X;
-            float maxUp = wall.vertices[0].Y;
-            float maxDown = wall.vertices[0].Y;
+            float maxLeft = wall.vertices[0].position.X;
+            float maxRight = wall.vertices[0].position.X;
+            float maxUp = wall.vertices[0].position.Y;
+            float maxDown = wall.vertices[0].position.Y;
 
-            foreach(Vector2 vertex in wall.vertices)
+            foreach(Vertex vertex in wall.vertices)
             {
-                if(vertex.X < maxLeft) maxLeft = vertex.X;
-                if(vertex.X > maxRight) maxRight = vertex.X;
-                if(vertex.Y < maxUp) maxUp = vertex.Y;
-                if(vertex.Y > maxDown) maxDown = vertex.Y;
+                if(vertex.position.X < maxLeft) maxLeft = vertex.position.X;
+                if(vertex.position.X > maxRight) maxRight = vertex.position.X;
+                if(vertex.position.Y < maxUp) maxUp = vertex.position.Y;
+                if(vertex.position.Y > maxDown) maxDown = vertex.position.Y;
             }
 
             float width = MathF.Abs(maxRight - maxLeft);
             float height = MathF.Abs(maxDown - maxUp);
             
             Vector2 aabbCenter = new Vector2((maxLeft + maxRight) / 2, (maxUp + maxDown) / 2) + wall.position;
-
+  
             if(CheckAABB(ball.position, ball.radius * 2, ball.radius * 2, aabbCenter, width, height))
             {
                 for(int i = 0; i < wall.vertices.Count(); i++)
-                {
+                {   
                     if(i < wall.vertices.Count() - 1)
                     {
-                        Vector2 lineSegPointA = wall.vertices[i] + wall.position;
-                        Vector2 lineSegPointB = wall.vertices[i+1] + wall.position;
-                        // get reaction/normal force on ball from the wall
-                        // current wall, y = 0x - 20, -100 < x < 100 => 0x - y - 20 = 0
-                        float t = Vector2.Dot(ball.position - lineSegPointA, lineSegPointB - lineSegPointA) /
-                                    Vector2.Dot(lineSegPointB - lineSegPointA, lineSegPointB - lineSegPointA);
-
-                        t = Math.Clamp(t, 0, 1);
-
-                        Vector2 closestPoint = lineSegPointA + t * (lineSegPointB - lineSegPointA);
-                        Vector2 normal = Vector2.Normalize(ball.position - closestPoint);
-                        float distance = (ball.position - closestPoint).Length();
-                        float depth = ball.radius - distance;
+                        Vector2 lineSegPointA = wall.vertices[i].position + wall.position;
+                        Vector2 lineSegPointB = wall.vertices[i+1].position + wall.position;
+                        (Vector2 tempNormalForce, float t) = GetLineSegNormalForce(ball, lineSegPointA, lineSegPointB);
                         
-                        normalForce += normal * depth * 1000;
+                        if(tempNormalForce.Length() > normalForce.Length()){
+                            normalForce = tempNormalForce;
+                            wall.vertices[i].velocity += -normalForce * (1-t) * Raylib.GetFrameTime();
+                            wall.vertices[i].position += wall.vertices[i].velocity * Raylib.GetFrameTime();
+                        }
                     }
+
+                    
                 }
             }
         }
-       
 
         Vector2 force = ball.springConstant * dirBallToMouse * distanceBallToMouse - (ball.velocity * ball.dampingFactor);
         force += normalForce;
@@ -69,6 +64,29 @@ public class Physics
         ball.velocity += acceleration * Raylib.GetFrameTime();
         ball.position += ball.velocity * Raylib.GetFrameTime();
         return normalForce;
+    }
+
+    static (Vector2 normalForce, float t) GetLineSegNormalForce(Ball ball, Vector2 lineSegPointA, Vector2 lineSegPointB)
+    {
+        Vector2 normalForce = Vector2.Zero;
+        float t = Vector2.Dot(ball.position - lineSegPointA, lineSegPointB - lineSegPointA) /
+                    Vector2.Dot(lineSegPointB - lineSegPointA, lineSegPointB - lineSegPointA);
+
+        
+        t = Math.Clamp(t, 0, 1);
+        
+        Vector2 closestPoint = lineSegPointA + t * (lineSegPointB - lineSegPointA);
+        
+        Vector2 normal = Vector2.Normalize(ball.position - closestPoint);
+        float distance = (ball.position - closestPoint).Length();
+        float depth = ball.radius - distance;
+        
+        if(float.IsNaN(normal.X)) normal.X = 0;
+        if(float.IsNaN(normal.Y)) normal.Y = 0;
+
+        if(distance <= ball.radius) normalForce = normal * depth * 2000;
+        
+        return (normalForce, t);
     }
 
     public static bool CheckAABB(Vector2 centreA, float widthA, float heightA, Vector2 centreB, float widthB, float heightB)
