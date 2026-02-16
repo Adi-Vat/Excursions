@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "u0c9oBU21BM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Adi\\Documents\\Excursions\\HapticSim2D\\HapticSim2D.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Adi\\.nuget\\packages\\raylib-cs\\7.0.2\\raylib-cs.7.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}
