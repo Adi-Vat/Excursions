@@ -47,12 +47,12 @@ public class Physics
                         
                         if(tempNormalForce.Length() > normalForce.Length()){
                             normalForce = tempNormalForce;
-                            wall.vertices[i].velocity += -normalForce * (1-t) * Raylib.GetFrameTime();
-                            wall.vertices[i].position += wall.vertices[i].velocity * Raylib.GetFrameTime();
+                            Vector2 forceA = -normalForce * (1-t) - (wall.vertices[i].velocity * 10);
+                            Vector2 forceB = -normalForce * (t) - (wall.vertices[i+1].velocity * 10);
+                            wall.vertices[i].velocity += forceA * Raylib.GetFrameTime();
+                            wall.vertices[i+1].velocity += forceB * Raylib.GetFrameTime();
                         }
                     }
-
-                    
                 }
             }
         }
@@ -73,7 +73,7 @@ public class Physics
                     Vector2.Dot(lineSegPointB - lineSegPointA, lineSegPointB - lineSegPointA);
 
         
-        t = Math.Clamp(t, 0, 1);
+        t = Math.Clamp(t, 0, 0.99f);
         
         Vector2 closestPoint = lineSegPointA + t * (lineSegPointB - lineSegPointA);
         

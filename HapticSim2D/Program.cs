@@ -20,8 +20,6 @@ public class Program
         for(int i = 0; i < 10; i++)
         {
             walls[0].vertices[i] = new Vertex(new Vector2(walls[0].position.X + (i-5) * 50, walls[0].position.Y));
-            //walls[0].vertices[i].position = new Vector2(walls[0].position.X + (i-5) * 50, walls[0].position.Y);
-            //walls[0].vertices[i].velocity = Vector2.Zero;
         }
     }
 
@@ -34,6 +32,9 @@ public class Program
             Vector2 mousePosition = Raylib.GetMousePosition() - new Vector2(offsetX, offsetY);
             Vector2 normalForce = Physics.ApplyBallPositionToMouse(ball, mousePosition, walls);
             normalForce /= 1000;
+
+            foreach(Wall wall in walls) wall.UpdateVertices();
+
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.LightGray);
             Raylib.DrawCircle((int)(ball.position.X + offsetX), (int)(ball.position.Y+offsetY), ball.radius, ball.colour);
@@ -92,11 +93,13 @@ public class Ball
 public class Vertex
 {
     public Vector2 position;
+    public Vector2 restPosition {get; private set;}
     public Vector2 velocity = Vector2.Zero;
 
     public Vertex(Vector2 _position)
     {
         position = _position;
+        restPosition = _position;
     }
 }
 
@@ -108,5 +111,20 @@ public class Wall
     public Wall(Vector2 _position)
     {
         position = _position;
+    }
+
+    public void UpdateVertices()
+    {
+        for(int i = 0; i < vertices.Count(); i++)
+        {
+            Vertex thisVert = vertices[i];
+            // Calculate restoring force
+            if(i == 0) continue;
+            else if(i == vertices.Count() - 1) continue;
+
+            Vector2 restoringForce = (thisVert.restPosition - thisVert.position) * 100 - thisVert.velocity * 10;
+            thisVert.velocity += restoringForce * Raylib.GetFrameTime();
+            thisVert.position += thisVert.velocity * Raylib.GetFrameTime();
+        }
     }
 }
