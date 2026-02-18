@@ -10,16 +10,18 @@ public class Program
     static float offsetX = screenWidth / 2;
     static float offsetY = screenHeight / 2;
     static List<Wall> walls = new List<Wall>();
-
+    public static float forceCutThreshold = 35000;
+    public static float cutWaitTime = 0.1f;
+    public static float cutTimer = 0f;
     static void Start()
     {
         Raylib.InitWindow(screenWidth, screenHeight, "Haptic Simulation");
         Raylib.SetTargetFPS(60);
         walls.Add(new Wall(new Vector2(0, 20)));
-        walls[0].vertices = new Vertex[10];
         for(int i = 0; i < 10; i++)
         {
-            walls[0].vertices[i] = new Vertex(new Vector2(walls[0].position.X + (i-5) * 50, walls[0].position.Y));
+            walls[0].vertices.Add(new Vertex(new Vector2(walls[0].position.X + (i-5) * 50, walls[0].position.Y)));
+            if(i == 0 || i == 9) walls[0].vertices[i].freeze = true;
         }
     }
 
@@ -29,8 +31,12 @@ public class Program
 
         while (!Raylib.WindowShouldClose())
         {
+            if(cutTimer > 0) cutTimer -= Raylib.GetFrameTime();
+            if(cutTimer < 0) cutTimer = 0;
+
+            List<Wall> nextWalls = new List<Wall>();
             Vector2 mousePosition = Raylib.GetMousePosition() - new Vector2(offsetX, offsetY);
-            Vector2 normalForce = Physics.ApplyBallPositionToMouse(ball, mousePosition, walls);
+            (Vector2 normalForce, nextWalls) = Physics.ApplyBallPositionToMouse(ball, mousePosition, walls);
             normalForce /= 1000;
 
             foreach(Wall wall in walls) wall.UpdateVertices();
@@ -62,6 +68,8 @@ public class Program
                             Color.White);
 
             Raylib.EndDrawing();   
+
+            walls = nextWalls.ToList();
         }
 
         Raylib.CloseWindow();
@@ -77,7 +85,6 @@ public class Ball
     public float springConstant;
     public float dampingFactor;
     public Color colour;
-    
 
     public Ball(Vector2 _position, float _radius,  float _mass, float _springConstant, float _dampingFactor, Color _colour)
     {
@@ -95,6 +102,9 @@ public class Vertex
     public Vector2 position;
     public Vector2 restPosition {get; private set;}
     public Vector2 velocity = Vector2.Zero;
+    public bool isFreeEnd = false;
+    public bool freeze = false;
+    public float bondLength = 25;
 
     public Vertex(Vector2 _position)
     {
@@ -106,7 +116,9 @@ public class Vertex
 public class Wall
 {
     public Vector2 position;
-    public Vertex[] vertices = new Vertex[10];
+    public List<Vertex> vertices = new List<Vertex>();
+    public float springConstant = 100;
+    public float dampingCoefficient = 0.1f;
 
     public Wall(Vector2 _position)
     {
@@ -119,11 +131,27 @@ public class Wall
         {
             Vertex thisVert = vertices[i];
             // Calculate restoring force
-            if(i == 0) continue;
-            else if(i == vertices.Count() - 1) continue;
+            if(thisVert.freeze) continue;
 
-            Vector2 restoringForce = (thisVert.restPosition - thisVert.position) * 100 - thisVert.velocity * 10;
-            thisVert.velocity += restoringForce * Raylib.GetFrameTime();
+            Vector2 force = Vector2.Zero;
+            if(i == 0)
+            {
+                if(vertices.Count <= 1) continue;
+                Vector2 dir = Vector2.Normalize(vertices[i+1].position - thisVert.position);
+                force = springConstant * (vertices[i+1].position - thisVert.position - (thisVert.bondLength + vertices[i+1].bondLength)  * dir);
+            }
+            else if(i == vertices.Count - 1)
+            {
+                if(vertices.Count <= 1) continue;
+                Vector2 dir = Vector2.Normalize(vertices[i-1].position - thisVert.position);
+                force = springConstant * (vertices[i-1].position - thisVert.position - (thisVert.bondLength + vertices[i-1].bondLength)  * dir);
+            }
+            else
+            {
+                force = springConstant * (vertices[i-1].position + vertices[i+1].position - 2*thisVert.position); 
+            }
+            force += new Vector2(0, 1) * 20;
+            thisVert.velocity += force * Raylib.GetFrameTime() - thisVert.velocity * dampingCoefficient;
             thisVert.position += thisVert.velocity * Raylib.GetFrameTime();
         }
     }
