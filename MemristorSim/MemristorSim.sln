@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemristorSim", "MemristorSim.csproj", "{284D096E-8D93-F534-6A47-FFC11225A3FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{284D096E-8D93-F534-6A47-FFC11225A3FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{284D096E-8D93-F534-6A47-FFC11225A3FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{284D096E-8D93-F534-6A47-FFC11225A3FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{284D096E-8D93-F534-6A47-FFC11225A3FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {198FAC17-D483-4D10-AB37-434A373B6626}
+	EndGlobalSection
+EndGlobal
