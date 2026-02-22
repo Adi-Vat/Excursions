@@ -8,8 +8,7 @@ $v=M(w, i)i$
 
 $\dfrac{dw}{dt} = f (w,i)$  
 
-However due to the difficulty in manufacturing these devices, an approximation can be achieved by using photochromatic dye.
-The equations can therefore be simplified, specifically:
+However due to the difficulty in manufacturing these devices, an approximation can be achieved by using photochromatic dye. In this simulation, I use the simplified equation,
 
 $v = M(w) i$
 
@@ -40,7 +39,7 @@ else if(current < 0) dwBydt = current * _currentState * beta;
 return dwBydt;
 ```
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
-Each molecule of dye is independent and modelled as random and stimulated. However at the population level, deterministic and predictable, where the rate of conversion decreases as more molecules convert,
+Each molecule of dye is independent of each other. However at the population level, can be modelled to be deterministic and predictable, where the rate of conversion decreases as more molecules convert,
 
 $w \rightarrow w_{max};  \dfrac{dw}{dt} \rightarrow 0$  
 
