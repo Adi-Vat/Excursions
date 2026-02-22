@@ -2,13 +2,18 @@
 ## Overview
 A memristor is a component that remembers the past charge through it. It was proposed as the fourth fundamental circuit component by Leon Chua in 1971 [[1]](#1)  
 Concrete physical manifestations of this device were proposed by Strukov et al. in 2008 [[2]](#2)  
+Memristors allow for the storage of a theoretically infinite number of states, [0, 1], limited by the SNR of the components.  
+Creating real memristors at any scale or for independant research is untennable. Therefore instead of simulating voltage controlled memristors, a light controlled photochromic approximation is being modelled instead. The set of results obtained in this project aim to reinforce the characteristics of a photochromic memristor.
+
+
+## Implementation
 The fundamental equations for this device are: [[1]](#1)  
 
 $v=M(w, i)i$  
 
 $\dfrac{dw}{dt} = f (w,i)$  
 
-However due to the difficulty in manufacturing these devices, an approximation can be achieved by using photochromatic dye. In this simulation, I use the simplified equation,
+In this simulation, I use the simplified equation,
 
 $v = M(w) i$
 
@@ -18,7 +23,7 @@ $i = \frac{v}{M(w)}$
 
 Where the resistance of the memristor is determined solely by its current state.  
 
-## Implementation  
+## Programming  
 To get the resistance, I lerp between $R_{on}$ and $R_{off}$ where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in the least conductive state.  
 `Roff + (Ron - Roff) * _currentState`  
 Where the `_currentState` is a dimensionless quantity between 0 and 1.  
@@ -41,7 +46,8 @@ return dwBydt;
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
 Each molecule of dye is independent of each other. However at the population level, can be modelled to be deterministic and predictable, where the rate of conversion decreases as more molecules convert,
 
-$w \rightarrow w_{max};  \dfrac{dw}{dt} \rightarrow 0$  
+$w \rightarrow w_{off};  \dfrac{dw_{forward}}{dt} \rightarrow 0$  
+$w \rightarrow w_{on};  \dfrac{dw_{backward}}{dt} \rightarrow 0$  
 
 To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics. This allows us to see the pinched hysteresis loop that is characteristic of memristive behaviour.   
 For,  
