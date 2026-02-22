@@ -1,14 +1,14 @@
 # Memristor Simulation
 ## Overview
-A memristor is a component that remembers the past charge through it. It was proposed as the fourth fundemental circuit component by Leon Chua in 1971 [[1]](#1)  
+A memristor is a component that remembers the past charge through it. It was proposed as the fourth fundamental circuit component by Leon Chua in 1971 [[1]](#1)  
 Concrete physical manifestations of this device were proposed by Strukov et al. in 2008 [[2]](#2)  
-The fundemental equations for this device are [[1]](#1):  
+The fundamental equations for this device are [[1]](#1):  
 
 $v=M(w, i)i$  
 
 $\dfrac{dw}{dt} = f (w,i)$  
 
-However due to the difficulty in manufacturing these devices, an approach to approximate/simulate them can be taken by using photochromic dye.  
+However due to the difficulty in manufacturing these devices, an approximation can be achieved by using photochromatic dye.
 The equations can therefore be simplified, specifically:
 
 $v = M(w) i$
@@ -40,7 +40,11 @@ else if(current < 0) dwBydt = current * _currentState * beta;
 return dwBydt;
 ```
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
-To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics.   
+Each molecule of dye is independent and modelled as random and stimulated, however at the population level, deterministic and predictable, where the rate of conversion decreases as more molecules convert,
+
+$w \rightarrow w_{max};  \dfrac{dw}{dt} \rightarrow 0$  
+
+To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics. This allows us to see the pinched hysteresis loop that is characteristic of memristive behaviour.   
 For,  
 $ω = \pi [\frac{rad}{s}]$  
 $V_{max} = 10 [V]$  
