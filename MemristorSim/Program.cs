@@ -1,8 +1,8 @@
 ﻿
 public class Program
 {
-    static float frequency = (float)Math.PI;
-    static float maxVoltage = 10;
+    static float frequency = 0;
+    static float maxVoltage = 3.3f;
     static float Roff = 10;
     static float Ron = 1;
     static float currentState = 0f;
@@ -16,23 +16,25 @@ public class Program
     public static void Main()
     {
         float nextState = currentState;
-        using (var fileStream = new FileStream("ac.csv", FileMode.Create))
+        using (var fileStream = new FileStream("pulse.csv", FileMode.Create))
         using (var streamWriter = new StreamWriter(fileStream))
         {
             streamWriter.AutoFlush = true;
             float t = 0;
             Console.WriteLine("Simulating...");
-            while (t <= 20)
+            while (t <= 5)
             {
                 currentState = nextState;
                 
                 float voltage = 0;
 
                 //if((int)(t*2) % 2 == 0) voltage = 3.3f;
-                voltage = MathF.Sin(t * frequency) * maxVoltage;
+                if(t > 1 && t < 2f) voltage = maxVoltage;
+                else if(t > 2 && t < 3f) voltage = -maxVoltage;
+                else voltage = 0;
 
                 float memristance = ComputeMemristance(currentState);
-                float current = voltage/memristance + ComputeThermalNoise(memristance) * 1e6f;
+                float current = voltage/memristance + ComputeThermalNoise(memristance);
                 float dw = MolecularSwitchingRate(currentState, current) * timeStep;
                 nextState = currentState + dw;
                 nextState = Math.Clamp(nextState, 0, 1);

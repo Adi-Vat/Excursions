@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-data = pd.read_csv('bin\\Debug\\net10.0\\ac.csv', header=None, names=['Time', 'V', 'I', 'W'])
+data = pd.read_csv('bin\\Debug\\net10.0\\pulse.csv', header=None, names=['Time', 'V', 'I', 'W'])
 plot1, ax1 = plt.subplots()
 plt.plot(data['V'], data['I'])
 plt.xlabel('Voltage / V')
