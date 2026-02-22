@@ -40,7 +40,7 @@ return dwBydt;
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
 To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics.   
 For,  
-$ω = \pi [rad/s]$  
+$ω = \pi [\frac{rad}{s}]$  
 $V_{max} = 10 [V]$  
 $R_{off} = 10 [Ω]$  
 $R_{on} = 1 [Ω]$  
