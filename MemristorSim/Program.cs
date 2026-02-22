@@ -22,15 +22,15 @@ public class Program
             streamWriter.AutoFlush = true;
             float t = 0;
             Console.WriteLine("Simulating...");
-            while (t <= 5)
+            while (t <= 10)
             {
                 currentState = nextState;
                 
                 float voltage = 0;
 
                 //if((int)(t*2) % 2 == 0) voltage = 3.3f;
-                if(t > 1 && t < 2f) voltage = maxVoltage;
-                else if(t > 2 && t < 3f) voltage = -maxVoltage;
+                if(t > 1 && t < 3f) voltage = maxVoltage;
+                else if(t > 4 && t < 6f) voltage = maxVoltage;
                 else voltage = 0;
 
                 float memristance = ComputeMemristance(currentState);
