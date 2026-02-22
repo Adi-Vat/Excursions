@@ -18,9 +18,10 @@ Click on the links to read more.
 [![](Rasterizer/RasterizerThumbnail.png)](https://youtu.be/TQdE5FCPVOk) | [![](ASCIIGraphViewer/ASCIIGraphViewerThumbnail.png)](https://youtu.be/gAi159Roucc)
 
 ## Physics Simulations
-
-[Waves 2D (Python)](/Waves2DPython/) | [Waves (C#)](/Waves/)
+[Memristor Sim (C#, Python)](/MemristorSim/) | [HapticSim2D (C#, C++) (WIP)](/HapticSim2D/)
 :----:|:----:
+![](MemristorSim/Graphs/SteadyState/Hysteresis_loop.png) | ![](HapticSim2D/Images/HapticSim2D_thumbnail.png)
+**[Waves 2D (Python)](/Waves2DPython/)** | **[Waves (C#)](/Waves/)**
 [![](Waves2DPython/Waves2DPythonThumbnail.png)](https://youtu.be/KjhDpEiBqeQ) | [![](Waves/WavesThumbnail.png)](https://youtu.be/JeCnEvR4Vik)
 
 
