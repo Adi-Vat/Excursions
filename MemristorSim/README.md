@@ -40,7 +40,7 @@ return dwBydt;
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
 To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics.   
 For,  
-$ω = \pi [rad s^{-1}]$  
+$ω = \pi [rad/s]$  
 $V_{max} = 10 [V]$  
 $R_{off} = 10 [Ω]$  
 $R_{on} = 1 [Ω]$  
@@ -48,7 +48,12 @@ $w = 0.35$
 $α = 0.5$  
 $β = 0.5$  
 
-|![IV Characterstic graph]()||
+*Steady state responses*  
+|*figure 1*|*figure 2*|
+|:---:|:---:|
+|![IV Characterstic graph](Graphs/SteadyState/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/SteadyState/Voltage_State_against_time.png)|  
+
+
 ## References
 <a id="1">[1]</a>
 L. Chua, "Memristor-The missing circuit element," in IEEE Transactions on Circuit Theory, vol. 18, no. 5, pp. 507-519, September 1971.  
