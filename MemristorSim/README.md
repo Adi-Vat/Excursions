@@ -2,7 +2,7 @@
 ## Overview
 A memristor is a component that remembers the past charge through it. It was proposed as the fourth fundamental circuit component by Leon Chua in 1971 [[1]](#1)  
 Concrete physical manifestations of this device were proposed by Strukov et al. in 2008 [[2]](#2)  
-The fundamental equations for this device are [[1]](#1):  
+The fundamental equations for this device are: [[1]](#1)  
 
 $v=M(w, i)i$  
 
@@ -22,7 +22,7 @@ Where the resistance of the memristor is determined solely by its current state.
 ## Implementation  
 To get the resistance, I lerp between $R_{on}$ and $R_{off}$ where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in the least conductive state.  
 `Roff + (Ron - Roff) * _currentState`  
-Where the current state is a dimensionless quantity between 0 and 1.  
+Where the `_currentState` is a dimensionless quantity between 0 and 1.  
 
 To get the current state, from $\dfrac{dw}{dt} = f (w,i)$, $f(w,i)$ must satisfy the following:  
 For a current $i$  
