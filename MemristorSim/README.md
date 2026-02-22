@@ -65,6 +65,20 @@ $β = 0.5$
 :---:|:---:
 ![IV Characterstic graph](Graphs/Transient/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/Transient/Voltage_state_vs_time.png)
 
+## Practical use as a logic device
+The inherent non-linearity of the memristor results in difficulty managing the state of the component.  
+*figure 5*  
+![3v3 DC Graph](Graphs/DC/3v3.png)  
+
+Ideally, we would like the rate of change of state to be independent of the state itself. However, a memristor is a **non-linear, time-variant system**, which results in the following:
+
+*figure 6*|*figure 7*
+:---:|:---:
+![3v3 Plus, Minus](Graphs/Pulses/3v3_plus_minus.png)|![3v3 Plus, Plus](Graphs/Pulses/3v3_plus_plus.png)
+
+*figure 6*, From $w_{0}$, successive identical but opposite pulses in voltage do **not** result in a return to $w_{0}$  
+*figure 7*, From $w_{0}$, $n$ successive identical pulses in voltage do **not** result in a linear increase, where $w_{new}$ = $n w
+
 ## References
 <a id="1">[1]</a>
 L. Chua, "Memristor-The missing circuit element," in IEEE Transactions on Circuit Theory, vol. 18, no. 5, pp. 507-519, September 1971.  
