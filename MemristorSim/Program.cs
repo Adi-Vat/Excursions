@@ -5,7 +5,7 @@ public class Program
     static float maxVoltage = 10;
     static float Roff = 10;
     static float Ron = 1;
-    static float currentState = 0.35f;
+    static float currentState = 0f;
     static float alpha = 0.5f;
     static float beta = 0.5f;
     static float timeStep = 0.05f;
