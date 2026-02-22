@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-data = pd.read_csv('bin\\Debug\\net10.0\\pulse.csv', header=None, names=['Time', 'V', 'I', 'W'])
+rawData = pd.read_csv('bin\\Debug\\net10.0\\ac.csv', header=None, names=['Time', 'V', 'I', 'W'])
+data = rawData
 plot1, ax1 = plt.subplots()
 plt.plot(data['V'], data['I'])
 plt.xlabel('Voltage / V')
 plt.ylabel('Current / A')
-plt.title('Hysteresis Loop [av853]')
+plt.title('Transient Hysteresis Loop [av853]')
 plt.axhline(y=0, color='black', linewidth=0.2)
 plt.axvline(x=0, color='black', linewidth=0.2)
 
@@ -24,7 +25,7 @@ ax4.plot(data['Time'], data['V']/data['I'], label="Current", color='orange')
 ax4.set_ylabel('Memristance / Ω', color='orange')
 '''
 
-ax2.set_title('Voltage and State vs Time [av853]')
+ax2.set_title('Transient w evolution [av853]')
 ax2.set_xlabel('Time / s')
 
 plot2.tight_layout()
