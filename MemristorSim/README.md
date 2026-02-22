@@ -46,8 +46,9 @@ return dwBydt;
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
 Each molecule of dye is independent of each other. However at the population level, can be modelled to be deterministic and predictable, where the rate of conversion decreases as more molecules convert,
 
-$w \rightarrow w_{off};  \dfrac{dw_{forward}}{dt} \rightarrow 0$  
-$w \rightarrow w_{on};  \dfrac{dw_{backward}}{dt} \rightarrow 0$  
+$w \rightarrow w_{off}; \space \dfrac{dw_{forward}}{dt} \rightarrow 0$  
+
+$w \rightarrow w_{on}; \space \dfrac{dw_{backward}}{dt} \rightarrow 0$  
 
 To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics. This allows us to see the pinched hysteresis loop that is characteristic of memristive behaviour.   
 For,  
@@ -83,7 +84,7 @@ Ideally, we would like the rate of change of state to be independent of the stat
 ![3v3 Plus, Minus](Graphs/Pulses/3v3_plus_minus.png)|![3v3 Plus, Plus](Graphs/Pulses/3v3_plus_plus.png)
 
 *figure 6*, From $w_{0}$, successive identical but opposite pulses in voltage do **not** result in a return to $w_{0}$  
-*figure 7*, From $w_{0}$, $n$ successive identical pulses in voltage do **not** result in a linear increase $\therefore w_{new} \neq n \cdot w_0$
+*figure 7*, From $w_{0}$, $n$ successive identical pulses in voltage do **not** result in a linear increase $\therefore w_{new} \neq n \cdot (\Delta w) + w_0$
 
 ## References
 <a id="1">[1]</a>
