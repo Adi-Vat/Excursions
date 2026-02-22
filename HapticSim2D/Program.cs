@@ -3,8 +3,8 @@ using Raylib_cs;
 
 public class Program
 {
-    const int screenWidth = 800;
-    const int screenHeight = 600;
+    const int screenWidth = 1200;
+    const int screenHeight = 900;
     static Ball ball = new Ball(_position:new Vector2(0,0), _radius:20, 
                                 _mass:1, _springConstant:200, _dampingFactor:25, _colour:Color.Red);
     static float offsetX = screenWidth / 2;
