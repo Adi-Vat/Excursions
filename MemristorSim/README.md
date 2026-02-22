@@ -40,7 +40,7 @@ else if(current < 0) dwBydt = current * _currentState * beta;
 return dwBydt;
 ```
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
-Each molecule of dye is independent and modelled as random and stimulated, however at the population level, deterministic and predictable, where the rate of conversion decreases as more molecules convert,
+Each molecule of dye is independent and modelled as random and stimulated. However at the population level, deterministic and predictable, where the rate of conversion decreases as more molecules convert,
 
 $w \rightarrow w_{max};  \dfrac{dw}{dt} \rightarrow 0$  
 
