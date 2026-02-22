@@ -67,8 +67,9 @@ $β = 0.5$
 
 ## Practical use as a logic device
 The inherent non-linearity of the memristor results in difficulty managing the state of the component.  
-*figure 5*  
-![3v3 DC Graph](Graphs/DC/3v3.png)  
+|*figure 5*|  
+|:---:|
+|![3v3 DC Graph](Graphs/DC/3v3.png)|
 
 Ideally, we would like the rate of change of state to be independent of the state itself. However, a memristor is a **non-linear, time-variant system**, which results in the following:
 
@@ -77,7 +78,7 @@ Ideally, we would like the rate of change of state to be independent of the stat
 ![3v3 Plus, Minus](Graphs/Pulses/3v3_plus_minus.png)|![3v3 Plus, Plus](Graphs/Pulses/3v3_plus_plus.png)
 
 *figure 6*, From $w_{0}$, successive identical but opposite pulses in voltage do **not** result in a return to $w_{0}$  
-*figure 7*, From $w_{0}$, $n$ successive identical pulses in voltage do **not** result in a linear increase, where $w_{new}$ = $n w
+*figure 7*, From $w_{0}$, $n$ successive identical pulses in voltage do **not** result in a linear increase $\therefore w_{new} \neq n \cdot w_0$
 
 ## References
 <a id="1">[1]</a>
