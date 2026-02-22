@@ -5,7 +5,7 @@ public class Program
     static float maxVoltage = 10;
     static float Roff = 10;
     static float Ron = 1;
-    static float currentState = 0.5f;
+    static float currentState = 0.35f;
     static float alpha = 0.5f;
     static float beta = 0.5f;
     static float timeStep = 0.05f;
@@ -22,16 +22,15 @@ public class Program
             streamWriter.AutoFlush = true;
             float t = 0;
             Console.WriteLine("Simulating...");
-            while (t <= 6)
+            while (t <= 20)
             {
                 currentState = nextState;
                 
                 float voltage = 0;
-                if((int)t % 2 == 0)
-                {
-                    voltage = 3.3f;
-                }
-                
+
+                //if((int)(t*2) % 2 == 0) voltage = 3.3f;
+                voltage = MathF.Sin(t * frequency) * maxVoltage;
+
                 float memristance = ComputeMemristance(currentState);
                 float current = voltage/memristance + ComputeThermalNoise(memristance) * 1e6f;
                 float dw = MolecularSwitchingRate(currentState, current) * timeStep;

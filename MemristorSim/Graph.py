@@ -6,7 +6,7 @@ plot1, ax1 = plt.subplots()
 plt.plot(data['V'], data['I'])
 plt.xlabel('Voltage / V')
 plt.ylabel('Current / A')
-plt.title('Hysteresis Loop')
+plt.title('Hysteresis Loop [av853]')
 plt.axhline(y=0, color='black', linewidth=0.2)
 plt.axvline(x=0, color='black', linewidth=0.2)
 
@@ -23,10 +23,10 @@ ax4 = ax2.twinx()
 ax4.plot(data['Time'], data['V']/data['I'], label="Current", color='orange')
 ax4.set_ylabel('Memristance / Ω', color='orange')
 '''
-ax2.legend()
-ax3.legend()
 
-ax2.set_title('Voltage and State vs Time')
+ax2.set_title('Voltage and State vs Time [av853]')
 ax2.set_xlabel('Time / s')
+
+plot2.tight_layout()
 
 plt.show()
