@@ -18,6 +18,8 @@ and more usefully,
 $i = \frac{v}{M(w)}$
 
 Where the resistance of the memristor is determined solely by its current state.  
+
+## Implementation  
 To get the resistance, I lerp between $R_{on}$ and $R_{off}$ where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in the least conductive state.  
 `Roff + (Ron - Roff) * _currentState`  
 Where the current state is a dimensionless quantity between 0 and 1.  
@@ -48,11 +50,16 @@ $w = 0.35$
 $α = 0.5$  
 $β = 0.5$  
 
-*Steady state responses*  
-|*figure 1*|*figure 2*|
-|:---:|:---:|
-|![IV Characterstic graph](Graphs/SteadyState/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/SteadyState/Voltage_State_against_time.png)|  
+### Steady state responses
+*figure 1*|*figure 2*
+:---:|:---:
+![IV Characterstic graph](Graphs/SteadyState/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/SteadyState/Voltage_State_against_time.png)
 
+  
+### Transient responses
+*figure 3*|*figure 4*
+:---:|:---:
+![IV Characterstic graph](Graphs/Transient/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/Transient/Voltage_state_vs_time.png)
 
 ## References
 <a id="1">[1]</a>
