@@ -1,7 +1,6 @@
 # Excursions
-EEE/CSE student.
 This repo contains small 1 day - 1 week projects, each done to understand something from first principles.
-Click on the links to read more.  
+Click on the links to read more. Click on the images to watch a video of the project.  
 
 *NB: to run directly downloaded and unzipped python projects please enter the .venv folder*
 
