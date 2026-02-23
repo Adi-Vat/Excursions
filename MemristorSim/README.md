@@ -46,9 +46,9 @@ return dwBydt;
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
 Each molecule of dye is independent of each other. However at the population level, can be modelled to be deterministic and predictable, where the rate of conversion decreases as more molecules convert,
 
-$w \rightarrow w_{off}; \space \dfrac{dw_{forward}}{dt} \rightarrow 0$  
+$w \rightarrow 1; \space R \rightarrow R_{on}; \space \dfrac{dw_{forward}}{dt} \rightarrow 0$  
 
-$w \rightarrow w_{on}; \space \dfrac{dw_{backward}}{dt} \rightarrow 0$  
+$w \rightarrow 0; \space R \rightarrow R_{off}; \space \dfrac{dw_{backward}}{dt} \rightarrow 0$  
 
 To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics. This allows us to see the pinched hysteresis loop that is characteristic of memristive behaviour.   
 For,  
