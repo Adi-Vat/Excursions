@@ -24,9 +24,11 @@ $i = \frac{v}{M(w)}$
 Where the resistance of the memristor is determined solely by its current state.  
 
 ## Programming  
-To get the resistance, I lerp between $R_{on}$ and $R_{off}$ where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in the least conductive state.  
+To get the resistance, I lerp between $R_{on}$ and $R_{off}$   
 `Roff + (Ron - Roff) * _currentState`  
-Where the `_currentState` is a dimensionless quantity between 0 and 1.  
+
+Where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in its most resistive state, such that $R_{on} < R_{off}$    
+And `_currentState` is a dimensionless quantity between 0 and 1.  
 
 To get the current state, from $\dfrac{dw}{dt} = f (w,i)$, $f(w,i)$ must satisfy the following:  
 For a current $i$  
@@ -70,7 +72,10 @@ $β = 0.5$
 ![IV Characterstic graph](Graphs/SteadyState/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/SteadyState/Voltage_State_against_time.png)
 :---:|:---:
 *figure 1*|*figure 2*
-  
+
+Note that in figure 1 when $V = 0$, $I = 0$; the characteristic "pinched" loop.  
+In figure 2 voltage and state are in quadrature, as state is related to the integral of voltage.
+
 ### Transient responses
 ![IV Characterstic graph](Graphs/Transient/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/Transient/Voltage_state_vs_time.png)
 :---:|:---:
