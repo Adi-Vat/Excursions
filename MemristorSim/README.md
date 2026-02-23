@@ -44,7 +44,13 @@ else if(current < 0) dwBydt = current * _currentState * beta;
 return dwBydt;
 ```
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
+
+*N.B., 'switching' and 'conversion' are used interchangeably in this project, however switching may refer to the electronic process while conversion may refer to the chemical process.*  
+
+## Modelling and Analysis
 Each molecule of dye is independent of each other. However at the population level, can be modelled to be deterministic and predictable, where the rate of conversion decreases as more molecules convert,
+
+$0 \leq w \leq 1$
 
 $w \rightarrow 1; \space R \rightarrow R_{on}; \space \dfrac{dw_{forward}}{dt} \rightarrow 0$  
 
@@ -52,10 +58,10 @@ $w \rightarrow 0; \space R \rightarrow R_{off}; \space \dfrac{dw_{backward}}{dt}
 
 To get a "fingerprint" for a memristor, it is best to plot the Lissajous figure from its IV characteristics. This allows us to see the pinched hysteresis loop that is characteristic of memristive behaviour.   
 For,  
-$ω = \pi [\frac{rad}{s}]$  
-$V_{max} = 10 [V]$  
-$R_{off} = 10 [Ω]$  
-$R_{on} = 1 [Ω]$  
+$ω = \pi \space [\frac{rad}{s}]$  
+$V_{max} = 10 \space [V]$  
+$R_{off} = 10 \space [Ω]$  
+$R_{on} = 1 \space [Ω]$  
 $w = 0.35$  
 $α = 0.5$  
 $β = 0.5$  
@@ -86,14 +92,17 @@ Ideally, we would like the rate of change of state to be independent of the stat
 *figure 6*, From $w_{0}$, successive identical but opposite pulses in voltage do **not** result in a return to $w_{0}$  
 *figure 7*, From $w_{0}$, $n$ successive identical pulses in voltage do **not** result in a linear increase $\therefore w_{new} \neq n \cdot (\Delta w) + w_0$
 
-The full relationship between the rate of change of state and the state itself can be shown in one graph.  
+The full relationship between the rate of change of state and the state itself can be shown in figure 8  
 
-|![dw/dt over w](Graphs/dw_over_w.png)|
-|:---:|
-|*figure 8*|
+|![dw/dt over w](Graphs/dw_over_w.png)|![state sweep](Graphs/Pulses/state_sweep.png)
+:---:|:---:
+*figure 8*|*figure 9*
 
 *N.B., the backward rate of change sweeps a range 10× the forward rate of change. This happens because at* $w=1$ *, the memristor is in its most conductive state;* $R_{on}$  
 *This results in a larger current passing through the memristor for the same voltage (Ohm's law). And as you'll remember, the memristor's state is current controlled.*
+
+The asymmetry of the forward and backward conversion rates is clearly shown in figure 9, where setting the memristor ($w \rightarrow 1$) takes ~12 seconds, and resetting ($w \rightarrow 0$) takes ~35 seconds, almost 3× as long.  
+
 
 ## References
 <a id="1">[1]</a>
