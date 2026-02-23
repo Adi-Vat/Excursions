@@ -2,10 +2,10 @@
 public class Program
 {
     static float frequency = MathF.PI;
-    static float maxVoltage = 10f;
+    static float maxVoltage = 3.3f;
     static float Roff = 10;
     static float Ron = 1;
-    static float currentState = 0.35f;
+    static float currentState = 0f;
     static float alpha = 0.5f;
     static float beta = 0.5f;
     static float timeStep = 0.05f;
@@ -16,25 +16,25 @@ public class Program
     public static void Main()
     {
         float nextState = currentState;
-        using (var fileStream = new FileStream("dwBydt.csv", FileMode.Create))
+        using (var fileStream = new FileStream("up_down.csv", FileMode.Create))
         using (var streamWriter = new StreamWriter(fileStream))
         {
             streamWriter.AutoFlush = true;
             float t = 0;
             Console.WriteLine("Simulating...");
-            /*
-            while (t <= 20)
+            
+            while (t <= 60)
             {
                 currentState = nextState;
                 
                 float voltage = 0;
                 //voltage = maxVoltage;
                 //if((int)(t*2) % 2 == 0) voltage = 3.3f;
-                //if(t > 1 && t < 3f) voltage = maxVoltage;
-                //else if(t > 4 && t < 6f) voltage = maxVoltage;
-                //else voltage = 0;
+                if(t > 0 && t < 15f) voltage = maxVoltage;
+                else if(t >= 15 && t < 60f) voltage = -maxVoltage;
+                else voltage = 0;
                 
-                voltage = maxVoltage * MathF.Sin(t * frequency);
+                //voltage = maxVoltage * MathF.Sin(t * frequency);
                 float memristance = ComputeMemristance(currentState);
                 float current = voltage/memristance + ComputeThermalNoise(memristance);
                 float dw = MolecularSwitchingRate(currentState, current) * timeStep;
@@ -43,7 +43,7 @@ public class Program
                 streamWriter.WriteLine(t + "," + voltage + "," + current + "," + currentState);
 
                 t += timeStep;
-            }*/
+            }
 
             // dw/dt = i * (1-w)
             // i = v/m(w)
@@ -51,12 +51,13 @@ public class Program
             // dw = [v/(r_off + (r_on - r_off)w)] * (1-w)dt
             // dw/dt = i * w
             // dw/dt = [v/roff + (r_on - roff)w] * w
+            /*
             for(float w = 0; w <= 1; w += 0.01f)
             {
                 float dwBydtForward = maxVoltage/(Roff + (Ron - Roff) * w) * (1-w);
                 float dwBydtBackward = maxVoltage/(Roff + (Ron - Roff) * w) * (w);
                 streamWriter.WriteLine(w + "," + dwBydtForward + "," + dwBydtBackward);
-            }
+            }*/
 
             Console.WriteLine("Done");
         }   
