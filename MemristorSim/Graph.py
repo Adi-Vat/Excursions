@@ -26,7 +26,7 @@ ax3.plot(data['Time'], data['V'], color='red')
 ax3.set_ylabel('Voltage / V', color='red')
 
 ax2.set_title('Full sweep of state [av853]')
-ax2.set_xlabel('State')
+ax2.set_xlabel('Time / s')
 
 plot2.tight_layout()
 
