@@ -2,8 +2,8 @@
 ## Overview
 A memristor is a component that remembers the past charge through it. It was proposed as the fourth fundamental circuit component by Leon Chua in 1971 [[1]](#1)  
 Concrete physical manifestations of this device were proposed by Strukov et al. in 2008 [[2]](#2)  
-Memristors allow for the storage of a theoretically infinite number of states, [0, 1], limited by the SNR of the components.  
-Creating real memristors at any scale or for independant research is untennable. Therefore instead of simulating voltage controlled memristors, a light controlled photochromic approximation is being modelled instead. The set of results obtained in this project aim to reinforce the characteristics of a photochromic memristor.
+Memristors allow for the storage of a theoretically infinite number of states, [0, 1], limited by the SNR of the read out signal.  
+Creating real memristors at any scale or for independant research is untenable. Therefore instead of simulating voltage controlled memristors, a light controlled photochromic approximation is being modelled instead. The set of results obtained in this project aim to reinforce the characteristics of a photochromic memristor.
 
 
 ## Implementation
