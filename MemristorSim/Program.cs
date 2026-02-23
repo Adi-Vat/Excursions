@@ -55,7 +55,6 @@ public class Program
             {
                 float dwBydtForward = maxVoltage/(Roff + (Ron - Roff) * w) * (1-w);
                 float dwBydtBackward = maxVoltage/(Roff + (Ron - Roff) * w) * (w);
-                dwBydtBackward /= 10;
                 streamWriter.WriteLine(w + "," + dwBydtForward + "," + dwBydtBackward);
             }
 
