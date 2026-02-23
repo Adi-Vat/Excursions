@@ -61,30 +61,39 @@ $α = 0.5$
 $β = 0.5$  
 
 ### Steady state responses
-*figure 1*|*figure 2*
-:---:|:---:
 ![IV Characterstic graph](Graphs/SteadyState/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/SteadyState/Voltage_State_against_time.png)
-
+:---:|:---:
+*figure 1*|*figure 2*
   
 ### Transient responses
-*figure 3*|*figure 4*
-:---:|:---:
 ![IV Characterstic graph](Graphs/Transient/Hysteresis_loop.png)|![Voltage and State against time graph](Graphs/Transient/Voltage_state_vs_time.png)
+:---:|:---:
+*figure 3*|*figure 4*
 
 ## Practical use as a logic device
 The inherent non-linearity of the memristor results in difficulty managing the state of the component.  
-|*figure 5*|  
-|:---:|
+
 |![3v3 DC Graph](Graphs/DC/3v3.png)|
+|:---:|
+|*figure 5*|  
 
 Ideally, we would like the rate of change of state to be independent of the state itself. However, a memristor is a **non-linear, time-variant system**, which results in the following:
 
-*figure 6*|*figure 7*
-:---:|:---:
 ![3v3 Plus, Minus](Graphs/Pulses/3v3_plus_minus.png)|![3v3 Plus, Plus](Graphs/Pulses/3v3_plus_plus.png)
+:---:|:---:
+*figure 6*|*figure 7*
 
 *figure 6*, From $w_{0}$, successive identical but opposite pulses in voltage do **not** result in a return to $w_{0}$  
 *figure 7*, From $w_{0}$, $n$ successive identical pulses in voltage do **not** result in a linear increase $\therefore w_{new} \neq n \cdot (\Delta w) + w_0$
+
+The full relationship between the rate of change of state and the state itself can be shown in one graph.  
+
+|![dw/dt over w](Graphs/dw_over_w.png)|
+|:---:|
+|*figure 8*|
+
+*N.B., the backward rate of change sweeps a range 10× the forward rate of change. This happens because at* $w=1$ *, the memristor is in its most conductive state;* $R_{on}$  
+*This results in a larger current passing through the memristor for the same voltage (Ohm's law). And as you'll remember, the memristor's state is current controlled.*
 
 ## References
 <a id="1">[1]</a>
