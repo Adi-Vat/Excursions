@@ -33,19 +33,30 @@ $$R_{on} \space \leq \space M(w) \space \leq \space R_{off}$$
 
 Where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in its most resistive state, such that $R_{on} < R_{off}$  
 
+To determine $\frac{dw}{dt}$, $f(w,i)$ must satisfy the following:  
+For a current $i$  
+$i > 0$, must result in an increase in the state, towards the maximum value (1).  
+$i < 0$, must result in a decrease in the state, towards the minimum value (0).  
+$i = 0$, must result in no change in state, to hold the value.  
+
+$$
+f(w,i) =
+  \begin{cases} 
+      \hfill \ i \cdot (1-w) \cdot \alpha    \hfill & \text{ $i > 0$} \\
+      \hfill \ 0    \hfill & \text{ $i = 0$} \\
+      \hfill \ i \cdot w \cdot \beta    \hfill & \text{ $i < 0$} \\
+  \end{cases}
+$$
+
 ## Programming  
 To get the resistance, I interpolate between $R_{on}$ and $R_{off}$   
 `Roff + (Ron - Roff) * _state`  
 
 `_state` is a dimensionless quantity between 0 and 1.  
 
-To get the current state, from $\dfrac{dw}{dt} = f (w,i)$, $f(w,i)$ must satisfy the following:  
-For a current $i$  
-$i > 0$, must result in an increase in the state, towards the maximum value (1).  
-$i < 0$, must result in a decrease in the state, towards the minimum value (0).  
-$i = 0$, must result in no change in state, to hold the value.  
+To get the current state, from $\dfrac{dw}{dt} = f (w,i)$  
 
-Therefore I implement this as a piecewise function  
+I implement this as a piecewise function  
 ```cs
 float dwBydt = 0;
 // move towards maximum w
