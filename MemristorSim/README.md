@@ -9,26 +9,35 @@ Creating real memristors at any scale or for independant research is untenable. 
 ## Implementation
 The fundamental equations for this device are: [[1]](#1)  
 
-$v=M(w, i)i$  
+$$v=M(w, i)i$$  
+$$\dfrac{dw}{dt} = f (w,i)$$  
 
-$\dfrac{dw}{dt} = f (w,i)$  
+$v$ is the voltage across the memristor  
+$M(w, i)$ is the function for memristance [Ω]  
+$i$ is the current through the memristor  
+$w$ is the state of the memristor
 
 In this simulation, I use the simplified equation,
 
-$v = M(w) i$
+$$v = M(w) i$$
 
 and more usefully,  
 
-$i = \frac{v}{M(w)}$
+$$i = \frac{v}{M(w)}$$
 
 Where the resistance of the memristor is determined solely by its current state.  
 
-## Programming  
-To get the resistance, I lerp between $R_{on}$ and $R_{off}$   
-`Roff + (Ron - Roff) * _currentState`  
+$$M(w) = R_{off} + (R_{on} - R_{off}) \cdot w$$  
 
-Where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in its most resistive state, such that $R_{on} < R_{off}$    
-And `_currentState` is a dimensionless quantity between 0 and 1.  
+$$R_{on} \space \leq \space M(w) \space \leq \space R_{off}$$  
+
+Where $R_{on}$ is the resistance of the component in its most conductive state, and $R_{off}$ is the resistance in its most resistive state, such that $R_{on} < R_{off}$  
+
+## Programming  
+To get the resistance, I interpolate between $R_{on}$ and $R_{off}$   
+`Roff + (Ron - Roff) * _state`  
+
+`_state` is a dimensionless quantity between 0 and 1.  
 
 To get the current state, from $\dfrac{dw}{dt} = f (w,i)$, $f(w,i)$ must satisfy the following:  
 For a current $i$  
@@ -40,9 +49,9 @@ Therefore I implement this as a piecewise function
 ```cs
 float dwBydt = 0;
 // move towards maximum w
-if(current > 0) dwBydt = current * (1-_currentState) * alpha;
+if(current > 0) dwBydt = current * (1-_state) * alpha;
 // move towards minimum w
-else if(current < 0) dwBydt = current * _currentState * beta;
+else if(current < 0) dwBydt = current * _state * beta;
 return dwBydt;
 ```
 where `alpha` and `beta` are coefficients to control the rate of forward and backward switching.  
