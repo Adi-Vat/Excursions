@@ -27,7 +27,7 @@ $$i = \frac{v}{M(w)}$$
 
 Where the resistance of the memristor is determined solely by its current state.  
 
-$$M(w) = R_{off} + (R_{on} - R_{off}) \cdot w$$  
+$$M(w) = R_{on} + (R_{off} - R_{on}) \cdot w$$  
 
 $$R_{on} \space \leq \space M(w) \space \leq \space R_{off}$$  
 
