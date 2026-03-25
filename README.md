@@ -3,6 +3,7 @@ This repo contains small 1 day - 1 week projects, each done to understand someth
 Click on the links to read more. Click on the images to watch a video of the project.  
 
 *NB: to run directly downloaded and unzipped python projects please enter the .venv folder*
+Click on the thumbnails to see videos!
 
 ## Compilers and Low-Level projects
 [z8 Processor Core (SystemVerilog)](/z8ProcessorCore/) | [z8 Assembler v2 (C)](/z8Assembler_v2)
