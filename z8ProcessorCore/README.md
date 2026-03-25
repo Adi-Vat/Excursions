@@ -47,4 +47,4 @@ I/O is mapped directly to data memory.
 ### Ouput
 |Bank 0|Bank1|
 |:---:|:---:|
-|![](bank_0.gif)|![](bank_1.gif)|
+|![](figures/bank_0.gif)|![](figures/bank_1.gif)|
