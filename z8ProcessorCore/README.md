@@ -3,7 +3,7 @@
 An 8-bit RISC processor written in System Verilog. It's used to run programs output from my [z8 Assembler](../z8Assembler_v2).  
 I built it from scratch to learn more about computer architecture, assemblers, and digital logic. It successfuly executes programs including an example Fibonacci series.
 
-[![Watch the video](z8ProcessorCoreThumbnail.png)](https://youtu.be/vuQimqax7PA)
+[![Watch the video](figures/z8ProcessorCoreThumbnail.png)](https://youtu.be/vuQimqax7PA)
 
 ## How to use
 You need a system-verilog simulator installed. I use Modelsim for waveforms and Icarus Verilog for output dumps.
@@ -32,7 +32,7 @@ N.B because of the location Modelsim runs the testbench from, relative addressin
 
 |Block diagram|Fetch-Decode-Execute-Writeback cycle|
 |:---:|:---:|
-| ![](BlockDiagram.png) | ![](fde_cycle.gif) |
+| ![](figures/BlockDiagram.png) | ![](figures/fde_cycle.gif) |
 
 The z8 processor uses a Harvard-style architecture with seperate data and program memory.   
 Variables are not directly seen by the processor, instead the assembler computes addresses and prevents collisions. They live in data memory.  
