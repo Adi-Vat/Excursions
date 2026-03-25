@@ -6,15 +6,7 @@ I built it from scratch to learn more about computer architecture, assemblers, a
 [![Watch the video](figures/z8ProcessorCoreThumbnail.png)](https://youtu.be/vuQimqax7PA)
 
 ## How to use
-You need a system-verilog simulator installed. I use Modelsim for waveforms and Icarus Verilog for output dumps.
-### Run the simulation
-In the command prompt, with Icarus Verilog installed, run the `sim.bat` file with  
-```bash
-sim
-```
-You will get a hex-dump of the data memory, the register states, and the flag state at the end of the program.  
-
-For Modelsim, just don't!
+You need a system-verilog simulator installed. Unfortunately due to some memory loading logic, IcarusVerilog cannot simulate this project. Use ModelSim instead to simulate your code.
 
 ### Change the loaded program
 The currently loaded program is found in `/programs/`. To change which one is loaded, open `memory_manager.sv` and change the arg for `readmemh$`.   
