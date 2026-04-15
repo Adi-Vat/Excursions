@@ -15,10 +15,14 @@ module memory_manager(
 );
 
 logic [0:DATA_MEM_SIZE-1][WORD_SIZE-1:0] data_mem;
-logic [INSTRUCTION_SIZE-1:0] prog_mem [0:255];
+(* rom_style = "M10K" *) logic [INSTRUCTION_SIZE-1:0] prog_mem [0:255];
 assign bank_0 = data_mem[BANK_0_START:BANK_0_END];
 assign bank_1 = data_mem[BANK_1_START:BANK_1_END];
 assign bank_sel = data_mem[CONTROL_FLAGS_ADDR][CF_BITS'(BANK_SEL)];
+
+initial begin
+    $readmemh("programs/fibonacci.hex", prog_mem);
+end
 
 always_ff @(posedge clk) begin
 	case (op)
@@ -26,7 +30,6 @@ always_ff @(posedge clk) begin
 	endcase
 	
 	if (reset) begin
-		$readmemh("C:/Users/Adi/Documents/Excursions/z8ProcessorCore/programs/bits.hex", prog_mem);	
 		for(int i = 0; i < DATA_MEM_SIZE; i++) data_mem[i] <= 0;
 	end
 end
@@ -39,9 +42,6 @@ always_comb begin
 	endcase
 	
 	current_instruction = prog_mem[pc];
-	
-	
-	
 end
 
 endmodule
