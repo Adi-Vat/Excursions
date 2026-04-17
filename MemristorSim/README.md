@@ -130,7 +130,5 @@ The asymmetry of the forward and backward conversion rates is clearly shown in f
 
 
 ## References
-<a id="1">[1]</a>
-L. Chua, "Memristor-The missing circuit element," in IEEE Transactions on Circuit Theory, vol. 18, no. 5, pp. 507-519, September 1971.  
-<a id="2">[2]</a>
-Strukov, D., Snider, G., Stewart, D. et al. "The missing memristor found," Nature 453, 80–83, May 2008.
+<a id="1">[1]</a>L. Chua, "Memristor-The missing circuit element," in IEEE Transactions on Circuit Theory, vol. 18, no. 5, pp. 507-519, September 1971.  
+<a id="2">[2]</a>Strukov, D., Snider, G., Stewart, D. et al. "The missing memristor found," Nature 453, 80–83, May 2008.
