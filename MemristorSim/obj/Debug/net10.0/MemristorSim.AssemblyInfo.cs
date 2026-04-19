@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MemristorSim")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b6e940fbae4db74b3f29c59ca0bb6f77ed32de0d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b44b3708328993631ed58f80bdbf96c1e5b82a9a")]
 [assembly: System.Reflection.AssemblyProductAttribute("MemristorSim")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MemristorSim")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

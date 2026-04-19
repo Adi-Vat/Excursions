@@ -1,106 +1,290 @@
+# av853
 import pygame
 import math
-import time
 
+# av853
+# speed of wave propogation
 C = 500
+# time step used to evaluate
 TIME_STEP = 0.0005
+# distance between adjacent cell
 DISTANCE_STEP = 1
+# density of field on screen
 FIELD_PER_PIXEL = 0.075
 SCREEN_WIDTH, SCREEN_HEIGHT = (800, 600)
-fieldWidth = int(SCREEN_WIDTH * FIELD_PER_PIXEL)
-fieldHeight = int(SCREEN_HEIGHT * FIELD_PER_PIXEL)
-field = [[0]*fieldHeight for _ in range(fieldWidth)]
-oldField = [[0]*fieldHeight for _ in range(fieldWidth)]
-newField = [[0]*fieldHeight for _ in range(fieldWidth)]
-start_time = pygame.time.get_ticks() / 1000.0
+# therefore, grid dimensions = 60x45 cells
 
-def computeFieldEquation(i, k):
-    global field, oldField, newField
-    amplitude = field[i][k]
-    oldAmplitude = oldField[i][k]
-    leftIndex = i-1
-    rightIndex = i + 1
-    upIndex = k-1
-    downIndex = k + 1
-    '''
-    if leftIndex < 0: leftIndex = fieldWidth - 1
-    leftAmplitude = field[leftIndex][k]
-    if rightIndex > fieldWidth - 1: rightIndex = 0
-    rightAmplitude = field[rightIndex][k]
-    if upIndex < 0: upIndex = fieldHeight - 1
-    upAmplitude = field[i][upIndex]
-    if downIndex > fieldHeight - 1: downIndex = 0
-    downAmplitude = field[i][downIndex]
-    '''
+class WaveField:
+    """
+    Represents a 2D wave simulation grid.
+    Handles storing the wave state and computing how the wave evolved over time
+    """
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.field = [[0]*height for _ in range(width)]
+        self.oldField = [[0]*height for _ in range(width)]
+        self.newField = [[0]*height for _ in range(width)]
+
+    def computeFieldEquation(self, i, k, elapsed_time):
+        """
+        Calculates the new amplitude of a cell in the grid.
+        Uses neighbouring cells and the 2D wave equation to calculate wave propagation.
+
+        Parameters:
+            i (int): x-coord in grid
+            k (int): y-coord in grid
+            elapsed_time (float): time since simulation started
+
+        Returns:
+            float: new amplitude value
+        """
+        amplitude = self.field[i][k]
+        oldAmplitude = self.oldField[i][k]
+
+        leftIndex = i - 1
+        rightIndex = i + 1
+        upIndex = k - 1
+        downIndex = k + 1
+
+        # Check if neighbouring cell is valid or not
+        if leftIndex < 0:
+            leftAmplitude = 0
+        else:
+            leftAmplitude = self.field[leftIndex][k]
+
+        if rightIndex > self.width - 1:
+            rightAmplitude = 0
+        else:
+            rightAmplitude = self.field[rightIndex][k]
+
+        if upIndex < 0:
+            upAmplitude = 0
+        else:
+            upAmplitude = self.field[i][upIndex]
+
+        if downIndex > self.height - 1:
+            downAmplitude = 0
+        else:
+            downAmplitude = self.field[i][downIndex]
+
+        # av853
+        sourceAmount = 0
+        if i == self.width // 2 and k == self.height // 2:
+            sourceAmount = math.sin(elapsed_time * 10)
+
+        # Apply discrete 2nd order derivative
+        laplacian = ( rightAmplitude + leftAmplitude
+                     + upAmplitude + downAmplitude 
+                     - 4 * amplitude
+        ) / (DISTANCE_STEP * DISTANCE_STEP)
+
+        newAmplitude = (
+            2 * amplitude
+            - oldAmplitude
+            + C * C * TIME_STEP * TIME_STEP * laplacian
+            + sourceAmount
+        )
+        
+
+        # apply walls
+        if (i == 15 
+            and (k < (self.height // 2) - 2
+            or k > (self.height // 2) + 2)):
+            newAmplitude = 0
+
+        # attenuate
+        newAmplitude *= 0.995
+        return newAmplitude
+
+    def calculateNextField(self, elapsed_time):
+        """
+        Updates the entire field by computing the next state for each cell in the grid
+        """
+        self.oldField = [row[:] for row in self.field]
+        self.field = [row[:] for row in self.newField]
+
+        for i in range(self.width):
+            for k in range(self.height):
+                self.newField[i][k] = self.computeFieldEquation(i, k, elapsed_time)
+
+
+class Renderer:
+    """
+    Draws the wave onto the screen using pygame.
+    """
+    def __init__(self, screen):
+        self.screen = screen
+
+    def drawField(self, wave_field, sensor_array):
+        """
+        Draws the wave field onto the screen.
+        Each cell is rendered as a circle whos size is dependant on the wave amplitude at that point.
+        
+        Parameters:
+            wave_field (WaveField): wave field to be drawn
+            sensor_array (list[Sensor]) sensors to be drawn
+        """
+        for x in range(wave_field.width):
+            for y in range(wave_field.height):
+                amplitude = abs(wave_field.field[x][y])
+
+                if amplitude > 0.01:
+                    screenX = x / FIELD_PER_PIXEL
+                    screenY = y / FIELD_PER_PIXEL
+
+                    radius = min(3, int(amplitude * 3))
+                    pygame.draw.circle(
+                        self.screen,
+                        (255, 255, 255),
+                        (int(screenX), int(screenY)),
+                        radius
+                    )
+
+        for sensor in sensor_array.sensors:
+            pygame.draw.circle(self.screen, (255,0,0), sensor.position, 5)
+
+class Sensor:
+    """
+    Can be placed anywhere on the grid, reads the EM field intensity at that point.
+    """
+    def __init__(self, position, id):
+        # position is stored as screen-pos (pixels)
+        self.position = position
+        self.radius = 5
+        self.id = id
     
-    if leftIndex < 0: leftAmplitude = 0
-    else: leftAmplitude = field[leftIndex][k]
+    """
+    Gets the strength of the EM field under the sensor
 
-    if rightIndex > fieldWidth - 1: rightAmplitude = 0
-    else: rightAmplitude = field[rightIndex][k]
-
-    if upIndex < 0: upAmplitude = 0
-    else: upAmplitude = field[i][upIndex]
+    Parameters:
+        wave_field (WaveField): wave field to be considered
     
-    if downIndex > fieldHeight - 1: downAmplitude = 0
-    else: downAmplitude = field[i][downIndex]
-    
-    sourceAmount = 0
-    elapsed_time = pygame.time.get_ticks() / 1000.0 - start_time  # Use elapsed time
-    if i == fieldWidth // 2 and k == fieldHeight // 2:
-        elapsed_time = pygame.time.get_ticks() / 1000.0 - start_time
-        sourceAmount = 1 * math.sin(elapsed_time * 10)
-    
-    laplacian = (rightAmplitude + leftAmplitude + upAmplitude + downAmplitude - 4*amplitude) / (DISTANCE_STEP * DISTANCE_STEP)
-    
-    newAmplitude = 2 * amplitude - oldAmplitude + C*C*TIME_STEP*TIME_STEP*laplacian + sourceAmount
-    
-    if i == 15 and (k < (fieldHeight // 2) - 2 or k > (fieldHeight // 2) + 2): newAmplitude = 0
-    
-    newAmplitude *= 0.995
-    return newAmplitude
+    returns a float of the value of the field
+    """
+    def read_field(self, wave_field):
+        gridX = round(self.position[0] * FIELD_PER_PIXEL)
+        gridY = round(self.position[1] * FIELD_PER_PIXEL)
+        return(wave_field.field[gridX][gridY])
 
-def calculateNextField():
-    global field, oldField, newField
-    oldField = [row[:] for row in field]
-    field = [row[:] for row in newField]
 
-    for i in range(fieldWidth):
-        for k in range(fieldHeight):
-            newAmplitude = computeFieldEquation(i, k)
-            newField[i][k] = newAmplitude
+class SensorArray:
+    """
+    Contains all the sensors that the user places
+    """
+    def __init__(self):
+        self.sensors = []
+        self.recording = False
 
-def drawField():
-    for x in range(fieldWidth):
-        for y in range(fieldHeight):
-            screenX = x/FIELD_PER_PIXEL
-            screenY = y/FIELD_PER_PIXEL
-            amplitude = abs(field[x][y])  # Get absolute value
-            if amplitude > 0.01:  # Only draw if visible
-                radius = min(3, int(amplitude * 3))  # Cap the radius
-                pygame.draw.circle(screen, (255, 255, 255), (int(screenX), int(screenY)), radius)
+    def add_sensor(self, sensor):
+        self.sensors.append(sensor)
 
-pygame.init()
+    def remove_sensor(self, mouse_pos):
+        for sensor in self.sensors:
+            if math.dist(mouse_pos, sensor.position) <= sensor.radius:
+                self.sensors.remove(sensor)
+        
+    """
+    Forces all sensors to re-read and writes their outputs to a CSV file
 
-screen =pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("2D waves")
-clock = pygame.time.Clock()
+    Parameters:
+        wave_field (WaveField): wave field being considered
+        output_file (File): file being written to
+        elapsed_time (float): time since program start
+    """
+    def update_sensors(self, wave_field, output_file, elapsed_time):
+        if not self.recording: return
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                field = oldField = newField = [[0]*fieldHeight for _ in range(fieldWidth)]
+        output_file.write(str(round(elapsed_time, 2)) + ',')
 
-    screen.fill((0, 0, 0))
-    calculateNextField()
-    drawField()
+        for i in range(len(self.sensors)):
+            sensor_value = self.sensors[i].read_field(wave_field)
 
-    pygame.display.flip()
-    clock.tick(60)
+            end_char = ','
+            if i == len(self.sensors) - 1: end_char = '\n'
 
-pygame.quit()
+            output_file.write(str(sensor_value) + end_char)
+        
 
+class App:
+    """
+    Main application class,
+    Controls the game loop, user input and coordinates simulation and rendering
+    """
+    def __init__(self):
+        # Initialise things that need to be initialised.
+        pygame.init()
+        self.output_file = open('output.csv', 'w')
+        self.sensor_array = SensorArray()
+        # unique sensor ids established here
+        self.next_sensor_id = 0
+
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("2D waves - refactored")
+        self.clock = pygame.time.Clock()
+
+        fieldWidth = int(SCREEN_WIDTH * FIELD_PER_PIXEL)
+        fieldHeight = int(SCREEN_HEIGHT * FIELD_PER_PIXEL)
+        
+        self.wave = WaveField(fieldWidth, fieldHeight)
+        self.renderer = Renderer(self.screen)
+
+        self.start_time = pygame.time.get_ticks() / 1000.0
+        self.running = True
+        
+
+    # handles continuous event updates etc
+    def run(self):
+        while self.running:
+            self.handleEvents()
+            elapsed_time = pygame.time.get_ticks() / 1000.0 - self.start_time
+
+            self.screen.fill((0, 0, 0))
+            self.wave.calculateNextField(elapsed_time)
+            self.renderer.drawField(self.wave, self.sensor_array)
+            self.sensor_array.update_sensors(self.wave, self.output_file, elapsed_time)
+
+            pygame.display.flip()
+            self.clock.tick(60)
+
+        self.output_file.close()
+        pygame.quit()
+
+    def handleEvents(self):
+        """
+        Handles button presses like reset and quit.
+        """
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    self.resetField()
+
+                if event.key == pygame.K_g:
+                    self.sensor_array.recording = not self.sensor_array.recording
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # lmb
+                if event.button == 1:
+                    x, y = event.pos
+                    self.addSensor((x, y))
+                # mmb
+                if event.button == 2:
+                    x, y = event.pos
+                    self.sensor_array.remove_sensor((x,y))
+
+    def resetField(self):
+        self.wave.field = [[0]*self.wave.height for _ in range(self.wave.width)]
+        self.wave.oldField = [[0]*self.wave.height for _ in range(self.wave.width)]
+        self.wave.newField = [[0]*self.wave.height for _ in range(self.wave.width)]
+
+    def addSensor(self, position):
+        new_sensor = Sensor(position, self.next_sensor_id)
+        self.sensor_array.add_sensor(new_sensor)
+        self.next_sensor_id += 1
+
+if __name__ == "__main__":
+    app = App()
+    app.run()
