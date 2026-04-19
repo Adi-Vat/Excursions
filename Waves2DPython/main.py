@@ -4,15 +4,19 @@ import math
 
 # av853
 # speed of wave propogation
-C = 500
+C = 50
 # time step used to evaluate
-TIME_STEP = 0.0005
+TIME_STEP = 0.005
 # distance between adjacent cell
 DISTANCE_STEP = 1
 # density of field on screen
 FIELD_PER_PIXEL = 0.075
 SCREEN_WIDTH, SCREEN_HEIGHT = (800, 600)
 # therefore, grid dimensions = 60x45 cells
+ATTENTUATION = 0.995
+STEPS_PER_FRAME = 5
+
+assert C * TIME_STEP / DISTANCE_STEP <= 0.707
 
 class WaveField:
     """
@@ -25,8 +29,9 @@ class WaveField:
         self.field = [[0]*height for _ in range(width)]
         self.oldField = [[0]*height for _ in range(width)]
         self.newField = [[0]*height for _ in range(width)]
+        self.sources = []
 
-    def computeFieldEquation(self, i, k, elapsed_time):
+    def computeFieldEquation(self, i, k, elapsed_time, field_sources):
         """
         Calculates the new amplitude of a cell in the grid.
         Uses neighbouring cells and the 2D wave equation to calculate wave propagation.
@@ -68,10 +73,15 @@ class WaveField:
         else:
             downAmplitude = self.field[i][downIndex]
 
-        # av853
+        # apply sources
         sourceAmount = 0
-        if i == self.width // 2 and k == self.height // 2:
-            sourceAmount = math.sin(elapsed_time * 10)
+        for source in field_sources.sources:
+            source_gridX = round(source.position[0] * FIELD_PER_PIXEL)
+            source_gridY = round(source.position[1] * FIELD_PER_PIXEL)
+            
+            if i == source_gridX and k == source_gridY:
+                sourceAmount = source.amplitude * math.sin(elapsed_time * 2 * math.pi * source.frequency + source.phase)
+
 
         # Apply discrete 2nd order derivative
         laplacian = ( rightAmplitude + leftAmplitude
@@ -94,10 +104,10 @@ class WaveField:
             newAmplitude = 0
 
         # attenuate
-        newAmplitude *= 0.995
+        newAmplitude *= ATTENTUATION
         return newAmplitude
 
-    def calculateNextField(self, elapsed_time):
+    def calculateNextField(self, elapsed_time, field_sources):
         """
         Updates the entire field by computing the next state for each cell in the grid
         """
@@ -106,7 +116,7 @@ class WaveField:
 
         for i in range(self.width):
             for k in range(self.height):
-                self.newField[i][k] = self.computeFieldEquation(i, k, elapsed_time)
+                self.newField[i][k] = self.computeFieldEquation(i, k, elapsed_time, field_sources)
 
 
 class Renderer:
@@ -116,7 +126,7 @@ class Renderer:
     def __init__(self, screen):
         self.screen = screen
 
-    def drawField(self, wave_field, sensor_array):
+    def drawField(self, wave_field, sensor_array, source_array):
         """
         Draws the wave field onto the screen.
         Each cell is rendered as a circle whos size is dependant on the wave amplitude at that point.
@@ -143,6 +153,9 @@ class Renderer:
 
         for sensor in sensor_array.sensors:
             pygame.draw.circle(self.screen, (255,0,0), sensor.position, 5)
+        
+        for s in source_array.sources:
+            pygame.draw.circle(self.screen, (0, 0, 255), source.position, 5)
 
 class Sensor:
     """
@@ -195,7 +208,7 @@ class SensorArray:
     def update_sensors(self, wave_field, output_file, elapsed_time):
         if not self.recording: return
 
-        output_file.write(str(round(elapsed_time, 2)) + ',')
+        output_file.write(str(round(elapsed_time, 4)) + ',')
 
         for i in range(len(self.sensors)):
             sensor_value = self.sensors[i].read_field(wave_field)
@@ -205,6 +218,25 @@ class SensorArray:
 
             output_file.write(str(sensor_value) + end_char)
         
+class Source:
+    def __init__(self, position, amplitude, frequency, phase):
+        self.position = position
+        self.amplitude = amplitude
+        self.frequency = frequency
+        self.phase = phase
+        self.radius = 5
+    
+class Sources:
+    def __init__(self):
+        self.sources = []
+    
+    def add_source(self, source):
+        self.sources.append(source)
+    
+    def remove_source(self, mouse_pos):
+        for source in self.sources:
+            if math.dist(mouse_pos, source.position) <= source.radius:
+                self.sensors.remove(source)
 
 class App:
     """
@@ -229,6 +261,12 @@ class App:
         self.wave = WaveField(fieldWidth, fieldHeight)
         self.renderer = Renderer(self.screen)
 
+        self.sources = Sources()
+        self.sources.add_source(Source(position=(300, 500), amplitude=1, frequency=4, phase=0))
+        self.sources.add_source(Source(position=(600, 200), amplitude=2, frequency=2, phase=0))
+        self.sources.add_source(Source(position=(100, 300), amplitude=1.5, frequency=6, phase=0))
+        self.sources.add_source(Source(position=(500, 300), amplitude=1, frequency=5, phase=0))
+        self.elapsed_time = 0
         self.start_time = pygame.time.get_ticks() / 1000.0
         self.running = True
         
@@ -237,13 +275,18 @@ class App:
     def run(self):
         while self.running:
             self.handleEvents()
-            elapsed_time = pygame.time.get_ticks() / 1000.0 - self.start_time
+            
+            for _ in range(STEPS_PER_FRAME):
+                self.elapsed_time += TIME_STEP
+                self.wave.calculateNextField(self.elapsed_time, self.sources)
+                self.sensor_array.update_sensors(self.wave, self.output_file, self.elapsed_time)
+                if self.sensor_array.recording:
+                    if self.elapsed_time >= 30:
+                        self.running = False
+                        break
 
             self.screen.fill((0, 0, 0))
-            self.wave.calculateNextField(elapsed_time)
-            self.renderer.drawField(self.wave, self.sensor_array)
-            self.sensor_array.update_sensors(self.wave, self.output_file, elapsed_time)
-
+            self.renderer.drawField(self.wave, self.sensor_array, self.sources)
             pygame.display.flip()
             self.clock.tick(60)
 
@@ -279,6 +322,8 @@ class App:
         self.wave.field = [[0]*self.wave.height for _ in range(self.wave.width)]
         self.wave.oldField = [[0]*self.wave.height for _ in range(self.wave.width)]
         self.wave.newField = [[0]*self.wave.height for _ in range(self.wave.width)]
+        self.start_time = pygame.time.get_ticks() / 1000.0
+        self.elapsed_time = 0
 
     def addSensor(self, position):
         new_sensor = Sensor(position, self.next_sensor_id)
