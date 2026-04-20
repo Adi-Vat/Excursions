@@ -154,7 +154,7 @@ class Renderer:
         for sensor in sensor_array.sensors:
             pygame.draw.circle(self.screen, (255,0,0), sensor.position, 5)
         
-        for s in source_array.sources:
+        for source in source_array.sources:
             pygame.draw.circle(self.screen, (0, 0, 255), source.position, 5)
 
 class Sensor:
