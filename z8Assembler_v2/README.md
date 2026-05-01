@@ -1,6 +1,6 @@
 # Z8 Assembler+Emulator (v2)
 ## Overview
-An assembler for my own assembly language, z8. And an accompanying emulator.  
+An assembler for my own assembly language z8, and an accompanying emulator.  
 Converts an assembly file to a hex file.  
 The hex file can then be run by my [z8 Processor Core](/z8ProcessorCore/), or can be emulated by the z8 Emulator (in this project).    
 
@@ -174,12 +174,12 @@ Example:
 #### ADD reg, reg/imm
 &rarr; `0x06 ADR` (add register)  
 &rarr; `0x07 ADD` (add direct)  
-Adds two numbers and stores the result in the src.  
+Adds two numbers and stores the result in the dest.  
 
 #### AND reg, reg/imm
 &rarr; `0x0A ANR` (and register)  
 &rarr; `0x0B AND` (and direct)  
-Performs the logical and & operator on two numbers and stores the result in the src.
+Performs the logical and & operator on two numbers and stores the result in the dest.
 
 #### CB imm, mem/reg
 &rarr; `0x21 CBIM` (clear bit in memory)  
